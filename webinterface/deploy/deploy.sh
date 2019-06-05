@@ -8,16 +8,16 @@ ROOT_DIR=${PWD}
 GIT_DIR="${PWD}/HEDTools"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
-GIT_REPO_URL="https://github.com/VisLab/HEDTools"
+GIT_REPO_URL="https://github.com/hed-standard/hed-pythons"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
-DEPLOY_DIR="HEDTools/python/webinterface/deploy"
+DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
-WEBINTERFACE_CODE_DIR="HEDTools/python/webinterface/webinterface/"
-VALIDATOR_CODE_DIR="HEDTools/python/hedvalidation/hedvalidation/"
+WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface/"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation/"
 
 ##### Functions
 
