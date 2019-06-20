@@ -5,7 +5,7 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-GIT_DIR="${PWD}/HEDTools"
+GIT_DIR="${PWD}/hed-python"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
