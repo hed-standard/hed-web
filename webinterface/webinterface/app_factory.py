@@ -3,7 +3,6 @@ from flask_wtf.csrf import CSRFProtect;
 import importlib;
 from config import Config;
 
-
 class AppFactory:
     @staticmethod
     def create_app(config_class):
