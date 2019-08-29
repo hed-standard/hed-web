@@ -487,8 +487,6 @@ def _generate_input_arguments_from_validation_form(form_request_object, spreadsh
         form_request_object, html_form_constants.HAS_COLUMN_NAMES, type_constants.BOOLEAN);
     validation_input_arguments[validation_arg_constants.CHECK_FOR_WARNINGS] = _get_optional_validation_form_field(
         form_request_object, html_form_constants.CHECK_FOR_WARNINGS, type_constants.BOOLEAN);
-    validation_input_arguments[validation_arg_constants.LEAF_EXTENSIONS] = _get_optional_validation_form_field(
-        form_request_object, validation_arg_constants.LEAF_EXTENSIONS, type_constants.BOOLEAN);
     return validation_input_arguments;
 
 
@@ -703,8 +701,7 @@ def validate_spreadsheet(validation_arguments):
                           required_tag_columns=validation_arguments[validation_arg_constants.REQUIRED_TAG_COLUMNS],
                           worksheet_name=validation_arguments[validation_arg_constants.WORKSHEET_NAME],
                           check_for_warnings=validation_arguments[validation_arg_constants.CHECK_FOR_WARNINGS],
-                          hed_xml_file=validation_arguments[validation_arg_constants.HED_XML_PATH],
-                          leaf_extensions=validation_arguments[validation_arg_constants.LEAF_EXTENSIONS]);
+                          hed_xml_file=validation_arguments[validation_arg_constants.HED_XML_PATH]);
 
 
 def spreadsheet_present_in_form(validation_form_request_object):
