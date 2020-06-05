@@ -5,30 +5,32 @@
 ##### Constants
 
 ROOT_DIR=${PWD}
-GIT_DIR="${PWD}/hed-python"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
+GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
+
 DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 DOCKER_FILE="${ROOT_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
-WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface/"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation/"
+WEBINTERFACE_CODE_DIR="hed-python/webinterface/webinterface"
+VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidation"
 
-GIT_HED_DIR="${PWD}/hed-specification"
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_REPO_FOLDER="hedxml"
+GIT_HED_DIR="${PWD}/hed-specification"
+GIT_HED_WILDCARD="${GIT_HED_DIR}/hedxml/*"
+HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidation/hed"
 
 ##### Functions
 
 clone_github_repo(){
-echo Cloning repo ... 
+echo Cloning repo ...
 git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
 }
 
@@ -46,7 +48,7 @@ cp $WSGI_FILE $CODE_DEPLOY_DIR
 cp $DOCKER_FILE $DOCKER_FILE_DEPLOY
 cp -r $WEBINTERFACE_CODE_DIR $CODE_DEPLOY_DIR
 cp -r $VALIDATOR_CODE_DIR $CODE_DEPLOY_DIR
-cp -r $GIT_HED_DIR $CODE_DEPLOY_DIR
+cp -r ${GIT_HED_WILDCARD} $HED_XML_DEPLOY_DIR
 }
 switch_to_web_directory()
 {
