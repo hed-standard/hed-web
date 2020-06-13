@@ -10,9 +10,9 @@ from flask import current_app;
 from logging.handlers import RotatingFileHandler;
 from logging import ERROR;
 from hedvalidation.hed_dictionary import HedDictionary;
-from webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants;
-from webinterface.constants.error import error_constants;
-from webinterface.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
+from web.constants.other import file_extension_constants, spreadsheet_constants, type_constants;
+from web.constants.error import error_constants;
+from web.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
     html_form_constants;
 
 app_config = current_app.config;
