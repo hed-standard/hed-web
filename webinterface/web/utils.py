@@ -5,11 +5,11 @@ import xlrd;
 import traceback;
 from flask import jsonify, Response;
 from werkzeug.utils import secure_filename;
-from hedvalidation.hed_input_reader import HedInputReader;
+from hedvalidator.hed_input_reader import HedInputReader;
 from flask import current_app;
 from logging.handlers import RotatingFileHandler;
 from logging import ERROR;
-from hedvalidation.hed_dictionary import HedDictionary;
+from hedvalidator.hed_dictionary import HedDictionary;
 from web.constants.other import file_extension_constants, spreadsheet_constants, type_constants;
 from web.constants.error import error_constants;
 from web.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
