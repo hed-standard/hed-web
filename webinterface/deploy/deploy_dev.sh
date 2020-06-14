@@ -7,62 +7,75 @@
 ROOT_DIR="${PWD}"
 IMAGE_NAME="hedtools-validation:latest"
 CONTAINER_NAME="hedtools-validation"
+# GIT_REPO_URL="https://github.com/VisLab/hed-python"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
-GIT_DIR="${PWD}/hed-python"
+GIT_DIR="${ROOT_DIR}/hed-python"
 GIT_REPO_BRANCH="master"
 HOST_PORT=33000;
 CONTAINER_PORT=80;
 
-DEPLOY_DIR="${PWD}"
+DEPLOY_DIR="${ROOT_DIR}/hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
-CONFIG_FILE="${ROOT_DIR}/hed-python/webinterface/deploy/config.py"
-WSGI_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/web.wsgi"
-DOCKER_FILE="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile_dev"
-DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/hed-python/webinterface/deploy/Dockerfile"
-WEBINTERFACE_CODE_DIR="${DEPLOY_DIR}/hed-python/webinterface/web"
-VALIDATOR_CODE_DIR="${DEPLOY_DIR}/hed-python/hedvalidation/hedvalidator"
+CONFIG_FILE="${DEPLOY_DIR}/config.py"
+WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
+DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
+DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
+WEBINTERFACE_CODE_DIR="${ROOT_DIR}/hed-python/webinterface/web"
+VALIDATOR_CODE_DIR="${ROOT_DIR}/hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
-GIT_HED_DIR="${PWD}/hed-specification"
-GIT_HED_WILDCARD="${GIT_HED_DIR}/hedxml/*"
+GIT_HED_DIR="${ROOT_DIR}/hed-specification/"
+GIT_HED_WILDCARD="${ROOT_DIR}/hed-specification/hedxml/"*
 HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 ##### Functions
 
 clone_github_repo(){
-echo Cloning hed-python repo in directory + "${PWD}"
-git clone $GIT_REPO_URL -b $GIT_REPO_BRANCH
+echo Cloning hed-python repo in directory  "${ROOT_DIR}" ...
+git clone "${GIT_REPO_URL}" -b "${GIT_REPO_BRANCH}"
 }
 
 clone_hed_github_repo(){
-echo Cloning HED repo in directory + "${PWD}"
+echo Cloning HED repo in directory "${ROOT_DIR}" ...
 git clone $GIT_HED_REPO_URL
 }
 
 create_web_directory()
 {
 echo Creating the web directory...
-echo Currently in "${PWD}"
+echo Currently in "${PWD}" ... root directory is "${ROOT_DIR}"
 echo Making the code  deploy directory "$CODE_DEPLOY_DIR" ...
 mkdir "$CODE_DEPLOY_DIR"
-cp "$CONFIG_FILE" "$CODE_DEPLOY_DIR"
-cp "$WSGI_FILE" "$CODE_DEPLOY_DIR"
-cp "$DOCKER_FILE" "$DOCKER_FILE_DEPLOY"
-cp -r "$WEBINTERFACE_CODE_DIR" "$CODE_DEPLOY_DIR"
-cp -r "$VALIDATOR_CODE_DIR" "$CODE_DEPLOY_DIR"
-cp -r "${GIT_HED_WILDCARD}" "$HED_XML_DEPLOY_DIR"
+
+echo Copying "${CONFIG_FILE}" to "${CODE_DEPLOY_DIR}" ...
+cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${WSGI_FILE}" to "${CODE_DEPLOY_DIR}" ...
+cp "${WSGI_FILE}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${DOCKER_FILE}" to "${DOCKER_FILE_DEPLOY}" ...
+cp "${DOCKER_FILE}" "${DOCKER_FILE_DEPLOY}"
+
+echo Copying "${WEBINTERFACE_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
+cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+
+echo Copying "${VALIDATOR_CODE_DIR}" to "${CODE_DEPLOY_DIR}" ...
+cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+
+echo Copying " ${GIT_HED_WILDCARD}" to "${HED_XML_DEPLOY_DIR}" ...
+cp -r ${GIT_HED_WILDCARD} "${HED_XML_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
 {
-echo Switching to web directory "$DEPLOY_DIR" ...
-cd "$DEPLOY_DIR"
+echo Switching to web directory "${DEPLOY_DIR}" ...
+cd "${DEPLOY_DIR}"
 }
 
 build_new_container()
 {
-echo Building new container...
-docker build -t $IMAGE_NAME .
+echo Building new container "${IMAGE_NAME}" ...
+docker build -t "${IMAGE_NAME}" .
 }
 
 delete_old_container()
@@ -82,7 +95,7 @@ cleanup_directory()
 echo Cleaning up directory...
 rm -rf "$GIT_DIR"
 rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR"
+cd "$ROOT_DIR" || error_exit Failed to clean up
 }
 
 error_exit()
@@ -96,13 +109,13 @@ if [ -z "$1" ]; then
 echo No branch specified... Using master branch
 else
 echo Branch specified... Using "$1" branch
-GIT_REPO_BRANCH=$1
+GIT_REPO_BRANCH="$1"
 fi
-clone_github_repo || error_exit "Cannot clone repo $GIT_REPO_URL branch $GIT_REPO_BRANCH"
-clone_hed_github_repo || error_exit "Cannot clone repo $GIT_HED_REPO_URL"
+clone_github_repo || error_exit "Cannot clone repo ${GIT_REPO_URL} branch ${GIT_REPO_BRANCH}"
+clone_hed_github_repo || error_exit "Cannot clone repo ${GIT_HED_REPO_URL}"
 create_web_directory
 switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-# cleanup_directory
+#cleanup_directory
