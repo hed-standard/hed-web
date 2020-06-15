@@ -22,8 +22,8 @@ VALIDATOR_CODE_DIR="hed-python/hedvalidation/hedvalidator"
 
 GIT_HED_REPO_URL="https://github.com/hed-standard/hed-specification"
 GIT_HED_DIR="${PWD}/hed-specification"
-GIT_HED_WILDCARD="${PWD}"/hed-specification/hedxml/*
-HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidation/hed"
+GIT_HED_WILDCARD="${PWD}/hed-specification/hedxml/."
+HED_XML_DEPLOY_DIR="${CODE_DEPLOY_DIR}/hedvalidator/hed"
 
 ##### Functions
 
@@ -41,11 +41,11 @@ create_web_directory()
 {
 echo Creating web directory...
 mkdir "${CODE_DEPLOY_DIR}"
-cp "$CONFIG_FILE" "${CODE_DEPLOY_DIR}"
-cp $WSGI_FILE "${CODE_DEPLOY_DIR}"
+cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
+cp ${WSGI_FILE} "${CODE_DEPLOY_DIR}"
 cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
-cp -r "${GIT_HED_WILDCARD}" "${HED_XML_DEPLOY_DIR}
+cp -r "${GIT_HED_WILDCARD}" "${HED_XML_DEPLOY_DIR}"
 }
 
 switch_to_web_directory()
@@ -75,8 +75,8 @@ cleanup_directory()
 {
 echo Cleaning up directory...
 rm -rf "${GIT_DIR}"
-rm -rf "{$GIT_HED_DIR}"
-cd "{$ROOT_DIR}"
+rm -rf "${GIT_HED_DIR}"
+cd "${ROOT_DIR}"
 }
 
 error_exit()
