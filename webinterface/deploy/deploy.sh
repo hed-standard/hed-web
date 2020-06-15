@@ -10,8 +10,8 @@ CONTAINER_NAME="hedtools-validation"
 GIT_REPO_URL="https://github.com/hed-standard/hed-python"
 GIT_DIR="${PWD}/hed-python"
 GIT_REPO_BRANCH="master"
-HOST_PORT=33000;
-CONTAINER_PORT=80;
+HOST_PORT=33000
+CONTAINER_PORT=80
 
 DEPLOY_DIR="hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
@@ -40,18 +40,18 @@ git clone $GIT_HED_REPO_URL
 create_web_directory()
 {
 echo Creating web directory...
-mkdir $CODE_DEPLOY_DIR
-cp "$CONFIG_FILE" $CODE_DEPLOY_DIR
-cp $WSGI_FILE $CODE_DEPLOY_DIR
-cp -r $WEBINTERFACE_CODE_DIR $CODE_DEPLOY_DIR
-cp -r $VALIDATOR_CODE_DIR $CODE_DEPLOY_DIR
-cp -r "${GIT_HED_WILDCARD}" $HED_XML_DEPLOY_DIR
+mkdir "${CODE_DEPLOY_DIR}"
+cp "$CONFIG_FILE" "${CODE_DEPLOY_DIR}"
+cp $WSGI_FILE "${CODE_DEPLOY_DIR}"
+cp -r "${WEBINTERFACE_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
+cp -r "${GIT_HED_WILDCARD}" "${HED_XML_DEPLOY_DIR}
 }
 
 switch_to_web_directory()
 {
 echo Switching to web directory...
-cd $DEPLOY_DIR
+cd "${DEPLOY_DIR}"
 }
 build_new_container()
 {
@@ -74,9 +74,9 @@ docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_P
 cleanup_directory()
 {
 echo Cleaning up directory...
-rm -rf "$GIT_DIR"
-rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR"
+rm -rf "${GIT_DIR}"
+rm -rf "{$GIT_HED_DIR}"
+cd "{$ROOT_DIR}"
 }
 
 error_exit()

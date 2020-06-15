@@ -16,7 +16,7 @@ CONTAINER_PORT=80;
 
 DEPLOY_DIR="${ROOT_DIR}/hed-python/webinterface/deploy"
 CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools"
-CONFIG_FILE="${DEPLOY_DIR}/config.py"
+CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/web.wsgi"
 DOCKER_FILE="${DEPLOY_DIR}/Dockerfile_dev"
 DOCKER_FILE_DEPLOY="${DEPLOY_DIR}/Dockerfile"
@@ -44,8 +44,8 @@ create_web_directory()
 {
 echo Creating the web directory...
 echo Currently in "${PWD}" ... root directory is "${ROOT_DIR}"
-echo Making the code  deploy directory "$CODE_DEPLOY_DIR" ...
-mkdir "$CODE_DEPLOY_DIR"
+echo Making the code  deploy directory "${CODE_DEPLOY_DIR}" ...
+mkdir "${CODE_DEPLOY_DIR}"
 
 echo Copying "${CONFIG_FILE}" to "${CODE_DEPLOY_DIR}" ...
 cp "${CONFIG_FILE}" "${CODE_DEPLOY_DIR}"
@@ -93,9 +93,9 @@ docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_P
 cleanup_directory()
 {
 echo Cleaning up directory...
-rm -rf "$GIT_DIR"
-rm -rf "$GIT_HED_DIR"
-cd "$ROOT_DIR" || error_exit Failed to clean up
+rm -rf "${GIT_DIR}"
+rm -rf "${GIT_HED_DIR}"
+cd "${ROOT_DIR}" || error_exit Failed to clean up
 }
 
 error_exit()
@@ -118,4 +118,4 @@ switch_to_web_directory
 build_new_container
 delete_old_container
 run_new_container
-#cleanup_directory
+cleanup_directory
