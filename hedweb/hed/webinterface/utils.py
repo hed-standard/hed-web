@@ -201,12 +201,14 @@ def report_eeg_events_validation_status(request):
     try:
         # parse hed_strings from json
         hed_strings = json.loads(form_data["hed_strings"])
-        hed_strings = hed_strings["hed_strings"]
+        # hed_strings is a list of HED strings associated with events in EEG.event (order preserved)
         hed_input_reader = HedInputReader(hed_strings, check_for_warnings=check_for_warnings, hed_xml_file=hed_xml_file)
+        # issues is a list of lists. Element list is empty if no error,
+        # else is a list of dictionaries, each dictionary contains an error-message key-value pair
         issues = hed_input_reader.get_validation_issues()
 
         # Prepare response
-        validation_status["issues"] = issues  # issues is a string array, each array in form "Issue in event _: issue"
+        validation_status["issues"] = issues
     except:
         validation_status[error_constants.ERROR_KEY] = traceback.format_exc()
     finally:
