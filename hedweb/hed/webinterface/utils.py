@@ -9,8 +9,8 @@ from flask import current_app
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
 from hed.validator.hed_validator import HedValidator
-from hed.validator import hed_cache
-from hed.validator.hed_dictionary import HedDictionary
+from hed.validator.util import hed_cache
+from hed.validator.util.hed_dictionary import HedDictionary
 from hed.validator.hed_file_input import HedFileInput
 from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
 from hed.webinterface.constants.error import error_constants

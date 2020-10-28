@@ -1,6 +1,6 @@
 import os
 from hed.webinterface.app_factory import AppFactory
-from hed.validator import hed_cache
+from hed.validator.util import hed_cache
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
 
