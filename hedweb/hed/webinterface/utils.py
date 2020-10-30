@@ -1,24 +1,25 @@
 import os
 import json
-import tempfile
 import xlrd
 import traceback
-from flask import jsonify, Response
+from flask import Response
 from werkzeug.utils import secure_filename
 from flask import current_app
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
+from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
-from hed.validator.util import hed_cache
-from hed.validator.util.hed_dictionary import HedDictionary
-from hed.validator.hed_file_input import HedFileInput
+from hed.util import hed_cache
+from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_file_input import HedFileInput
 from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
 from hed.webinterface.constants.error import error_constants
 from hed.webinterface.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
     html_form_constants
+from hed.shared.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
+    UPLOAD_DIRECTORY_KEY, _save_file_to_upload_folder
 
 app_config = current_app.config
-UPLOAD_DIRECTORY_KEY = 'UPLOAD_FOLDER'
 
 
 def find_hed_version_in_file(form_request_object):
@@ -196,7 +197,7 @@ def report_eeg_events_validation_status(request):
     form_data = request.form
     check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
     # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
-    if "hed_xml_file" in request.files and _get_file_extension(request.files["hed_xml_file"].filename) == "xml":
+    if "hed_xml_file" in request.files and get_file_extension(request.files["hed_xml_file"].filename) == "xml":
         hed_xml_file = _save_hed_to_upload_folder_if_present(request.files["hed_xml_file"])
     else:
         hed_xml_file = ''
@@ -295,26 +296,6 @@ def generate_download_file_response(download_file_name):
         return traceback.format_exc()
 
 
-def handle_http_error(error_code, error_message):
-    """Handles an http error.
-
-    Parameters
-    ----------
-    error_code: string
-        The code associated with the error.
-    error_message: string
-        The message associated with the error.
-
-    Returns
-    -------
-    boolean
-        A tuple containing a HTTP response object and a code.
-
-    """
-    current_app.logger.error(error_message)
-    return jsonify(message=error_message), error_code
-
-
 def setup_logging():
     """Sets up the current_application logging. If the log directory does not exist then there will be no logging.
 
@@ -323,55 +304,6 @@ def setup_logging():
         file_handler = RotatingFileHandler(current_app.config['LOG_FILE'], maxBytes=10 * 1024 * 1024, backupCount=5)
         file_handler.setLevel(ERROR)
         current_app.logger.addHandler(file_handler)
-
-
-def create_upload_directory(upload_directory):
-    """Creates the upload directory.
-
-    """
-    _create_folder_if_needed(upload_directory)
-
-
-def _file_extension_is_valid(filename, accepted_file_extensions):
-    """Checks the other extension against a list of accepted ones.
-
-    Parameters
-    ----------
-    filename: string
-        The name of the other.
-
-    accepted_file_extensions: list
-        A list containing all of the accepted other extensions.
-
-    Returns
-    -------
-    boolean
-        True if the other has a valid other extension.
-
-    """
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in accepted_file_extensions
-
-
-def _save_hed_to_upload_folder_if_present(hed_file_object):
-    """Save a HED XML other to the upload folder.
-
-    Parameters
-    ----------
-    hed_file_object: File object
-        A other object that points to a HED XML other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the HED XML other that was saved to the upload folder.
-
-    """
-    hed_file_path = ''
-    if hed_file_object.filename:
-        hed_file_extension = '.' + _get_file_extension(hed_file_object.filename)
-        hed_file_path = _save_file_to_upload_folder(hed_file_object, hed_file_extension)
-    return hed_file_path
 
 
 def _save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, validation_issues, worksheet_name=''):
@@ -400,24 +332,6 @@ def _save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, valid
     return validation_issues_filename
 
 
-def _file_has_valid_extension(file_object, accepted_file_extensions):
-    """Checks to see if a other has a valid other extension.
-
-    Parameters
-    ----------
-    file_object: File object
-        A other object that points to a other.
-    accepted_file_extensions: list
-        A list of other extensions that are accepted
-
-    Returns
-    -------
-    boolean
-        True if the other has a valid other extension.
-
-    """
-    return file_object and _file_extension_is_valid(file_object.filename, accepted_file_extensions)
-
 
 def _generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name=''):
     """Generates a filename for the attachment that will contain the spreadsheet validation issues.
@@ -439,22 +353,6 @@ def _generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_na
                secure_filename(worksheet_name) + file_extension_constants.TEXT_EXTENSION
     return file_extension_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(spreadsheet_filename).rsplit('.')[
         0] + file_extension_constants.TEXT_EXTENSION
-
-
-def _get_file_extension(file_name_or_path):
-    """Get the other extension from the specified filename. This can be the full path or just the name of the other.
-
-       Parameters
-       ----------
-       file_name_or_path: string
-           The name or full path of a other.
-
-       Returns
-       -------
-       string
-           The extension of the other.
-       """
-    return secure_filename(file_name_or_path).rsplit('.')[-1]
 
 
 def _generate_input_arguments_from_validation_form(form_request_object, spreadsheet_file_path,
@@ -603,90 +501,6 @@ def _get_optional_validation_form_field(validation_form_request_object, form_fie
         if form_field_name in validation_form_request_object.form:
             form_field_value = validation_form_request_object.form[form_field_name]
     return form_field_value
-
-
-def delete_file_if_it_exist(file_path):
-    """Deletes a other if it exist.
-
-    Parameters
-    ----------
-    file_path: string
-        The path to a other.
-
-    Returns
-    -------
-    boolean
-        True if the other exist and was deleted.
-    """
-    if os.path.isfile(file_path):
-        os.remove(file_path)
-        return True
-    return False
-
-
-def _create_folder_if_needed(folder_path):
-    """Checks to see if the upload folder exist. If it doesn't then it creates it.
-
-    Parameters
-    ----------
-    folder_path: string
-        The path of the folder that you want to create.
-
-    Returns
-    -------
-    boolean
-        True if the upload folder needed to be created, False if otherwise.
-
-    """
-    folder_needed_to_be_created = False
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        folder_needed_to_be_created = True
-    return folder_needed_to_be_created
-
-
-def _save_file_to_upload_folder(file_object, file_suffix=""):
-    """Save a other to the upload folder.
-
-    Parameters
-    ----------
-    file_object: File object
-        A other object that points to a other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the other that was saved to the temporary folder.
-
-    """
-    temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False,
-                                                        dir=current_app.config[UPLOAD_DIRECTORY_KEY])
-    _copy_file_line_by_line(file_object, temporary_upload_file)
-    return temporary_upload_file.name
-
-
-def _copy_file_line_by_line(file_object_1, file_object_2):
-    """Copy the contents of one other to the other other.
-
-    Parameters
-    ----------
-    file_object_1: File object
-        A other object that points to a other that will be copied.
-    file_object_2: File object
-        A other object that points to a other that will copy the other other.
-
-    Returns
-    -------
-    boolean
-       True if the other was copied successfully, False if it wasn't.
-
-    """
-    try:
-        for line in file_object_1:
-            file_object_2.write(line)
-        return True
-    except:
-        return False
 
 
 def validate_spreadsheet(validation_arguments):
@@ -905,7 +719,7 @@ def _get_column_delimiter_based_on_file_extension(file_name_or_path):
 
     """
     column_delimiter = ''
-    file_extension = _get_file_extension(file_name_or_path)
+    file_extension = get_file_extension(file_name_or_path)
     if file_extension in spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY:
         column_delimiter = spreadsheet_constants.SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY.get(file_extension)
     return column_delimiter
@@ -942,7 +756,7 @@ def save_spreadsheet_to_upload_folder(spreadsheet_file_object):
         The path to the spreadsheet that was saved to the upload folder.
 
     """
-    spreadsheet_file_extension = '.' + _get_file_extension(spreadsheet_file_object.filename)
+    spreadsheet_file_extension = get_file_extension(spreadsheet_file_object.filename)
     spreadsheet_file_path = _save_file_to_upload_folder(spreadsheet_file_object, spreadsheet_file_extension)
     return spreadsheet_file_path
 
@@ -961,7 +775,7 @@ def save_hed_to_upload_folder(hed_file_object):
         The path to the HED XML other that was saved to the upload folder.
 
     """
-    hed_file_extension = '.' + _get_file_extension(hed_file_object.filename)
+    hed_file_extension = get_file_extension(hed_file_object.filename)
     hed_file_path = _save_file_to_upload_folder(hed_file_object, hed_file_extension)
     return hed_file_path
 
