@@ -30,7 +30,7 @@ def configure_app():
 
 app = configure_app()
 with app.app_context():
-    from hed.shared import web_utils
+    from hed.webinterface import web_utils
     from hed.webinterface.routes import route_blueprint
 
     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])

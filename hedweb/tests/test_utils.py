@@ -1,6 +1,6 @@
 import unittest
 
-import hed.shared.web_utils
+from hed.webinterface import web_utils
 from hed import webinterface
 from hed.webinterface.app_factory import AppFactory
 from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
 
     def test_file_extension_is_valid(self):
         file_name = 'abc' + spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS[0]
-        is_valid = hed.shared.web_utils._file_extension_is_valid(file_name,
+        is_valid = web_utils._file_extension_is_valid(file_name,
                                                                  spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS)
         self.assertTrue(is_valid)
 
@@ -48,14 +48,14 @@ class Test(unittest.TestCase):
 
     def test_create_folder_if_needed(self):
         some_folder = '3k32j23kj'
-        created = hed.shared.web_utils._create_folder_if_needed(some_folder)
+        created = web_utils._create_folder_if_needed(some_folder)
         self.assertTrue(created)
         os.rmdir(some_folder)
 
     def test_copy_file_line_by_line(self):
         some_file1 = '3k32j23kj1.txt'
         some_file2 = '3k32j23kj2.txt'
-        success = hed.shared.web_utils._copy_file_line_by_line(some_file1, some_file2)
+        success = web_utils._copy_file_line_by_line(some_file1, some_file2)
         self.assertFalse(success)
 
     def test_initialize_worksheets_info_dictionary(self):

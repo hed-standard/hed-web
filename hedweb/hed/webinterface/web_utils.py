@@ -7,6 +7,7 @@ from hed.util.file_util import get_file_extension
 
 UPLOAD_DIRECTORY_KEY = 'UPLOAD_FOLDER'
 
+
 def handle_http_error(error_code, error_message, as_text=False):
     """Handles an http error.
 

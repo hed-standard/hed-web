@@ -16,7 +16,7 @@ from hed.webinterface.constants.other import file_extension_constants, spreadshe
 from hed.webinterface.constants.error import error_constants
 from hed.webinterface.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
     html_form_constants
-from hed.shared.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
+from hed.webinterface.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
     UPLOAD_DIRECTORY_KEY, _save_file_to_upload_folder
 
 app_config = current_app.config

@@ -4,7 +4,7 @@ import json
 from hed.webinterface import utils
 from hed.webinterface.constants.error import error_constants
 from hed.webinterface.constants.routing import page_constants, route_constants, blueprint_constants
-from hed.shared.web_utils import handle_http_error
+from hed.webinterface.web_utils import handle_http_error
 import traceback
 
 import hed.util.file_util

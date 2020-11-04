@@ -2,7 +2,7 @@ import unittest
 import os
 from hed.webinterface.app_factory import AppFactory
 import shutil
-from hed.shared import web_utils
+from hed.webinterface import web_utils
 
 class Test(unittest.TestCase):
     @classmethod
