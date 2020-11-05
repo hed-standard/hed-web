@@ -1,4 +1,4 @@
-SPREADSHEET_FILE_EXTENSIONS = ['xls', 'xlsx', 'txt', 'tsv']
+SPREADSHEET_FILE_EXTENSIONS = ['.xls', '.xlsx', '.txt', '.tsv']
 HED_FILE_EXTENSIONS = ['.xml']
 OTHER_TAG_COLUMN_NAMES = ['Event Details', 'Multiple Tags', 'HED tag', 'HED tags', 'Tag', 'Tags']
 SPECIFIC_TAG_COLUMN_NAMES = ['Category', 'Description', 'Label', 'Long']
@@ -8,5 +8,5 @@ SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY = {'Category': ['Categories', 'Category', '
                                         'Label': ['Event Label', 'Event Labels', 'Label', 'Labels', 'Short',
                                                   'Short Label', 'Short Labels'],
                                         'Long': ['Long', 'Long name', 'Long names']}
-SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY = {'txt': '\t', 'tsv': '\t'}
+SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY = {'.txt': '\t', '.tsv': '\t'}
 OTHER_HED_VERSION_OPTION = 'Other'

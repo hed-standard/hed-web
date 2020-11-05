@@ -18,7 +18,7 @@ CODE_DEPLOY_DIR="${DEPLOY_DIR}/hedtools3"
 CONFIG_FILE="${ROOT_DIR}/config.py"
 WSGI_FILE="${DEPLOY_DIR}/webinterface.wsgi"
 WEBINTERFACE_CODE_DIR="hed-python/hedweb/hed"
-VALIDATOR_CODE_DIR="hed-python/hedvalidation/hed"
+VALIDATOR_CODE_DIR="hed-python/hedtools/hed"
 
 ##### Functions
 

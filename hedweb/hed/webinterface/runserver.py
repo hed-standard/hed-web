@@ -1,6 +1,6 @@
 import os
 from hed.webinterface.app_factory import AppFactory
-from hed.validator import hed_cache
+from hed.util import hed_cache
 from logging.handlers import RotatingFileHandler
 from logging import ERROR
 
@@ -30,11 +30,11 @@ def configure_app():
 
 app = configure_app()
 with app.app_context():
-    from hed.webinterface import utils
+    from hed.webinterface import web_utils
     from hed.webinterface.routes import route_blueprint
 
     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-    utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
+    web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
     hed_cache.set_cache_directory(app.config['HED_CACHE_FOLDER'])
     setup_logging()
 
