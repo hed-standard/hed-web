@@ -13,7 +13,7 @@ app_config = current_app.config
 route_blueprint = Blueprint(blueprint_constants.ROUTE_BLUEPRINT, __name__)
 
 
-@route_blueprint.route(route_constants.HOME_ROUTE, strict_slashes=False, methods=['GET'])
+@route_blueprint.route(route_constants.HED_TOOLS_HOME_ROUTE, strict_slashes=False, methods=['GET'])
 def render_home_page():
     """Handles the home page.
 
@@ -26,7 +26,7 @@ def render_home_page():
         A rendered template for the home page.
 
     """
-    return render_template(page_constants.HOME_PAGE)
+    return render_template(page_constants.HED_TOOLS_HOME_PAGE)
 
 
 @route_blueprint.route(route_constants.COMMON_ERRORS_ROUTE, strict_slashes=False, methods=['GET'])
@@ -176,7 +176,7 @@ def get_worksheets_info():
     return json.dumps(worksheets_info)
 
 
-@route_blueprint.route(route_constants.HELP_ROUTE, strict_slashes=False, methods=['GET'])
+@route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])
 def render_help_page():
     """Handles the site help page.
 
@@ -189,7 +189,7 @@ def render_help_page():
         A rendered template for the help page.
 
     """
-    return render_template(page_constants.HELP_PAGE)
+    return render_template(page_constants.HED_TOOLS_HELP_PAGE)
 
 
 @route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])
@@ -208,7 +208,7 @@ def render_additional_examples_page():
     return render_template(page_constants.ADDITIONAL_EXAMPLES_PAGE)
 
 
-@route_blueprint.route(route_constants.SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+@route_blueprint.route(route_constants.VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_validation_results():
     """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
 

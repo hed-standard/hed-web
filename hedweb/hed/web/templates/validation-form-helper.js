@@ -147,7 +147,7 @@ function flashInvalidHEDExtensionMessage() {
 
 /**
  * Resets the flash messages that aren't related to the form submission.
- A * @param {String} message - If true, reset the flash message related to the submit button.
+ A * @param {String} message - If true, reset the flash message related to the validation-submit button.
  */
 function resetFlashMessages(resetSubmitFlash) {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
@@ -155,7 +155,7 @@ function resetFlashMessages(resetSubmitFlash) {
     flashMessageOnScreen('', 'success', 'tag-columns-flash');
     flashMessageOnScreen('', 'success', 'hed-flash');
     if (resetSubmitFlash) {
-        flashMessageOnScreen('', 'success', 'submit-flash');
+        flashMessageOnScreen('', 'success', 'validation-submit-flash');
     }
 }
 
@@ -245,7 +245,8 @@ function clearSpreadsheetFileLabel() {
  */
 function flashSubmitMessage() {
     resetFlashMessages(false);
-    flashMessageOnScreen('Worksheet is being validated ...', 'success', 'submit-flash')
+    flashMessageOnScreen('Worksheet is being validated ...', 'success',
+        'validation-submit-flash')
 }
 
 /**
@@ -276,7 +277,7 @@ function spreadsheetIsSpecified() {
 /**
  * Submits the form if the tag columns textbox is valid.
  */
-$('#submit').click(function () {
+$('#validation-submit').click(function () {
     if (spreadsheetIsSpecified() && tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
@@ -308,7 +309,7 @@ function submitForm() {
             error: function (jqXHR) {
                 console.log(jqXHR.responseJSON.message);
                 flashMessageOnScreen('Spreadsheet could not be processed', 'error',
-                    'submit-flash');
+                    'validation-submit-flash');
             }
         }
     )
@@ -357,13 +358,16 @@ function deleteUploadedSpreadsheet(uploadedSpreadsheetFile) {
 function checkIssueCount(rowIssueCount, rowErrorCount, rowWarningCount) {
     var issuesFound = false;
     if (rowIssueCount === 0) {
-        flashMessageOnScreen('No issues were found.', 'success', 'submit-flash');
+        flashMessageOnScreen('No issues were found.', 'success',
+            'validation-submit-flash');
     } else if (generateWarningsIsChecked()) {
         flashMessageOnScreen(rowIssueCount.toString() + ' issues found. ' + rowErrorCount.toString() + ' errors, '
-            + rowWarningCount.toString() + ' warnings. Creating attachment.', 'error', 'submit-flash');
+            + rowWarningCount.toString() + ' warnings. Creating attachment.', 'error',
+            'validation-submit-flash');
         issuesFound = true;
     } else {
-        flashMessageOnScreen(rowIssueCount.toString() + ' errors found. Creating attachment.', 'error', 'submit-flash');
+        flashMessageOnScreen(rowIssueCount.toString() + ' errors found. Creating attachment.', 'error',
+            'validation-submit-flash');
         issuesFound = true;
     }
     return issuesFound;
@@ -439,7 +443,8 @@ function getWorksheetsInfo(workbookFile) {
         error: function (jqXHR) {
             console.log(jqXHR);
             // console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Spreadsheet could not be processed.', 'error', 'submit-flash');
+            flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
+                'validation-submit-flash');
         }
     });
 }
