@@ -1,9 +1,8 @@
 import unittest
 
-from hed.webinterface import web_utils
-from hed import webinterface
-from hed.webinterface.app_factory import AppFactory
-from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
+from hed.web import web_utils
+from hed.web.app_factory import AppFactory
+from hed.web.constants import file_constants, spreadsheet_constants
 import os
 
 
@@ -17,24 +16,23 @@ class Test(unittest.TestCase):
     def create_test_app(self):
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
-            from hed.webinterface.routes import route_blueprint
+            from hed.web.routes import route_blueprint
             app.register_blueprint(route_blueprint)
             self.app = app.test_client()
 
     def test_find_major_hed_versions(self):
-        hed_info = webinterface.utils.find_major_hed_versions()
+        hed_info = web_utils.find_major_hed_versions()
         self.assertTrue(self.major_version_key in hed_info)
 
     def test_file_extension_is_valid(self):
-        file_name = 'abc' + spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS[0]
-        is_valid = web_utils._file_extension_is_valid(file_name,
-                                                                 spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS)
+        file_name = 'abc' + file_constants.SPREADSHEET_FILE_EXTENSIONS[0]
+        is_valid = web_utils._file_extension_is_valid(file_name, file_constants.SPREADSHEET_FILE_EXTENSIONS)
         self.assertTrue(is_valid)
 
     def test_generate_spreadsheet_validation_filename(self):
         spreadsheet_filename = 'abc.xls'
         expected_spreadsheet_filename = 'validated_' + spreadsheet_filename.rsplit('.')[0] + '.txt'
-        validation_file_name = webinterface.utils._generate_spreadsheet_validation_filename(spreadsheet_filename,
+        validation_file_name = web_utils._generate_spreadsheet_validation_filename(spreadsheet_filename,
                                                                                    worksheet_name='')
         self.assertTrue(validation_file_name)
         self.assertEqual(expected_spreadsheet_filename, validation_file_name)

@@ -12,9 +12,9 @@ from hed.validator.hed_validator import HedValidator
 from hed.util import hed_cache
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_file_input import HedFileInput
-from hed.web.constants import file_extension_constants, spreadsheet_constants, type_constants
+from hed.web.constants import file_constants, spreadsheet_constants, type_constants
 from hed.web.constants import error_constants
-from hed.web.constants import python_form_constants, validation_arg_constants, js_form_constants, \
+from hed.web.constants import python_form_constants, validation_constants, js_form_constants, \
     html_form_constants
 from hed.web.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
     UPLOAD_DIRECTORY_KEY, _save_file_to_upload_folder
@@ -163,7 +163,7 @@ def report_spreadsheet_validation_status(form_request_object):
         validation_issues = hed_input_reader.get_validation_issues()
         validation_status[js_form_constants.DOWNLOAD_FILE] = _save_validation_issues_to_file_in_upload_folder(
             original_spreadsheet_filename, validation_issues,
-            validation_input_arguments[validation_arg_constants.WORKSHEET_NAME])
+            validation_input_arguments[validation_constants.WORKSHEET_NAME])
         validation_status[js_form_constants.ISSUE_COUNT] = tag_validator.get_issue_count()
         validation_status[js_form_constants.ERROR_COUNT] = tag_validator.get_error_count()
         validation_status[js_form_constants.WARNING_COUNT] = tag_validator.get_warning_count()
@@ -238,7 +238,7 @@ def _get_uploaded_file_paths_from_forms(form_request_object):
     hed_file_path = ''
     if spreadsheet_present_in_form(form_request_object) and _file_has_valid_extension(
             form_request_object.files[js_form_constants.SPREADSHEET_FILE],
-            spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS):
+            file_constants.SPREADSHEET_FILE_EXTENSIONS):
         spreadsheet_file_path = save_spreadsheet_to_upload_folder(
             form_request_object.files[js_form_constants.SPREADSHEET_FILE])
     if hed_present_in_form(form_request_object) and _file_has_valid_extension(
@@ -263,7 +263,7 @@ def _get_original_spreadsheet_filename(form_request_object):
     """
     if spreadsheet_present_in_form(form_request_object) and _file_has_valid_extension(
             form_request_object.files[js_form_constants.SPREADSHEET_FILE],
-            spreadsheet_constants.SPREADSHEET_FILE_EXTENSIONS):
+            file_constants.SPREADSHEET_FILE_EXTENSIONS):
         return form_request_object.files[js_form_constants.SPREADSHEET_FILE].filename
     return ''
 
@@ -347,11 +347,11 @@ def _generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_na
         The name of the attachment other containing the validation issues.
     """
     if worksheet_name:
-        return file_extension_constants.VALIDATION_OUTPUT_FILE_PREFIX + \
+        return validation_constants.VALIDATION_OUTPUT_FILE_PREFIX + \
                secure_filename(spreadsheet_filename).rsplit('.')[0] + '_' + \
-               secure_filename(worksheet_name) + file_extension_constants.TEXT_EXTENSION
-    return file_extension_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(spreadsheet_filename).rsplit('.')[
-        0] + file_extension_constants.TEXT_EXTENSION
+               secure_filename(worksheet_name) + file_constants.TEXT_EXTENSION
+    return validation_constants.VALIDATION_OUTPUT_FILE_PREFIX + secure_filename(spreadsheet_filename).rsplit('.')[
+        0] + file_constants.TEXT_EXTENSION
 
 
 def _generate_input_arguments_from_validation_form(form_request_object, spreadsheet_file_path,
@@ -371,18 +371,18 @@ def _generate_input_arguments_from_validation_form(form_request_object, spreadsh
         A dictionary containing input arguments for calling the underlying validation function.
     """
     validation_input_arguments = {}
-    validation_input_arguments[validation_arg_constants.SPREADSHEET_PATH] = spreadsheet_file_path
-    validation_input_arguments[validation_arg_constants.HED_XML_PATH] = _get_hed_path_from_validation_form(
+    validation_input_arguments[validation_constants.SPREADSHEET_PATH] = spreadsheet_file_path
+    validation_input_arguments[validation_constants.HED_XML_PATH] = _get_hed_path_from_validation_form(
         form_request_object, hed_file_path)
-    validation_input_arguments[validation_arg_constants.TAG_COLUMNS] = \
+    validation_input_arguments[validation_constants.TAG_COLUMNS] = \
         _convert_other_tag_columns_to_list(form_request_object.form[html_form_constants.TAG_COLUMNS])
-    validation_input_arguments[validation_arg_constants.COLUMN_PREFIX_DICTIONARY] = \
+    validation_input_arguments[validation_constants.COLUMN_PREFIX_DICTIONARY] = \
         _get_specific_tag_columns_from_validation_form(form_request_object)
-    validation_input_arguments[validation_arg_constants.WORKSHEET_NAME] = _get_optional_validation_form_field(
+    validation_input_arguments[validation_constants.WORKSHEET_NAME] = _get_optional_validation_form_field(
         form_request_object, html_form_constants.WORKSHEET_NAME, type_constants.STRING)
-    validation_input_arguments[validation_arg_constants.HAS_COLUMN_NAMES] = _get_optional_validation_form_field(
+    validation_input_arguments[validation_constants.HAS_COLUMN_NAMES] = _get_optional_validation_form_field(
         form_request_object, html_form_constants.HAS_COLUMN_NAMES, type_constants.BOOLEAN)
-    validation_input_arguments[validation_arg_constants.CHECK_FOR_WARNINGS] = _get_optional_validation_form_field(
+    validation_input_arguments[validation_constants.CHECK_FOR_WARNINGS] = _get_optional_validation_form_field(
         form_request_object, html_form_constants.CHECK_FOR_WARNINGS, type_constants.BOOLEAN)
     return validation_input_arguments
 
@@ -515,16 +515,16 @@ def validate_spreadsheet(validation_arguments):
     HedValidator object
         A HedValidator object containing the validation results.
     """
-    file_input_object = HedFileInput(validation_arguments[validation_arg_constants.SPREADSHEET_PATH],
-                                     worksheet_name=validation_arguments[validation_arg_constants.WORKSHEET_NAME],
-                                     tag_columns=validation_arguments[validation_arg_constants.TAG_COLUMNS],
-                                     has_column_names=validation_arguments[validation_arg_constants.HAS_COLUMN_NAMES],
+    file_input_object = HedFileInput(validation_arguments[validation_constants.SPREADSHEET_PATH],
+                                     worksheet_name=validation_arguments[validation_constants.WORKSHEET_NAME],
+                                     tag_columns=validation_arguments[validation_constants.TAG_COLUMNS],
+                                     has_column_names=validation_arguments[validation_constants.HAS_COLUMN_NAMES],
                                      column_prefix_dictionary=validation_arguments[
-                                         validation_arg_constants.COLUMN_PREFIX_DICTIONARY]
+                                         validation_constants.COLUMN_PREFIX_DICTIONARY]
                                      )
     return HedValidator(file_input_object,
-                        check_for_warnings=validation_arguments[validation_arg_constants.CHECK_FOR_WARNINGS],
-                        hed_xml_file=validation_arguments[validation_arg_constants.HED_XML_PATH])
+                        check_for_warnings=validation_arguments[validation_constants.CHECK_FOR_WARNINGS],
+                        hed_xml_file=validation_arguments[validation_constants.HED_XML_PATH])
 
 
 def spreadsheet_present_in_form(validation_form_request_object):
