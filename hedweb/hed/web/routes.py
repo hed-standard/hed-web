@@ -1,10 +1,10 @@
 from flask import render_template, Response, request, Blueprint, current_app
 import os
 import json
-from hed.webinterface import utils
-from hed.webinterface.constants.error import error_constants
-from hed.webinterface.constants.routing import page_constants, route_constants, blueprint_constants
-from hed.webinterface.web_utils import handle_http_error
+from hed.web import utils
+from hed.web.constants import error_constants
+from hed.web.constants import page_constants, route_constants, blueprint_constants
+from hed.web.web_utils import handle_http_error
 import traceback
 
 import hed.util.file_util
@@ -145,7 +145,7 @@ def get_spreadsheet_columns_info():
     spreadsheet_columns_info = utils.find_spreadsheet_columns_info(request)
     if error_constants.ERROR_KEY in spreadsheet_columns_info:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                       spreadsheet_columns_info[error_constants.ERROR_KEY])
+                                 spreadsheet_columns_info[error_constants.ERROR_KEY])
     return json.dumps(spreadsheet_columns_info)
 
 
@@ -170,7 +170,7 @@ def get_worksheets_info():
         worksheets_info = utils.find_worksheets_info(request)
         if error_constants.ERROR_KEY in worksheets_info:
             return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                           worksheets_info[error_constants.ERROR_KEY])
+                                     worksheets_info[error_constants.ERROR_KEY])
     except:
         worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
     return json.dumps(worksheets_info)
@@ -224,12 +224,12 @@ def get_validation_results():
     validation_status = utils.report_spreadsheet_validation_status(request)
     if error_constants.ERROR_KEY in validation_status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                       validation_status[error_constants.ERROR_KEY])
+                                 validation_status[error_constants.ERROR_KEY])
     return json.dumps(validation_status)
 
 
 @route_blueprint.route(route_constants.EEG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_EEG_events_validation_results():
+def get_eeg_events_validation_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
     return json string containing the output.
 
@@ -246,7 +246,7 @@ def get_EEG_events_validation_results():
 
     if error_constants.ERROR_KEY in validation_status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                       validation_status[error_constants.ERROR_KEY])
+                                 validation_status[error_constants.ERROR_KEY])
     return json.dumps(validation_status)
 
 

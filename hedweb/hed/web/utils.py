@@ -12,11 +12,11 @@ from hed.validator.hed_validator import HedValidator
 from hed.util import hed_cache
 from hed.util.hed_dictionary import HedDictionary
 from hed.util.hed_file_input import HedFileInput
-from hed.webinterface.constants.other import file_extension_constants, spreadsheet_constants, type_constants
-from hed.webinterface.constants.error import error_constants
-from hed.webinterface.constants.form import python_form_constants, validation_arg_constants, js_form_constants, \
+from hed.web.constants import file_extension_constants, spreadsheet_constants, type_constants
+from hed.web.constants import error_constants
+from hed.web.constants import python_form_constants, validation_arg_constants, js_form_constants, \
     html_form_constants
-from hed.webinterface.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
+from hed.web.web_utils import _save_hed_to_upload_folder_if_present, _file_has_valid_extension, \
     UPLOAD_DIRECTORY_KEY, _save_file_to_upload_folder
 
 app_config = current_app.config
@@ -56,7 +56,7 @@ def find_major_hed_versions():
     Returns
     -------
     string
-        A serialized JSON string containing inforamtion about the major HED versions.
+        A serialized JSON string containing information about the major HED versions.
 
     """
     hed_info = {}
@@ -332,7 +332,6 @@ def _save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, valid
     return validation_issues_filename
 
 
-
 def _generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name=''):
     """Generates a filename for the attachment that will contain the spreadsheet validation issues.
 
@@ -404,8 +403,8 @@ def _get_hed_path_from_validation_form(form_request_object, hed_file_path):
         The HED XML other path.
     """
     if _hed_version_in_form(form_request_object) and \
-            (form_request_object.form[
-                 html_form_constants.HED_VERSION] != spreadsheet_constants.OTHER_HED_VERSION_OPTION or not hed_file_path):
+        (form_request_object.form[html_form_constants.HED_VERSION] != spreadsheet_constants.OTHER_HED_VERSION_OPTION
+         or not hed_file_path):
         return hed_cache.get_path_from_hed_version(form_request_object.form['hed-version'])
     return hed_file_path
 
@@ -466,7 +465,7 @@ def _get_specific_tag_columns_from_validation_form(form_request_object):
             if tag_column_name_index:
                 tag_column_name_index = int(tag_column_name_index)
 
-                #todo: Remove these giant kludges at some point
+                # todo: Remove these giant kludges at some point
                 if tag_column_name == "Long":
                     tag_column_name = "Long Name"
                 tag_column_name = "Event/" + tag_column_name + "/"
@@ -520,7 +519,8 @@ def validate_spreadsheet(validation_arguments):
                                      worksheet_name=validation_arguments[validation_arg_constants.WORKSHEET_NAME],
                                      tag_columns=validation_arguments[validation_arg_constants.TAG_COLUMNS],
                                      has_column_names=validation_arguments[validation_arg_constants.HAS_COLUMN_NAMES],
-                                     column_prefix_dictionary=validation_arguments[validation_arg_constants.COLUMN_PREFIX_DICTIONARY]
+                                     column_prefix_dictionary=validation_arguments[
+                                         validation_arg_constants.COLUMN_PREFIX_DICTIONARY]
                                      )
     return HedValidator(file_input_object,
                         check_for_warnings=validation_arguments[validation_arg_constants.CHECK_FOR_WARNINGS],
