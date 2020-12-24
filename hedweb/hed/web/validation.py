@@ -10,7 +10,6 @@ from hed.util.hed_file_input import HedFileInput
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web import web_utils
 from hed.web import utils
-from hed.web.web_utils import UPLOAD_DIRECTORY_KEY
 
 app_config = current_app.config
 
@@ -92,10 +91,11 @@ def get_uploaded_file_paths_from_forms(form_request_object):
             file_constants.SPREADSHEET_FILE_EXTENSIONS):
         spreadsheet_file_path = utils.save_spreadsheet_to_upload_folder(
             form_request_object.files[common_constants.SPREADSHEET_FILE])
-    if utils.hed_present_in_form(form_request_object) and utils.file_has_valid_extension(
-            form_request_object.files[common_constants.HED_SCHEMA_FILE], [file_constants.SCHEMA_XML_EXTENSION]):
-        hed_file_path = utils.save_hed_to_upload_folder_if_present(
-            form_request_object.files[common_constants.HED_SCHEMA_FILE])
+    if common_constants.HED_XML_FILE in form_request_object.files and \
+            utils.file_has_valid_extension(form_request_object.files[common_constants.HED_XML_FILE],
+                                           [file_constants.SCHEMA_XML_EXTENSION]):
+        hed_file_path = web_utils.save_hed_to_upload_folder_if_present(
+            form_request_object.files[common_constants.HED_XML_FILE])
     return spreadsheet_file_path, hed_file_path
 
 
@@ -204,7 +204,7 @@ def save_validation_issues_to_file_in_upload_folder(spreadsheet_filename, valida
 
     """
     validation_issues_filename = generate_spreadsheet_validation_filename(spreadsheet_filename, worksheet_name)
-    validation_issues_file_path = os.path.join(current_app.config[UPLOAD_DIRECTORY_KEY], validation_issues_filename)
+    validation_issues_file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], validation_issues_filename)
     with open(validation_issues_file_path, 'w', encoding='utf-8') as validation_issues_file:
         for val_issue in validation_issues:
             validation_issues_file.write(val_issue['message'])

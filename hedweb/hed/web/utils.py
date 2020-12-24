@@ -11,8 +11,7 @@ from hed.util.hed_dictionary import HedDictionary
 from hed.web.constants import file_constants, spreadsheet_constants
 from hed.web.constants import error_constants
 from hed.web.constants import common_constants
-from hed.web.web_utils import save_hed_to_upload_folder_if_present, file_has_valid_extension, \
-    UPLOAD_DIRECTORY_KEY, save_file_to_upload_folder
+from hed.web.web_utils import file_has_valid_extension, save_file_to_upload_folder
 
 app_config = current_app.config
 
@@ -64,13 +63,15 @@ def find_all_str_indices_in_list(list_of_strs, str_value):
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
-def find_hed_version_in_file(form_request_object):
-    """Finds the version number in a HED XML other.
+def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
+    """Finds the version number in an HED XML other.
 
     Parameters
     ----------
     form_request_object: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data
+    key_name: str
+        Name of the key for the HED XML file in the form_request_object
 
     Returns
     -------
@@ -80,8 +81,8 @@ def find_hed_version_in_file(form_request_object):
     """
     hed_info = {}
     try:
-        if hed_file_present_in_form(form_request_object):
-            hed_file = form_request_object.files[common_constants.HED_SCHEMA_FILE]
+        if key_name in form_request_object.files:
+            hed_file = form_request_object.files[key_name]
             hed_file_path = save_hed_to_upload_folder(hed_file)
             hed_info[common_constants.HED_VERSION] = HedDictionary.get_hed_xml_version(hed_file_path)
     except:
@@ -217,7 +218,7 @@ def generate_download_file_response(download_file_name):
     """
     try:
         def generate():
-            full_filename = os.path.join(app_config[UPLOAD_DIRECTORY_KEY], download_file_name)
+            full_filename = os.path.join(app_config['UPLOAD_FOLDER'], download_file_name)
             with open(full_filename, 'r', encoding='utf-8') as download_file:
                 for line in download_file:
                     yield line
@@ -440,9 +441,6 @@ def get_text_file_column_names(text_file_path, column_delimiter):
     return text_file_columns
 
 
-def get_uploaded_file_paths_from_forms(form_request_object):
-    return ''
-
 def get_worksheet_column_names(workbook_file_path, worksheet_name):
     """Get the worksheet columns in a Excel workbook.
 
@@ -496,23 +494,6 @@ def hed_version_in_form(form_request_object):
         True if the hed version is in the validation form. False, if otherwise.
     """
     return common_constants.HED_VERSION in form_request_object.form
-
-
-def hed_file_present_in_form(validation_form_request_object):
-    """Checks to see if a HED XML other is present in a request object from validation form.
-
-    Parameters
-    ----------
-    validation_form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    boolean
-        True if a HED XML other is present in a request object from the validation form.
-
-    """
-    return common_constants.HED_XML_FILE in validation_form_request_object.files
 
 
 def initialize_spreadsheet_columns_info_dictionary():

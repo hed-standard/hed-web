@@ -18,7 +18,8 @@ $('#hed-xml-file').change(function () {
         getVersionFromHEDFile(hedFile);
         updateHEDFileLabel(hedPath);
     } else {
-        flashInvalidHEDExtensionMessage();
+        flashMessageOnScreen('Please upload a valid HED file (.xml)', 'error',
+            'hed-flash')
     }
 });
 
@@ -56,7 +57,8 @@ $('#spreadsheet-file').change(function () {
         getSpreadsheetColumnsInfo(spreadsheetFile, '');
     } else {
         resetForm();
-        flashInvalidExcelExtensionMessage();
+        flashMessageOnScreen('Please upload a excel or text spreadsheet (.xlsx, .xls, .tsv, .txt)',
+            'error', 'spreadsheet-flash');
     }
 });
 
@@ -219,23 +221,6 @@ function fileHasValidExtension(filePath, acceptedFileExtensions) {
 }
 
 
-
-/**
- * Flash message when Excel workbook file extension is invalid.
- */
-function flashInvalidExcelExtensionMessage() {
-    flashMessageOnScreen('Please upload a excel or text spreadsheet (.xlsx, .xls, .tsv, .txt)',
-        'error', 'spreadsheet-flash');
-}
-
-/**
- * Flash message when HED XML file extension is invalid.
- */
-function flashInvalidHEDExtensionMessage() {
-    flashMessageOnScreen('Please upload a valid HED file (.xml)', 'error', 'hed-flash');
-}
-
-
 /**
  * Flash a message on the screen.
  * @param {String} message - The message that will be flashed on the screen.
@@ -340,14 +325,6 @@ function getSpreadsheetColumnsInfo(spreadsheetFile, worksheetName) {
     });
 }
 
-
-
-/**
- * Gets the static data that the form uses.
- */
-function getStaticFormData() {
-    getHEDVersions();
-}
 
 /**
  * Gets the version from the HED file that the user uploaded.

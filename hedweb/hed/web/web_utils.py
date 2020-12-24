@@ -6,8 +6,6 @@ from logging import ERROR
 
 from hed.util.file_util import get_file_extension
 
-UPLOAD_DIRECTORY_KEY = 'UPLOAD_FOLDER'
-
 
 def copy_file_line_by_line(file_object_1, file_object_2):
     """Copy the contents of one other to the other other.
@@ -124,7 +122,7 @@ def save_file_to_upload_folder(file_object, file_suffix=""):
 
     """
     temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False,
-                                                        dir=current_app.config[UPLOAD_DIRECTORY_KEY])
+                                                        dir=current_app.config['UPLOAD_FOLDER'])
     copy_file_line_by_line(file_object, temporary_upload_file)
     return temporary_upload_file.name
 
