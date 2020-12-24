@@ -8,6 +8,19 @@ $(document).ready(function () {
 });
 
 /**
+ * Event handler function when the HED version drop-down menu changes. If Other is selected the file browser
+ * underneath it will appear. If another option is selected then it will disappear.
+ */
+$('#hed-version').change(function () {
+    if ($(this).val() === HED_OTHER_VERSION_OPTION) {
+        $('#hed-other-version').show();
+    } else {
+        hideOtherHEDVersionFileUpload()
+    }
+    flashMessageOnScreen('', 'success', 'hed-flash');
+});
+
+/**
  * Checks if the HED file uploaded has a valid extension.
  */
 $('#hed-xml-file').change(function () {
@@ -23,18 +36,6 @@ $('#hed-xml-file').change(function () {
     }
 });
 
-/**
- * Event handler function when the HED version drop-down menu changes. If Other is selected the file browser
- * underneath it will appear. If another option is selected then it will disappear.
- */
-$('#hed-version').change(function () {
-    if ($(this).val() === HED_OTHER_VERSION_OPTION) {
-        $('#hed-other-version').show();
-    } else {
-        $('#hed-other-version').hide();
-    }
-    flashMessageOnScreen('', 'success', 'hed-flash');
-});
 
 /**
  * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
@@ -43,7 +44,7 @@ $('#spreadsheet-file').change(function () {
     let spreadsheet = $('#spreadsheet-file');
     let spreadsheetPath = spreadsheet.val();
     let spreadsheetFile = spreadsheet[0].files[0];
-    resetFlashMessages(true);
+    resetFlashMessages();
     if (cancelWasPressedInChromeFileUpload(spreadsheetPath)) {
         resetForm();
     }
@@ -79,7 +80,7 @@ $('#validation-submit').click(function () {
 $('#worksheet-name').change(function () {
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
     let worksheetName = $('#worksheet-name option:selected').text();
-    resetFlashMessages(true);
+    resetFlashMessages();
     getSpreadsheetColumnsInfo(spreadsheetFile, worksheetName);
 });
 
@@ -251,10 +252,9 @@ function flashSpreadsheetTagColumnCountMessage(TagColumnIndices, requiredTagColu
 
 /**
  * Flash a submit message.
- * @param {Array} worksheetNames - An array containing the names of Excel workbook worksheets.
  */
 function flashSubmitMessage() {
-    resetFlashMessages(false);
+    resetFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'validation-submit-flash')
 }
@@ -341,7 +341,7 @@ function getVersionFromHEDFile(hedXMLFile) {
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            resetFlashMessages(true);
+            resetFlashMessages();
             flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'],
                 'success', 'hed-flash');
         },
@@ -409,6 +409,7 @@ function hideSpreadsheetColumnNamesTable() {
  * Hides the HED XML file upload.
  */
 function hideOtherHEDVersionFileUpload() {
+    $('#hed-display-name').text('');
     $('#hed-other-version').hide();
 }
 
@@ -488,23 +489,20 @@ function prepareValidationForm() {
     resetForm();
     getHEDVersions()
     // getStaticFormData();
-    // hideSpreadsheetColumnNamesTable();
-    // hideOtherHEDVersionFileUpload();
+    hideSpreadsheetColumnNamesTable();
+    hideOtherHEDVersionFileUpload();
 }
 
 
 /**
  * Resets the flash messages that aren't related to the form submission.
- A * @param {String} message - If true, reset the flash message related to the validation-submit button.
  */
-function resetFlashMessages(resetSubmitFlash) {
+function resetFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
     flashMessageOnScreen('', 'success', 'tag-columns-flash');
     flashMessageOnScreen('', 'success', 'hed-flash');
-    if (resetSubmitFlash) {
-        flashMessageOnScreen('', 'success', 'validation-submit-flash');
-    }
+    flashMessageOnScreen('', 'success', 'validation-submit-flash');
 }
 
 
@@ -516,7 +514,7 @@ function resetForm() {
     clearSpreadsheetFileLabel();
     clearWorksheetSelectbox();
     hideSpreadsheetColumnNamesTable();
-    hideOtherHEDVersionFileUpload();
+    hideOtherHEDVersionFileUpload()
 }
 
 /**
@@ -657,8 +655,7 @@ function spreadsheetIsSpecified() {
  * @returns {boolean} - True if the spreadsheet tag column indices array is empty.
  */
 function spreadsheetTagColumnsIndicesAreEmpty(tagColumnsIndices) {
-    let numberOfTagColumnIndices = tagColumnsIndices.length;
-    if (numberOfTagColumnIndices > 0) {
+    if (tagColumnsIndices.length > 0) {
         return false;
     }
     return true;
@@ -672,7 +669,9 @@ function spreadsheetTagColumnsIndicesAreEmpty(tagColumnsIndices) {
 function submitForm() {
     let validationForm = document.getElementById("validation-form");
     let formData = new FormData(validationForm);
-    flashSubmitMessage();
+    resetFlashMessages();
+    flashMessageOnScreen('Worksheet is being validated ...', 'success',
+        'validation-submit-flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_validation_results')}}",
@@ -681,6 +680,7 @@ function submitForm() {
             processData: false,
             dataType: 'json',
             success: function (validationStatus) {
+                resetFlashMessages();
                 if (checkIssueCount(validationStatus['issue-count'], validationStatus['error-count'],
                     validationStatus['warning-count'])) {
                     downloadValidationOutputFile(validationStatus['download-file']);
@@ -689,6 +689,7 @@ function submitForm() {
                 }
             },
             error: function (jqXHR) {
+                resetFlashMessages();
                 console.log(jqXHR.responseJSON.message);
                 flashMessageOnScreen('Spreadsheet could not be processed', 'error',
                     'validation-submit-flash');

@@ -220,6 +220,7 @@ def generate_download_file_response(download_file_name):
         def generate():
             full_filename = os.path.join(app_config['UPLOAD_FOLDER'], download_file_name)
             with open(full_filename, 'r', encoding='utf-8') as download_file:
+                yield download_file_name + ".....\n"
                 for line in download_file:
                     yield line
             delete_file_if_it_exist(full_filename)
