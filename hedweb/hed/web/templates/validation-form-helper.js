@@ -432,7 +432,7 @@ function hideSpreadsheetColumnNamesTable() {
  * Hides the HED XML file upload.
  */
 function hideOtherHEDVersionFileUpload() {
-    $('#other-hed-version').hide();
+    $('#hed-other-version').hide();
 }
 
 
@@ -449,7 +449,6 @@ function populateHEDVersionsDropdown(hedVersions) {
     hedVersionDropdown.append('<option value=' + HED_OTHER_VERSION_OPTION + '>' + HED_OTHER_VERSION_OPTION +
         '</option>');
 }
-
 
 
 /**
@@ -510,9 +509,10 @@ function populateWorksheetSelectbox(worksheetNames) {
  */
 function prepareValidationForm() {
     resetForm();
-    getStaticFormData();
-    hideSpreadsheetColumnNamesTable();
-    hideOtherHEDVersionFileUpload();
+    getHEDVersions()
+    // getStaticFormData();
+    // hideSpreadsheetColumnNamesTable();
+    // hideOtherHEDVersionFileUpload();
 }
 
 
