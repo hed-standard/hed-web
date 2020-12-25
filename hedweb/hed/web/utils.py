@@ -1,28 +1,14 @@
-import os
 import xlrd
 import traceback
-from flask import Response
+
 from flask import current_app
 
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
-from hed.util import hed_cache
-from hed.util.hed_dictionary import HedDictionary
 
-from hed.web.constants import file_constants, spreadsheet_constants
-from hed.web.constants import error_constants
-from hed.web.constants import common_constants
+from hed.web.constants import common_constants, error_constants, file_constants, spreadsheet_constants
 from hed.web.web_utils import file_has_valid_extension, save_file_to_upload_folder
 
 app_config = current_app.config
-
-
-def check_if_option_in_form(form_request_object, option_name, target_value):
-    """Checks if the given option has a specific value.
-       This is used for radio buttons.
-    """
-    if option_name in form_request_object.values and form_request_object.values[option_name] == target_value:
-        return True
-    return False
 
 
 def convert_other_tag_columns_to_list(other_tag_columns):
@@ -63,52 +49,8 @@ def find_all_str_indices_in_list(list_of_strs, str_value):
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
-def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
-    """Finds the version number in an HED XML other.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data
-    key_name: str
-        Name of the key for the HED XML file in the form_request_object
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing the version number information.
-
-    """
-    hed_info = {}
-    try:
-        if key_name in form_request_object.files:
-            hed_file = form_request_object.files[key_name]
-            hed_file_path = save_hed_to_upload_folder(hed_file)
-            hed_info[common_constants.HED_VERSION] = HedDictionary.get_hed_xml_version(hed_file_path)
-    except:
-        hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return hed_info
 
 
-def find_major_hed_versions():
-    """Finds the major HED versions that are kept on the server.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information about the major HED versions.
-
-    """
-    hed_info = {}
-    try:
-        hed_cache.cache_all_hed_xml_versions()
-        hed_info[common_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
-    except:
-        hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return hed_info
 
 
 def find_spreadsheet_columns_info(form_request_object):
@@ -202,33 +144,6 @@ def find_worksheets_info(form_request_object):
     return worksheets_info
 
 
-def generate_download_file_response(download_file_name):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_file_name: string
-        The download other name.
-
-    Returns
-    -------
-    response object
-        A response object containing the download other.
-
-    """
-    try:
-        def generate():
-            full_filename = os.path.join(app_config['UPLOAD_FOLDER'], download_file_name)
-            with open(full_filename, 'r', encoding='utf-8') as download_file:
-                yield download_file_name + ".....\n"
-                for line in download_file:
-                    yield line
-            delete_file_if_it_exist(full_filename)
-
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': "attachment filename=%s" % download_file_name})
-    except:
-        return traceback.format_exc()
 
 
 def get_column_delimiter_based_on_file_extension(file_name_or_path):
@@ -271,26 +186,6 @@ def get_excel_worksheet_names(workbook_file_path):
     return worksheet_names
 
 
-def get_hed_path_from_form(form_request_object, hed_file_path):
-    """Gets the validation function input arguments from a request object associated with the validation form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-    hed_file_path: string
-        The path to the HED XML other.
-
-    Returns
-    -------
-    string
-        The HED XML other path.
-    """
-    if hed_version_in_form(form_request_object) and \
-        (form_request_object.form[common_constants.HED_VERSION] != spreadsheet_constants.OTHER_HED_VERSION_OPTION
-         or not hed_file_path):
-        return hed_cache.get_path_from_hed_version(form_request_object.form[common_constants.HED_VERSION])
-    return hed_file_path
 
 
 def get_optional_form_field(form_request_object, form_field_name, ftype=''):
@@ -464,39 +359,6 @@ def get_worksheet_column_names(workbook_file_path, worksheet_name):
     return worksheet_column_names
 
 
-def hed_present_in_form(validation_form_request_object):
-    """Checks to see if a HED XML other is present in a request object from validation form.
-
-    Parameters
-    ----------
-    validation_form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    boolean
-        True if a HED XML other is present in a request object from the validation form.
-
-    """
-    return common_constants.HED_SCHEMA_FILE in validation_form_request_object.files
-
-
-def hed_version_in_form(form_request_object):
-    """Checks to see if the hed version is in the validation form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    boolean
-        True if the hed version is in the validation form. False, if otherwise.
-    """
-    return common_constants.HED_VERSION in form_request_object.form
-
-
 def initialize_spreadsheet_columns_info_dictionary():
     """Initializes a dictionary that will hold information related to the spreadsheet columns.
 
@@ -619,24 +481,6 @@ def save_spreadsheet_to_upload_folder(spreadsheet_file_object):
     spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file_object, spreadsheet_file_extension)
     return spreadsheet_file_path
 
-
-def save_hed_to_upload_folder(hed_file_object):
-    """Save an spreadsheet other to the upload folder.
-
-    Parameters
-    ----------
-    hed_file_object: File object
-        A other object that points to a HED XML other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the HED XML other that was saved to the upload folder.
-
-    """
-    hed_file_extension = get_file_extension(hed_file_object.filename)
-    hed_file_path = save_file_to_upload_folder(hed_file_object, hed_file_extension)
-    return hed_file_path
 
 
 def spreadsheet_present_in_form(validation_form_request_object):

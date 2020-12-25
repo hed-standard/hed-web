@@ -6,9 +6,9 @@ from hed.schematools import xml2wiki, wiki2xml, constants as converter_constants
 from hed.tools.duplicate_tags import check_for_duplicate_tags
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension
 from hed.util.exceptions import SchemaError
-from hed.web.utils import check_if_option_in_form
+
 from hed.web.web_utils import handle_http_error, save_hed_to_upload_folder_if_present, file_has_valid_extension, \
-    file_extension_is_valid
+    file_extension_is_valid, check_if_option_in_form
 from hed.web.constants import common_constants, error_constants, file_constants
 
 app_config = current_app.config
@@ -44,7 +44,10 @@ def get_uploaded_file_paths_from_schema_form(form_request_object):
         The local file path, if exists.
     """
     schema_local_path = ''
-    if hed_present_in_form(form_request_object) and file_has_valid_extension(
+    hed_present_in_form = check_if_option_in_form(form_request_object, common_constants.SCHEMA_UPLOAD_OPTIONS,
+                                                  common_constants.SCHEMA_FILE_OPTION) and \
+                          common_constants.SCHEMA_FILE in form_request_object.files
+    if hed_present_in_form and file_has_valid_extension(
             form_request_object.files[common_constants.SCHEMA_FILE], file_constants.SCHEMA_EXTENSIONS):
         schema_local_path = save_hed_to_upload_folder_if_present(
             form_request_object.files[common_constants.SCHEMA_FILE])
@@ -187,22 +190,3 @@ def url_present_in_form(form_request_object):
     url_checked = check_if_option_in_form(form_request_object, common_constants.SCHEMA_UPLOAD_OPTIONS,
                                           common_constants.SCHEMA_URL_OPTION)
     return url_checked and common_constants.SCHEMA_URL in form_request_object.values
-
-
-def hed_present_in_form(form_request_object):
-    """Checks to see if a HED XML other is present in a request object from conversion form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the conversion form.
-
-    Returns
-    -------
-    boolean
-        True if a HED XML other is present in a request object from the conversion form.
-
-    """
-    return check_if_option_in_form(form_request_object, common_constants.SCHEMA_UPLOAD_OPTIONS,
-                                   common_constants.SCHEMA_FILE_OPTION) and \
-        common_constants.SCHEMA_FILE in form_request_object.files

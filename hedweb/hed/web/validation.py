@@ -33,8 +33,8 @@ def generate_input_arguments_from_validation_form(form_request_object, spreadshe
     """
     validation_input_arguments = {}
     validation_input_arguments[common_constants.SPREADSHEET_PATH] = spreadsheet_file_path
-    validation_input_arguments[common_constants.HED_XML_FILE] = utils.get_hed_path_from_form(
-        form_request_object, hed_file_path)
+    validation_input_arguments[common_constants.HED_XML_FILE] = \
+        web_utils.get_hed_path_from_form(form_request_object, hed_file_path)
     validation_input_arguments[common_constants.TAG_COLUMNS] = \
         utils.convert_other_tag_columns_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
     validation_input_arguments[common_constants.COLUMN_PREFIX_DICTIONARY] = \
