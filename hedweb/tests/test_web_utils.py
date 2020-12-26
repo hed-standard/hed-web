@@ -1,10 +1,12 @@
 import os
 import unittest
-from flask import current_app, jsonify, Response
+
+
 from hed.web.app_factory import AppFactory
-from hed.util import hed_cache
-#from hed.web.utils import app_config, initialize_worksheets_info_dictionary
-from hed.web.constants import file_constants, spreadsheet_constants
+import shutil
+# from hed.util import hed_cache
+# #from hed.web.utils import app_config, initialize_worksheets_info_dictionary
+# from hed.web.constants import file_constants, spreadsheet_constants
 
 
 # app = AppFactory.create_app('config.TestConfig')
@@ -23,12 +25,28 @@ from hed.web.constants import file_constants, spreadsheet_constants
 #     web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
 
 class Test(unittest.TestCase):
-    def setUp(self):
-    # self.create_test_app()
-    # self.app = app.app.test_client()
-    # self.major_version_key = 'major_versions'
-        self.hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        self.tsv_file1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tsv_file1.txt')
+    @classmethod
+    def setUpClass(cls):
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        app = AppFactory.create_app('config.TestConfig')
+        with app.app_context():
+
+            from hed.web.routes import route_blueprint
+            from hed.web import web_utils
+            app.register_blueprint(route_blueprint)
+            web_utils.create_upload_directory(cls.upload_directory)
+            app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            cls.app = app.test_client()
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.upload_directory)
+    # def setUp(self):
+    # # self.create_test_app()
+    # # self.app = app.app.test_client()
+    # # self.major_version_key = 'major_versions'
+    #     self.hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+    #     self.tsv_file1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tsv_file1.txt')
 
     # def create_test_app(self):
     #     app = AppFactory.create_app('config.TestConfig')
@@ -41,12 +59,25 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing check_if_option_in_form")
 
     def test_copy_file_line_by_line(self):
+        from hed.web import web_utils
+        #from flask import current_app
+        #app_config = current_app.config
         self.assertTrue(1, "Testing copy_file_line_by_line")
-        # def test_copy_file_line_by_line(self):
-        #     some_file1 = '3k32j23kj1.txt'
-        #     some_file2 = '3k32j23kj2.txt'
-        #     success = web_utils.copy_file_line_by_line(some_file1, some_file2)
-        #     self.assertFalse(success)
+        some_file1 = '3k32j23kj1.txt'
+        some_file2 = '3k32j23kj2.txt'
+        success = web_utils.copy_file_line_by_line(some_file1, some_file2)
+        self.assertFalse(success, "A file that does not exist cannot be copied")
+
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        print(Test.upload_directory)
+
+        upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        os.mkdir(upload_dir)
+        #print(app_config['UPLOAD_FOLDER'])
+        hed_copy = os.path.join(upload_dir, 'temp.xml')
+        print(upload_dir)
+        success = web_utils.copy_file_line_by_line(hed_file, hed_copy)
+        self.assertTrue(success, "A file that exists can be copied")
 
     def test_create_upload_directory(self):
         self.assertTrue(1, "Testing create_upload_directory")
@@ -97,77 +128,6 @@ class Test(unittest.TestCase):
 
     def test_save_hed_to_upload_folder(self):
         self.assertTrue(1, "Testing save_hed_to_upload_folder")
-
-
-
-
-    # def test_convert_other_tag_columns_to_list(self):
-    #     other_tag_columns_str = '1,2,3'
-    #     expected_other_columns = [1, 2, 3]
-    #     other_tag_columns = utils.convert_other_tag_columns_to_list(other_tag_columns_str)
-    #     self.assertTrue(other_tag_columns)
-    #     self.assertEqual(expected_other_columns, other_tag_columns)
-    #
-    # def test_create_folder_if_needed(self):
-    #     some_folder = '3k32j23kj'
-    #     created = web_utils.create_folder_if_needed(some_folder)
-    #     self.assertTrue(created)
-    #     os.rmdir(some_folder)
-    #
-
-    #
-
-
-    # def test_initialize_spreadsheet_columns_info_dictionary(self):
-    #     worksheets_info_dictionary = utils._initialize_spreadsheet_columns_info_dictionary()
-    #     self.assertTrue(worksheets_info_dictionary)
-    #     self.assertIsInstance(worksheets_info_dictionary, dict)
-    #
-    # def test_get_text_file_column_names(self):
-    #     column_names = utils.get_text_file_column_names(self.tsv_file1, '\t')
-    #     self.assertTrue(column_names)
-    #     self.assertIsInstance(column_names, list)
-    #
-    # def test_get_column_delimiter_based_on_file_extension(self):
-    #     delimiter = utils.get_column_delimiter_based_on_file_extension(self.tsv_file1)
-    #     tab_delimiter = '\t'
-    #     self.assertTrue(delimiter)
-    #     self.assertIsInstance(delimiter, str)
-    #     self.assertEqual(tab_delimiter, delimiter)
-    #
-    # def test_get_spreadsheet_other_tag_column_indices(self):
-    #     column_names = ['a,', spreadsheet_constants.OTHER_TAG_COLUMN_NAMES[0]]
-    #     expected_indices = [2]
-    #     indices = utils.get_spreadsheet_other_tag_column_indices(column_names)
-    #     self.assertTrue(indices)
-    #     self.assertIsInstance(indices, list)
-    #     self.assertEqual(indices, expected_indices)
-    #
-    # def test_get_spreadsheet_specific_tag_column_indices(self):
-    #     column_names = ['a,', spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
-    #         spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES[0]][0]]
-    #     # print(column_names)
-    #     indices = utils.get_spreadsheet_specific_tag_column_indices(column_names)
-    #     self.assertTrue(indices)
-    #     self.assertIsInstance(indices, dict)
-    #
-    # def test_find_all_str_indices_in_list(self):
-    #     list_1 = ['a', 'a', 'c', 'd']
-    #     search_str = 'a'
-    #     expected_indices = [1, 2]
-    #     indices = utils.find_all_str_indices_in_list(list_1, search_str)
-    #     self.assertTrue(indices)
-    #     self.assertIsInstance(indices, list)
-    #     self.assertEqual(expected_indices, indices)
-    #
-    # def test_find_str_index_in_list(self):
-    #     list_1 = ['a', 'a', 'c', 'd']
-    #     search_str = 'a'
-    #     expected_indices = 1
-    #     indices = utils.find_str_index_in_list(list_1, search_str)
-    #     self.assertTrue(indices)
-    #     self.assertIsInstance(indices, int)
-    #     self.assertEqual(expected_indices, indices)
 
 
 if __name__ == '__main__':

@@ -14,6 +14,56 @@ from hed.web.constants import common_constants, error_constants, file_constants
 app_config = current_app.config
 
 
+def generate_download_file_response_and_delete(full_filename, display_filename=None):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    full_filename: string
+        The download other name.
+    display_filename: string
+        What the save as window should show for filename.  If none use download file name.
+
+    Returns
+    -------
+    response object or string.
+        A response object containing the download, or a string on error.
+
+    """
+    if display_filename is None:
+        display_filename = full_filename
+    try:
+        def generate():
+            with open(full_filename, 'r', encoding='utf-8') as download_file:
+                for line in download_file:
+                    yield line
+            delete_file_if_it_exist(full_filename)
+
+        return Response(generate(), mimetype='text/plain charset=utf-8',
+                        headers={'Content-Disposition': f"attachment; filename={display_filename}"})
+    except:
+        return traceback.format_exc()
+
+
+def generate_input_arguments_from_schema_form(form_request_object):
+    """Gets the conversion function input arguments from a request object associated with the conversion form.
+
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from the conversion form.
+
+    Returns
+    -------
+    dictionary
+        A dictionary containing input arguments for calling the underlying conversion function.
+    """
+    conversion_input_arguments = {}
+    hed_file_path = get_uploaded_file_paths_from_schema_form(form_request_object)
+    conversion_input_arguments[common_constants.SCHEMA_PATH] = hed_file_path
+    return conversion_input_arguments
+
+
 def get_schema_conversion_function(schema_local_path):
     """Runs the appropriate xml<>mediawiki converter depending on input filetype.
 
@@ -121,56 +171,6 @@ def run_schema_duplicate_tag_detection(form_request_object):
     finally:
         delete_file_if_it_exist(hed_file_path)
     return ""
-
-
-def generate_download_file_response_and_delete(full_filename, display_filename=None):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    full_filename: string
-        The download other name.
-    display_filename: string
-        What the save as window should show for filename.  If none use download file name.
-
-    Returns
-    -------
-    response object or string.
-        A response object containing the download, or a string on error.
-
-    """
-    if display_filename is None:
-        display_filename = full_filename
-    try:
-        def generate():
-            with open(full_filename, 'r', encoding='utf-8') as download_file:
-                for line in download_file:
-                    yield line
-            delete_file_if_it_exist(full_filename)
-
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment; filename={display_filename}"})
-    except:
-        return traceback.format_exc()
-
-
-def generate_input_arguments_from_schema_form(form_request_object):
-    """Gets the conversion function input arguments from a request object associated with the conversion form.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the conversion form.
-
-    Returns
-    -------
-    dictionary
-        A dictionary containing input arguments for calling the underlying conversion function.
-    """
-    conversion_input_arguments = {}
-    hed_file_path = get_uploaded_file_paths_from_schema_form(form_request_object)
-    conversion_input_arguments[common_constants.SCHEMA_PATH] = hed_file_path
-    return conversion_input_arguments
 
 
 def url_present_in_form(form_request_object):
