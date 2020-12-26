@@ -73,7 +73,6 @@ def create_upload_directory(upload_directory):
     return folder_needed_to_be_created
 
 
-
 def file_has_valid_extension(file_object, accepted_file_extensions):
     """Checks to see if a other has a valid other extension.
 

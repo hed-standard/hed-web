@@ -49,10 +49,6 @@ def find_all_str_indices_in_list(list_of_strs, str_value):
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
-
-
-
-
 def find_spreadsheet_columns_info(form_request_object):
     """Finds the info associated with the spreadsheet columns.
 
@@ -144,8 +140,6 @@ def find_worksheets_info(form_request_object):
     return worksheets_info
 
 
-
-
 def get_column_delimiter_based_on_file_extension(file_name_or_path):
     """Gets the spreadsheet column delimiter based on the other extension.
 
@@ -184,8 +178,6 @@ def get_excel_worksheet_names(workbook_file_path):
     opened_workbook_file = xlrd.open_workbook(workbook_file_path)
     worksheet_names = opened_workbook_file.sheet_names()
     return worksheet_names
-
-
 
 
 def get_optional_form_field(form_request_object, form_field_name, ftype=''):
@@ -480,7 +472,6 @@ def save_spreadsheet_to_upload_folder(spreadsheet_file_object):
     spreadsheet_file_extension = get_file_extension(spreadsheet_file_object.filename)
     spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file_object, spreadsheet_file_extension)
     return spreadsheet_file_path
-
 
 
 def spreadsheet_present_in_form(validation_form_request_object):

@@ -22,12 +22,20 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_render_home_page(self):
-        response = self.app.get('/')
-        self.assertEqual(response.status_code, 200)
-
     def test_delete_file_in_upload_directory(self):
         response = self.app.get('/delete/file_that_does_not_exist')
+        self.assertEqual(response.status_code, 404)
+
+    def test_download_file_in_upload_directory(self):
+        response = self.app.get('/download-file/file_that_does_not_exist')
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_duplicate_tag_results(self):
+        response = self.app.get('/schema-duplicate-tag-results')
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_eeg_events_validation_results(self):
+        response = self.app.get('/eeg-validation-submit')
         self.assertEqual(response.status_code, 404)
 
     def test_get_hed_version_in_file(self):
@@ -35,13 +43,56 @@ class Test(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_get_major_hed_versions(self):
-        response = self.app.post('/get-major-hed-versions')
+        response = self.app.post('/get-hed-major-versions')
         self.assertEqual(response.status_code, 405)
+
+    def test_get_major_hed_versions(self):
+        response = self.app.post('/get-hed-major-versions')
+        self.assertEqual(response.status_code, 405)
+
+    def test_get_schema_conversion_results(self):
+        response = self.app.post('/schema-conversion-submit')
+        self.assertEqual(response.status_code, 400)
 
     def test_get_spreadsheet_columns_info(self):
         response = self.app.post('/get-spreadsheet-columns-info')
         self.assertEqual(response.status_code, 400)
 
+    def test_get_validation_results(self):
+        response = self.app.post('/validation-submit')
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_worksheets_info(self):
+        response = self.app.post('/get-worksheets-info')
+        self.assertEqual(response.status_code, 400)
+
+    def test_render_additional_examples_page(self):
+        response = self.app.get('/additional-examples')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_common_error_page(self):
+        response = self.app.get('/common-errors')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_eeg_validation_form(self):
+        response = self.app.get('/eeg-validation')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_home_page(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_help_page(self):
+        response = self.app.get('/hed-tools-help')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_schema_form(self):
+        response = self.app.get('/schema')
+        self.assertEqual(response.status_code, 200)
+
+    def test_render_validation_form(self):
+        response = self.app.get('/validation')
+        self.assertEqual(response.status_code, 200)
 
 if __name__ == '__main__':
     unittest.main()
