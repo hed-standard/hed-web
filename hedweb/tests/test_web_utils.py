@@ -34,7 +34,8 @@ class Test(unittest.TestCase):
             from hed.web.routes import route_blueprint
             from hed.web import web_utils
             app.register_blueprint(route_blueprint)
-            web_utils.create_upload_directory(cls.upload_directory)
+            if not os.path.exists(cls.upload_directory):
+                os.mkdir(cls.upload_directory)
             app.config['UPLOAD_FOLDER'] = cls.upload_directory
             cls.app = app.test_client()
 
@@ -57,23 +58,6 @@ class Test(unittest.TestCase):
 
     def test_check_if_option_in_form(self):
         self.assertTrue(1, "Testing check_if_option_in_form")
-
-    def test_copy_file_line_by_line(self):
-        from hed.web import web_utils
-        #from flask import current_app
-        #app_config = current_app.config
-        self.assertTrue(1, "Testing copy_file_line_by_line")
-        some_file1 = '3k32j23kj1.txt'
-        some_file2 = '3k32j23kj2.txt'
-        success = web_utils.copy_file_line_by_line(some_file1, some_file2)
-        self.assertFalse(success, "A file that does not exist cannot be copied")
-
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        local_config = web_utils.app_config
-        #print(app_config['UPLOAD_FOLDER'])
-        hed_copy = os.path.join(local_config['UPLOAD_FOLDER'], 'temp.xml')
-        success = web_utils.copy_file_line_by_line(hed_file, hed_copy)
-        self.assertTrue(success, "A file that exists can be copied")
 
     def test_create_upload_directory(self):
         self.assertTrue(1, "Testing create_upload_directory")
@@ -114,13 +98,28 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing save_hed_to_upload_folder")
 
     def test_save_hed_to_upload_folder_if_present(self):
-        self.assertTrue(1, "Testing save_hed_to_upload_folder_if_present")
+        self.assertTrue(1, "Testing save_hed_to_upload_folder")
 
     def test_setup_logging(self):
         self.assertTrue(1, "Testing setup_logging")
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
+        from hed.web import web_utils
+        # from flask import current_app
+        # app_config = current_app.config
+        self.assertTrue(1, "Testing copy_file_line_by_line")
+        some_file1 = '3k32j23kj1.txt'
+        some_file2 = '3k32j23kj2.txt'
+        tempName = web_utils.save_file_to_upload_folder(some_file1, some_file2)
+        #self.assertFalse(success, "A file that does not exist cannot be copied")
+
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        local_config = web_utils.app_config
+        # print(app_config['UPLOAD_FOLDER'])
+        hed_copy = os.path.join(local_config['UPLOAD_FOLDER'], 'temp.xml')
+        #success = web_utils.copy_file_line_by_line(hed_file, hed_copy)
+        #self.assertTrue(success, "A file that exists can be copied")
 
     def test_save_hed_to_upload_folder(self):
         self.assertTrue(1, "Testing save_hed_to_upload_folder")

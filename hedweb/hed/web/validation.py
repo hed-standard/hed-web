@@ -94,7 +94,7 @@ def get_uploaded_file_paths_from_forms(form_request_object):
     if common_constants.HED_XML_FILE in form_request_object.files and \
             utils.file_has_valid_extension(form_request_object.files[common_constants.HED_XML_FILE],
                                            [file_constants.SCHEMA_XML_EXTENSION]):
-        hed_file_path = web_utils.save_hed_to_upload_folder_if_present(
+        hed_file_path = web_utils.save_hed_to_upload_folder(
             form_request_object.files[common_constants.HED_XML_FILE])
     return spreadsheet_file_path, hed_file_path
 
@@ -122,7 +122,7 @@ def report_eeg_events_validation_status(request):
     check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
     # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
     if "hed-xml-file" in request.files and get_file_extension(request.files["hed-xml-file"].filename) == "xml":
-        hed_xml_file = web_utils.save_hed_to_upload_folder_if_present(request.files["hed-xml-file"])
+        hed_xml_file = web_utils.save_hed_to_upload_folder(request.files["hed-xml-file"])
     else:
         hed_xml_file = ''
 

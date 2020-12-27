@@ -7,7 +7,7 @@ from hed.tools.duplicate_tags import check_for_duplicate_tags
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension
 from hed.util.exceptions import SchemaError
 
-from hed.web.web_utils import handle_http_error, save_hed_to_upload_folder_if_present, file_has_valid_extension, \
+from hed.web.web_utils import handle_http_error, save_hed_to_upload_folder, file_has_valid_extension, \
     file_extension_is_valid, check_if_option_in_form
 from hed.web.constants import common_constants, error_constants, file_constants
 
@@ -99,7 +99,7 @@ def get_uploaded_file_paths_from_schema_form(form_request_object):
                           common_constants.SCHEMA_FILE in form_request_object.files
     if hed_present_in_form and file_has_valid_extension(
             form_request_object.files[common_constants.SCHEMA_FILE], file_constants.SCHEMA_EXTENSIONS):
-        schema_local_path = save_hed_to_upload_folder_if_present(
+        schema_local_path = save_hed_to_upload_folder(
             form_request_object.files[common_constants.SCHEMA_FILE])
     elif url_present_in_form(form_request_object):
         schema_local_path = url_to_file(form_request_object.values[common_constants.SCHEMA_URL])

@@ -37,28 +37,28 @@ def check_if_option_in_form(form_request_object, option_name, target_value):
     return False
 
 
-def copy_file_line_by_line(file_object_1, file_object_2):
-    """Copy the contents of one other to the other other.
-
-    Parameters
-    ----------
-    file_object_1: File object
-        A other object that points to a other that will be copied.
-    file_object_2: File object
-        A other object that points to a other that will copy the other other.
-
-    Returns
-    -------
-    boolean
-       True if the other was copied successfully, False if it wasn't.
-
-    """
-    try:
-        for line in file_object_1:
-            file_object_2.write(line)
-        return True
-    except:
-        return False
+# def copy_file_line_by_line(file_object_1, file_object_2):
+#     """Copy the contents of one other to the other other.
+#
+#     Parameters
+#     ----------
+#     file_object_1: File object
+#         A other object that points to a other that will be copied.
+#     file_object_2: File object
+#         A other object that points to a other that will copy the other other.
+#
+#     Returns
+#     -------
+#     boolean
+#        True if the other was copied successfully, False if it wasn't.
+#
+#     """
+#     try:
+#         for line in file_object_1:
+#             file_object_2.write(line)
+#         return True
+#     except:
+#         return False
 
 
 def create_upload_directory(upload_directory):
@@ -250,32 +250,17 @@ def save_file_to_upload_folder(file_object, file_suffix=""):
         The path to the other that was saved to the temporary folder.
 
     """
-    temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False,
-                                                        dir=current_app.config['UPLOAD_FOLDER'])
-    copy_file_line_by_line(file_object, temporary_upload_file)
+    try:
+        temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False,
+                                                            dir=current_app.config['UPLOAD_FOLDER'])
+        for line in file_object:
+            temporary_upload_file.write(line)
+    except:
+        return ''
     return temporary_upload_file.name
 
 
 def save_hed_to_upload_folder(hed_file_object):
-    """Save an spreadsheet other to the upload folder.
-
-    Parameters
-    ----------
-    hed_file_object: File object
-        A other object that points to a HED XML other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the HED XML other that was saved to the upload folder.
-
-    """
-    hed_file_extension = get_file_extension(hed_file_object.filename)
-    hed_file_path = save_file_to_upload_folder(hed_file_object, hed_file_extension)
-    return hed_file_path
-
-
-def save_hed_to_upload_folder_if_present(hed_file_object):
     """Save a HED XML other to the upload folder.
 
     Parameters
