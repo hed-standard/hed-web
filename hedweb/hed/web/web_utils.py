@@ -9,7 +9,7 @@ from logging import ERROR
 from hed.util import hed_cache
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.util.hed_dictionary import HedDictionary
-from hed.web.constants import common_constants, error_constants
+from hed.web.constants import common_constants, error_constants, file_constants
 
 app_config = current_app.config
 
@@ -131,8 +131,7 @@ def find_hed_version_in_uploaded_file(form_request_object, key_name=common_const
     hed_info = {}
     try:
         if key_name in form_request_object.files:
-            hed_file = form_request_object.files[key_name]
-            hed_file_path = save_hed_to_upload_folder(hed_file)
+            hed_file_path = save_file_to_upload_folder(form_request_object.files[key_name])
             hed_info[common_constants.HED_VERSION] = HedDictionary.get_hed_xml_version(hed_file_path)
     except:
         hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
@@ -189,6 +188,44 @@ def generate_download_file_response(download_file_name):
         return traceback.format_exc()
 
 
+# def get_file_from_form(form_request_object, file_key):
+#     """Checks to see if a spreadsheet other is present in a request object from validation form.
+#
+#     Parameters
+#     ----------
+#     form_request_object: Request object
+#         A Request object containing user data from a form.
+#     file_key: str
+#         String with the key in the form_request_object.files dictionary
+#
+#     Returns
+#     -------
+#     file_object or None
+#         Returns None if there isn't one.
+#
+#     """
+#     return form_request_object.files.get(file_key, None)
+
+
+def get_original_filename(form_request_object):
+    """Gets the original name of the spreadsheet.
+
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from the validation form.
+
+    Returns
+    -------
+    string
+        The name of the spreadsheet.
+    """
+    if common_constants.SPREADSHEET_FILE in form_request_object.files and \
+        file_has_valid_extension(form_request_object.files[common_constants.SPREADSHEET_FILE],
+                                 file_constants.SPREADSHEET_FILE_EXTENSIONS):
+        return form_request_object.files[common_constants.SPREADSHEET_FILE].filename
+    return ''
+
 def get_hed_path_from_form(form_request_object, hed_file_path):
     """Gets the validation function input arguments from a request object associated with the validation form.
 
@@ -234,15 +271,13 @@ def handle_http_error(error_code, error_message, as_text=False):
     return jsonify(message=error_message), error_code
 
 
-def save_file_to_upload_folder(file_object, file_suffix=""):
+def save_file_to_upload_folder(file_object):
     """Save a other to the upload folder.
 
     Parameters
     ----------
     file_object: File object
         A other object that points to a other that was first saved in a temporary location.
-    file_suffix: str
-        Optional suffix to modify the filename by
 
     Returns
     -------
@@ -250,35 +285,39 @@ def save_file_to_upload_folder(file_object, file_suffix=""):
         The path to the other that was saved to the temporary folder.
 
     """
+    file_path = ''
     try:
-        temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False,
-                                                            dir=current_app.config['UPLOAD_FOLDER'])
-        for line in file_object:
-            temporary_upload_file.write(line)
+        if file_object.filename:
+            file_extension = get_file_extension(file_object.filename)
+            temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=False,
+                                                                dir=current_app.config['UPLOAD_FOLDER'])
+            for line in file_object:
+                temporary_upload_file.write(line)
+            file_path = temporary_upload_file.name
     except:
-        return ''
-    return temporary_upload_file.name
+        file_path = ''
+    return file_path
 
 
-def save_hed_to_upload_folder(hed_file_object):
-    """Save a HED XML other to the upload folder.
-
-    Parameters
-    ----------
-    hed_file_object: File object
-        A other object that points to a HED XML other that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the HED XML other that was saved to the upload folder.
-
-    """
-    hed_file_path = ''
-    if hed_file_object.filename:
-        hed_file_extension = get_file_extension(hed_file_object.filename)
-        hed_file_path = save_file_to_upload_folder(hed_file_object, hed_file_extension)
-    return hed_file_path
+# def save_hed_to_upload_folder(hed_file_object):
+#     """Save a HED XML other to the upload folder.
+#
+#     Parameters
+#     ----------
+#     hed_file_object: File object
+#         A other object that points to a HED XML other that was first saved in a temporary location.
+#
+#     Returns
+#     -------
+#     string
+#         The path to the HED XML other that was saved to the upload folder.
+#
+#     """
+#     hed_file_path = ''
+#     if hed_file_object.filename:
+#         hed_file_extension = get_file_extension(hed_file_object.filename)
+#         hed_file_path = save_file_to_upload_folder(hed_file_object, hed_file_extension)
+#     return hed_file_path
 
 
 def setup_logging():
@@ -289,3 +328,5 @@ def setup_logging():
         file_handler = RotatingFileHandler(current_app.config['LOG_FILE'], maxBytes=10 * 1024 * 1024, backupCount=5)
         file_handler.setLevel(ERROR)
         current_app.logger.addHandler(file_handler)
+
+

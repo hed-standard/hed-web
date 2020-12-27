@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
         self.assertTrue(1, "Testing get_optional_form_field")
 
     def test_get_original_spreadsheet_filename(self):
-        self.assertTrue(1, "Testing get_original_spreadsheet_filename")
+        self.assertTrue(1, "Testing get_original_filename")
 
     def test_get_specific_tag_columns_from_form(self):
         self.assertTrue(1, "Testing get_specific_tag_columns_from_form")
@@ -155,9 +155,6 @@ class Test(unittest.TestCase):
 
     def test_save_spreadsheet_to_upload_folder(self):
         self.assertTrue(1, "Testing save_spreadsheet_to_upload_folder")
-
-    def test_spreadsheet_present_in_form(self):
-        self.assertTrue(1, "Testing initialize_worksheets_info_dictionary")
 
     def test_worksheet_name_present_in_form(self):
         self.assertTrue(1, "Testing worksheet_name_present_in_form")

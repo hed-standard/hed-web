@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
+
+import hed.web.web_utils
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web import web_utils
 from hed.web import utils
@@ -86,16 +88,15 @@ def get_uploaded_file_paths_from_forms(form_request_object):
     """
     spreadsheet_file_path = ''
     hed_file_path = ''
-    if utils.spreadsheet_present_in_form(form_request_object) and utils.file_has_valid_extension(
-            form_request_object.files[common_constants.SPREADSHEET_FILE],
-            file_constants.SPREADSHEET_FILE_EXTENSIONS):
-        spreadsheet_file_path = utils.save_spreadsheet_to_upload_folder(
+    if common_constants.SPREADSHEET_FILE in form_request_object.files and \
+        web_utils.file_has_valid_extension(form_request_object.files[common_constants.SPREADSHEET_FILE],
+                                           file_constants.SPREADSHEET_FILE_EXTENSIONS):
+        spreadsheet_file_path = utils.save_file_to_upload_folder(
             form_request_object.files[common_constants.SPREADSHEET_FILE])
     if common_constants.HED_XML_FILE in form_request_object.files and \
-            utils.file_has_valid_extension(form_request_object.files[common_constants.HED_XML_FILE],
-                                           [file_constants.SCHEMA_XML_EXTENSION]):
-        hed_file_path = web_utils.save_hed_to_upload_folder(
-            form_request_object.files[common_constants.HED_XML_FILE])
+            web_utils.file_has_valid_extension(form_request_object.files[common_constants.HED_XML_FILE],
+                                               [file_constants.SCHEMA_XML_EXTENSION]):
+        hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
     return spreadsheet_file_path, hed_file_path
 
 
@@ -122,7 +123,7 @@ def report_eeg_events_validation_status(request):
     check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
     # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
     if "hed-xml-file" in request.files and get_file_extension(request.files["hed-xml-file"].filename) == "xml":
-        hed_xml_file = web_utils.save_hed_to_upload_folder(request.files["hed-xml-file"])
+        hed_xml_file = web_utils.save_file_to_upload_folder(request.files["hed-xml-file"])
     else:
         hed_xml_file = ''
 
@@ -164,7 +165,7 @@ def report_spreadsheet_validation_status(form_request_object):
     hed_file_path = ''
     try:
         spreadsheet_file_path, hed_file_path = get_uploaded_file_paths_from_forms(form_request_object)
-        original_spreadsheet_filename = utils.get_original_spreadsheet_filename(form_request_object)
+        original_spreadsheet_filename = hed.web.web_utils.get_original_filename(form_request_object)
         validation_input_arguments = generate_input_arguments_from_validation_form(
             form_request_object, spreadsheet_file_path, hed_file_path)
         hed_validator = validate_spreadsheet(validation_input_arguments)

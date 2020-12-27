@@ -5,8 +5,8 @@ from flask import current_app
 
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 
-from hed.web.constants import common_constants, error_constants, file_constants, spreadsheet_constants
-from hed.web.web_utils import file_has_valid_extension, save_file_to_upload_folder
+from hed.web.constants import common_constants, error_constants, spreadsheet_constants
+from hed.web.web_utils import save_file_to_upload_folder
 
 app_config = current_app.config
 
@@ -66,9 +66,9 @@ def find_spreadsheet_columns_info(form_request_object):
     spreadsheet_columns_info = []
     try:
         spreadsheet_columns_info = initialize_spreadsheet_columns_info_dictionary()
-        if spreadsheet_present_in_form(form_request_object):
+        if common_constants.SPREADSHEET_FILE in form_request_object.files:
             spreadsheet_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
-            spreadsheet_file_path = save_spreadsheet_to_upload_folder(spreadsheet_file)
+            spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file)
             if spreadsheet_file_path and worksheet_name_present_in_form(form_request_object):
                 worksheet_name = form_request_object.form[common_constants.WORKSHEET_NAME]
                 spreadsheet_columns_info = populate_spreadsheet_columns_info_dictionary(spreadsheet_columns_info,
@@ -128,9 +128,9 @@ def find_worksheets_info(form_request_object):
     worksheets_info = {}
     try:
         worksheets_info = initialize_worksheets_info_dictionary()
-        if spreadsheet_present_in_form(form_request_object):
+        if common_constants.SPREADSHEET_FILE in form_request_object.files:
             workbook_file = form_request_object.files[common_constants.SPREADSHEET_FILE]
-            workbook_file_path = save_spreadsheet_to_upload_folder(workbook_file)
+            workbook_file_path = save_file_to_upload_folder(workbook_file)
             if workbook_file_path:
                 worksheets_info = populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
     except:
@@ -205,26 +205,6 @@ def get_optional_form_field(form_request_object, form_field_name, ftype=''):
         if form_field_name in form_request_object.form:
             form_field_value = form_request_object.form[form_field_name]
     return form_field_value
-
-
-def get_original_spreadsheet_filename(form_request_object):
-    """Gets the original name of the spreadsheet.
-
-    Parameters
-    ----------
-    form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    string
-        The name of the spreadsheet.
-    """
-    if spreadsheet_present_in_form(form_request_object) and file_has_valid_extension(
-            form_request_object.files[common_constants.SPREADSHEET_FILE],
-            file_constants.SPREADSHEET_FILE_EXTENSIONS):
-        return form_request_object.files[common_constants.SPREADSHEET_FILE].filename
-    return ''
 
 
 def get_specific_tag_columns_from_form(form_request_object):
@@ -453,42 +433,6 @@ def populate_worksheets_info_dictionary(worksheets_info, spreadsheet_file_path):
     worksheets_info[common_constants.REQUIRED_TAG_COLUMN_INDICES] = \
         get_spreadsheet_specific_tag_column_indices(worksheets_info[common_constants.COLUMN_NAMES])
     return worksheets_info
-
-
-def save_spreadsheet_to_upload_folder(spreadsheet_file_object):
-    """Save an spreadsheet other to the upload folder.
-
-    Parameters
-    ----------
-    spreadsheet_file_object: File object
-        A other object that points to a spreadsheet that was first saved in a temporary location.
-
-    Returns
-    -------
-    string
-        The path to the spreadsheet that was saved to the upload folder.
-
-    """
-    spreadsheet_file_extension = get_file_extension(spreadsheet_file_object.filename)
-    spreadsheet_file_path = save_file_to_upload_folder(spreadsheet_file_object, spreadsheet_file_extension)
-    return spreadsheet_file_path
-
-
-def spreadsheet_present_in_form(validation_form_request_object):
-    """Checks to see if a spreadsheet other is present in a request object from validation form.
-
-    Parameters
-    ----------
-    validation_form_request_object: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    boolean
-        True if a spreadsheet other is present in a request object from the validation form.
-
-    """
-    return common_constants.SPREADSHEET_FILE in validation_form_request_object.files
 
 
 def worksheet_name_present_in_form(validation_form_request_object):
