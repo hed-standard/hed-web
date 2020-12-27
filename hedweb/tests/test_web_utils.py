@@ -69,13 +69,9 @@ class Test(unittest.TestCase):
         self.assertFalse(success, "A file that does not exist cannot be copied")
 
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        print(Test.upload_directory)
-
-        upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
-        os.mkdir(upload_dir)
+        local_config = web_utils.app_config
         #print(app_config['UPLOAD_FOLDER'])
-        hed_copy = os.path.join(upload_dir, 'temp.xml')
-        print(upload_dir)
+        hed_copy = os.path.join(local_config['UPLOAD_FOLDER'], 'temp.xml')
         success = web_utils.copy_file_line_by_line(hed_file, hed_copy)
         self.assertTrue(success, "A file that exists can be copied")
 
