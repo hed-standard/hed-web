@@ -1,10 +1,12 @@
 import os
 import unittest
+import shutil
+
 from unittest.mock import Mock
 
 
 from hed.web.app_factory import AppFactory
-import shutil
+
 # from hed.util import hed_cache
 # #from hed.web.utils import app_config, initialize_worksheets_info_dictionary
 # from hed.web.constants import file_constants, spreadsheet_constants
@@ -46,11 +48,28 @@ class Test(unittest.TestCase):
     def test_check_if_option_in_form(self):
         self.assertTrue(1, "Testing check_if_option_in_form")
 
+    def test_convert_number_str_to_list(self):
+        from hed.web.web_utils import convert_number_str_to_list
+        other_tag_columns_str = '1,2,3'
+        expected_other_columns = [1, 2, 3]
+        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+        self.assertTrue(other_tag_columns)
+        self.assertEqual(expected_other_columns, other_tag_columns)
+        other_tag_columns_str = ''
+        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+        self.assertEqual(len(other_tag_columns), 0, "")
+        other_tag_columns_str = '2,4,3'
+        expected_other_columns = [2, 4, 3]
+        other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+        self.assertTrue(other_tag_columns)
+        self.assertEqual(expected_other_columns, other_tag_columns)
+        other_tag_columns_str = 'A,B,C'
+        expected_other_columns = ['A','B','C']
+        with self.assertRaises(ValueError):
+            other_tag_columns = convert_number_str_to_list(other_tag_columns_str)
+
     def test_create_upload_directory(self):
         self.assertTrue(1, "Testing create_upload_directory")
-
-    def test_file_has_valid_extension(self):
-        self.assertTrue(1, "Testing file_has_valid_extension")
 
     def test_file_extension_is_valid(self):
         self.assertTrue(1, "Testing file_extension_is_valid")
@@ -68,6 +87,10 @@ class Test(unittest.TestCase):
         self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
         is_valid = web_utils.file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
         self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
+
+    def test_generate_download_file_response_and_delete(self):
+        self.assertTrue(1, "Testing generate_download_file_response_and_delete")
+
 
     def test_get_original_filename(self):
         self.assertTrue(1, "Testing get_original_filename")

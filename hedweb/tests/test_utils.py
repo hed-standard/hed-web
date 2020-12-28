@@ -1,52 +1,30 @@
-import unittest
-# from flask import current_app, jsonify, Response
-# from hed.web.app_factory import AppFactory
-# from hed.util import hed_cache
-# from hed.web.utils import app_config, initialize_worksheets_info_dictionary
-# from hed.web.app_factory import AppFactory
-# from hed.web.constants import file_constants, spreadsheet_constants
 import os
+import unittest
+import shutil
 
-# app = AppFactory.create_app('config.TestConfig')
-# with app.app_context():
-#     from hed.web import utils
-#     from hed.web.routes import route_blueprint
-#
-#     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-#     web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
-#     hed_cache.set_cache_directory(app.config['HED_CACHE_FOLDER'])
-# with app.app_context():
-#     from hed.web import web_utils
-#     from hed.web.routes import route_blueprint
-#
-#     app.register_blueprint(route_blueprint, url_prefix=app.config['URL_PREFIX'])
-#     web_utils.create_upload_directory(app.config['UPLOAD_FOLDER'])
 
 class Test(unittest.TestCase):
-    def setUp(self):
-        print("hello")
-    # self.create_test_app()
-    # self.app = app.app.test_client()
-    # self.major_version_key = 'major_versions'
-    # self.hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-    # self.tsv_file1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/tsv_file1.txt')
 
-    # def create_test_app(self):
-    #     app = AppFactory.create_app('config.TestConfig')
-    #     with app.app_context():
-    #         from hed.web.routes import route_blueprint
-    #         app.register_blueprint(route_blueprint)
-    #         self.app = app.test_client()
+    @classmethod
+    def setUpClass(cls):
+        from hed.web.app_factory import AppFactory
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        app = AppFactory.create_app('config.TestConfig')
+        with app.app_context():
 
-    def test_convert_other_tag_columns_to_list(self):
-        self.assertTrue(1, "Testing convert_other_tag_columns_to_list")
-        # def test_convert_other_tag_columns_to_list(self):
-        #     other_tag_columns_str = '1,2,3'
-        #     expected_other_columns = [1, 2, 3]
-        #     other_tag_columns = utils.convert_other_tag_columns_to_list(other_tag_columns_str)
-        #     self.assertTrue(other_tag_columns)
-        #     self.assertEqual(expected_other_columns, other_tag_columns)
-        #
+            from hed.web.routes import route_blueprint
+            app.register_blueprint(route_blueprint)
+            if not os.path.exists(cls.upload_directory):
+                os.mkdir(cls.upload_directory)
+            app.config['UPLOAD_FOLDER'] = cls.upload_directory
+            cls.app = app.test_client()
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.upload_directory)
+
+
+
 
     def test_find_all_str_indices_in_list(self):
         self.assertTrue(1, "Testing find_all_str_indices_in_list")
@@ -88,7 +66,12 @@ class Test(unittest.TestCase):
         #
 
     def test_get_excel_worksheet_names(self):
-        self.assertTrue(1, "Testing get_excel_worksheet_names")
+        from hed.web.utils import get_excel_worksheet_names
+        self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
+        worksheet_names = get_excel_worksheet_names(self.excel_file)
+        self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")
+        self.assertIn('PVT Events', worksheet_names, "PVT Events is one of the worksheet names")
+        self.assertNotIn('Temp', worksheet_names, "Temp is not one of the worksheet names")
 
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")

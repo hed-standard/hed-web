@@ -61,6 +61,23 @@ def check_if_option_in_form(form_request_object, option_name, target_value):
 #         return False
 
 
+def convert_number_str_to_list(number_str):
+    """Converts a string of integers to a list of integers, which is useful for web forms.
+
+    Parameters
+    ----------
+    number_str: str
+        A string containing integers.
+
+    Returns
+    -------
+    list
+        A list containing numbers.
+    """
+    if number_str:
+        return list(map(int, number_str.split(',')))
+    return []
+
 def create_upload_directory(upload_directory):
     """Creates the upload directory.
 
@@ -71,25 +88,6 @@ def create_upload_directory(upload_directory):
         os.makedirs(upload_directory)
         folder_needed_to_be_created = True
     return folder_needed_to_be_created
-
-
-def file_has_valid_extension(file_object, accepted_file_extensions):
-    """Checks to see if a other has a valid other extension.
-
-    Parameters
-    ----------
-    file_object: File object
-        A other object that points to a other.
-    accepted_file_extensions: list
-        A list of other extensions that are accepted
-
-    Returns
-    -------
-    boolean
-        True if the other has a valid other extension.
-
-    """
-    return file_object and file_extension_is_valid(file_object.filename, accepted_file_extensions)
 
 
 def file_extension_is_valid(filename, accepted_file_extensions = None):
@@ -191,6 +189,36 @@ def generate_download_file_response(download_file_name):
         return traceback.format_exc()
 
 
+def generate_download_file_response_and_delete(full_filename, display_filename=None):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    full_filename: string
+        The download other name.
+    display_filename: string
+        What the save as window should show for filename.  If none use download file name.
+
+    Returns
+    -------
+    response object or string.
+        A response object containing the download, or a string on error.
+
+    """
+    if display_filename is None:
+        display_filename = full_filename
+    try:
+        def generate():
+            with open(full_filename, 'r', encoding='utf-8') as download_file:
+                for line in download_file:
+                    yield line
+            delete_file_if_it_exist(full_filename)
+
+        return Response(generate(), mimetype='text/plain charset=utf-8',
+                        headers={'Content-Disposition': f"attachment; filename={display_filename}"})
+    except:
+        return traceback.format_exc()
+
 # def get_file_from_form(form_request_object, file_key):
 #     """Checks to see if a spreadsheet other is present in a request object from validation form.
 #
@@ -234,12 +262,11 @@ def get_original_filename(form_request_object, file_key, valid_extensions = None
 
 
 def get_hed_path_from_form(form_request_object, hed_file_path):
-    """Gets the validation function input arguments from a request object associated with the validation form.
-
+    """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
     ----------
     form_request_object: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data from a form.
     hed_file_path: string
         The path to the HED XML other.
 

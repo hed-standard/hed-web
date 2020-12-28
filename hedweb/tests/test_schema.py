@@ -31,8 +31,6 @@ class Test(unittest.TestCase):
     #         app.register_blueprint(route_blueprint)
     #         self.app = app.test_client()
 
-    def test_generate_download_file_response_and_delete(self):
-        self.assertTrue(1, "Testing generate_download_file_response_and_delete")
 
     def test_generate_input_arguments_from_schema_form(self):
         self.assertTrue(1, "Testing generate_input_arguments_from_schema_form")

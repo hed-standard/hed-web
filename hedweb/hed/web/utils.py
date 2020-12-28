@@ -11,24 +11,6 @@ from hed.web.web_utils import save_file_to_upload_folder
 app_config = current_app.config
 
 
-def convert_other_tag_columns_to_list(other_tag_columns):
-    """Gets the other tag columns from the validation form.
-
-    Parameters
-    ----------
-    other_tag_columns: str
-        A string containing the other tag columns.
-
-    Returns
-    -------
-    list
-        A list containing the other tag columns.
-    """
-    if other_tag_columns:
-        return list(map(int, other_tag_columns.split(',')))
-    return []
-
-
 def find_all_str_indices_in_list(list_of_strs, str_value):
     """Find the indices of a string value in a list.
 

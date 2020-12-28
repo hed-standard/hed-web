@@ -1,6 +1,6 @@
 import traceback
 from urllib.error import URLError, HTTPError
-from flask import current_app, Response
+from flask import current_app
 
 from hed.schematools import xml2wiki, wiki2xml, constants as converter_constants
 from hed.tools.duplicate_tags import check_for_duplicate_tags
@@ -8,42 +8,11 @@ from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_ex
 from hed.util.exceptions import SchemaError
 
 from hed.web.web_utils import check_if_option_in_form, file_extension_is_valid, handle_http_error, \
-    save_file_to_upload_folder
+    save_file_to_upload_folder, generate_download_file_response_and_delete
 
 from hed.web.constants import common_constants, error_constants, file_constants
 
 app_config = current_app.config
-
-
-def generate_download_file_response_and_delete(full_filename, display_filename=None):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    full_filename: string
-        The download other name.
-    display_filename: string
-        What the save as window should show for filename.  If none use download file name.
-
-    Returns
-    -------
-    response object or string.
-        A response object containing the download, or a string on error.
-
-    """
-    if display_filename is None:
-        display_filename = full_filename
-    try:
-        def generate():
-            with open(full_filename, 'r', encoding='utf-8') as download_file:
-                for line in download_file:
-                    yield line
-            delete_file_if_it_exist(full_filename)
-
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment; filename={display_filename}"})
-    except:
-        return traceback.format_exc()
 
 
 def generate_input_arguments_from_schema_form(form_request_object):
