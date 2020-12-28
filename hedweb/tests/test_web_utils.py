@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest.mock import Mock
 
 
 from hed.web.app_factory import AppFactory
@@ -32,7 +33,6 @@ class Test(unittest.TestCase):
         with app.app_context():
 
             from hed.web.routes import route_blueprint
-            from hed.web import web_utils
             app.register_blueprint(route_blueprint)
             if not os.path.exists(cls.upload_directory):
                 os.mkdir(cls.upload_directory)
@@ -55,19 +55,31 @@ class Test(unittest.TestCase):
     def test_file_extension_is_valid(self):
         self.assertTrue(1, "Testing file_extension_is_valid")
         from hed.web import web_utils
-        file_name = 'abc.xml'
-        #     is_valid = web_utils.file_extension_is_valid(file_name, file_constants.SPREADSHEET_FILE_EXTENSIONS)
-        #     self.assertTrue(is_valid)
-        #
+        is_valid = web_utils.file_extension_is_valid('abc.xml', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
+        is_valid = web_utils.file_extension_is_valid('abc.XML', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if capitalized version of valid extension')
+        is_valid = web_utils.file_extension_is_valid('abc.temp', ['.xml', '.txt'])
+        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
+        file_name = 'abc'
+        is_valid = web_utils.file_extension_is_valid('abc')
+        self.assertTrue(is_valid, 'File names with no extension are valid when no valid extensions provided')
+        is_valid = web_utils.file_extension_is_valid('abc', ['.xml', '.txt'])
+        self.assertFalse(is_valid, 'File name has a valid extension if the extension not in list of valid extensions')
+        is_valid = web_utils.file_extension_is_valid('C:abc.Txt', ['.xml', '.txt'])
+        self.assertTrue(is_valid, 'File name has a valid extension if the extension is in list of valid extensions')
 
-    def test_get_file_from_form(self):
-        self.assertTrue(1, "Testing get_file_from_form")
-        from hed.web import web_utils
-        local_config = web_utils.app_config
-        file_dict = {'hed_file': 'hedX', 'other_file': 'XXX'}
-        the_form = {'other': 'junk', 'files': file_dict}
-        the_file = web_utils.get_file_from_form(the_form, 'hed_file')
-        self.assertEqual(the_file, 'hedX', "hedX should be in the dictionary")
+    def test_get_original_filename(self):
+        self.assertTrue(1, "Testing get_original_filename")
+        # from hed.web import web_utils
+        # local_config = web_utils.app_config
+        # request_form = Mock()
+        # request_form.files = {'hed_file': 'hedX', 'other_file': 'XXX'}
+        #
+        #
+        # #get_original_filename(form_request_object, file_key, valid_extensions)
+        # the_file = web_utils. get_original_filename(request_form, 'hed_file')
+        # self.assertEqual(the_file, 'hedX', "hedX should be in the dictionary")
 
     def test_find_hed_version_in_uploaded_file(self):
         self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
@@ -90,32 +102,24 @@ class Test(unittest.TestCase):
 
     def test_save_file_to_upload_folder(self):
         self.assertTrue(1, "Testing save_file_to_upload_folder")
-
-    def test_save_hed_to_upload_folder(self):
-        self.assertTrue(1, "Testing save_hed_to_upload_folder")
-
-    def test_save_hed_to_upload_folder_if_present(self):
-        self.assertTrue(1, "Testing save_hed_to_upload_folder")
-
-    def test_setup_logging(self):
-        self.assertTrue(1, "Testing setup_logging")
-
-    def test_save_file_to_upload_folder(self):
-        self.assertTrue(1, "Testing save_file_to_upload_folder")
-        from hed.web import web_utils
-        # from flask import current_app
-        # app_config = current_app.config
+        #import hed.web.web_utils
+        from hed.web.web_utils import save_file_to_upload_folder, app_config
+        #from flask import current_app
+        local_config = app_config
         self.assertTrue(1, "Testing copy_file_line_by_line")
         some_file = '3k32j23kj1.txt'
-        temp_name = web_utils.save_file_to_upload_folder(some_file)
+        temp_name = save_file_to_upload_folder(some_file)
         self.assertEqual(temp_name, '', "A file that does not exist cannot be copied")
 
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        local_config = web_utils.app_config
+
         # print(app_config['UPLOAD_FOLDER'])
         hed_copy = os.path.join(local_config['UPLOAD_FOLDER'], 'temp.xml')
         #success = web_utils.copy_file_line_by_line(hed_file, hed_copy)
         #self.assertTrue(success, "A file that exists can be copied")
+
+    def test_setup_logging(self):
+        self.assertTrue(1, "Testing setup_logging")
 
 
 if __name__ == '__main__':

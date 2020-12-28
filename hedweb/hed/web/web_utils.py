@@ -92,7 +92,7 @@ def file_has_valid_extension(file_object, accepted_file_extensions):
     return file_object and file_extension_is_valid(file_object.filename, accepted_file_extensions)
 
 
-def file_extension_is_valid(filename, accepted_file_extensions):
+def file_extension_is_valid(filename, accepted_file_extensions = None):
     """Checks the other extension against a list of accepted ones.
 
     Parameters
@@ -101,7 +101,7 @@ def file_extension_is_valid(filename, accepted_file_extensions):
         The name of the other.
 
     accepted_file_extensions: list
-        A list containing all of the accepted other extensions.
+        A list containing all of the accepted other extensions or an empty list of all are acceted
 
     Returns
     -------
@@ -109,7 +109,10 @@ def file_extension_is_valid(filename, accepted_file_extensions):
         True if the other has a valid other extension.
 
     """
-    return os.path.splitext(filename.lower())[1] in accepted_file_extensions
+    if not accepted_file_extensions or os.path.splitext(filename.lower())[1] in accepted_file_extensions:
+        return True
+    else:
+        return False
 
 
 def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
@@ -207,24 +210,28 @@ def generate_download_file_response(download_file_name):
 #     return form_request_object.files.get(file_key, None)
 
 
-def get_original_filename(form_request_object):
-    """Gets the original name of the spreadsheet.
+def get_original_filename(form_request_object, file_key, valid_extensions = None):
+    """Gets the original name of the file if it has a valid extension.
 
     Parameters
     ----------
     form_request_object: Request object
-        A Request object containing user data from the validation form.
+        A Request object containing user data from a posted form.
+    file_key: str
+        Key string in the files dictionary of the form_request_object
+    valid_extensions: list of str
+        List containing the valid extensions
 
     Returns
     -------
     string
-        The name of the spreadsheet.
+        The name of the uploaded file.
     """
-    if common_constants.SPREADSHEET_FILE in form_request_object.files and \
-        file_has_valid_extension(form_request_object.files[common_constants.SPREADSHEET_FILE],
-                                 file_constants.SPREADSHEET_FILE_EXTENSIONS):
-        return form_request_object.files[common_constants.SPREADSHEET_FILE].filename
+    if file_key in form_request_object.files and \
+            file_extension_is_valid(form_request_object.files[file_key].filename, valid_extensions):
+        return form_request_object.files[file_key].filename
     return ''
+
 
 def get_hed_path_from_form(form_request_object, hed_file_path):
     """Gets the validation function input arguments from a request object associated with the validation form.
@@ -297,27 +304,6 @@ def save_file_to_upload_folder(file_object):
     except:
         file_path = ''
     return file_path
-
-
-# def save_hed_to_upload_folder(hed_file_object):
-#     """Save a HED XML other to the upload folder.
-#
-#     Parameters
-#     ----------
-#     hed_file_object: File object
-#         A other object that points to a HED XML other that was first saved in a temporary location.
-#
-#     Returns
-#     -------
-#     string
-#         The path to the HED XML other that was saved to the upload folder.
-#
-#     """
-#     hed_file_path = ''
-#     if hed_file_object.filename:
-#         hed_file_extension = get_file_extension(hed_file_object.filename)
-#         hed_file_path = save_file_to_upload_folder(hed_file_object, hed_file_extension)
-#     return hed_file_path
 
 
 def setup_logging():

@@ -89,12 +89,12 @@ def get_uploaded_file_paths_from_forms(form_request_object):
     spreadsheet_file_path = ''
     hed_file_path = ''
     if common_constants.SPREADSHEET_FILE in form_request_object.files and \
-        web_utils.file_has_valid_extension(form_request_object.files[common_constants.SPREADSHEET_FILE],
+        web_utils.file_extension_is_valid(form_request_object.files[common_constants.SPREADSHEET_FILE].filename,
                                            file_constants.SPREADSHEET_FILE_EXTENSIONS):
         spreadsheet_file_path = utils.save_file_to_upload_folder(
             form_request_object.files[common_constants.SPREADSHEET_FILE])
     if common_constants.HED_XML_FILE in form_request_object.files and \
-            web_utils.file_has_valid_extension(form_request_object.files[common_constants.HED_XML_FILE],
+            web_utils.file_extension_is_valid(form_request_object.files[common_constants.HED_XML_FILE].filename,
                                                [file_constants.SCHEMA_XML_EXTENSION]):
         hed_file_path = web_utils.save_file_to_upload_folder(form_request_object.files[common_constants.HED_XML_FILE])
     return spreadsheet_file_path, hed_file_path
@@ -165,7 +165,9 @@ def report_spreadsheet_validation_status(form_request_object):
     hed_file_path = ''
     try:
         spreadsheet_file_path, hed_file_path = get_uploaded_file_paths_from_forms(form_request_object)
-        original_spreadsheet_filename = hed.web.web_utils.get_original_filename(form_request_object)
+        original_spreadsheet_filename = \
+            hed.web.web_utils.get_original_filename(form_request_object, common_constants.SPREADSHEET_FILE,
+                                                    file_constants.SPREADSHEET_FILE_EXTENSIONS)
         validation_input_arguments = generate_input_arguments_from_validation_form(
             form_request_object, spreadsheet_file_path, hed_file_path)
         hed_validator = validate_spreadsheet(validation_input_arguments)

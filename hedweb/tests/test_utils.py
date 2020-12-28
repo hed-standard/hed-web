@@ -153,9 +153,6 @@ class Test(unittest.TestCase):
     def test_populate_worksheets_info_dictionary(self):
         self.assertTrue(1, "Testing populate_worksheets_info_dictionary")
 
-    def test_save_spreadsheet_to_upload_folder(self):
-        self.assertTrue(1, "Testing save_spreadsheet_to_upload_folder")
-
     def test_worksheet_name_present_in_form(self):
         self.assertTrue(1, "Testing worksheet_name_present_in_form")
 
