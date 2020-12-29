@@ -26,17 +26,6 @@ class Test(unittest.TestCase):
 
 
 
-    def test_find_all_str_indices_in_list(self):
-        self.assertTrue(1, "Testing find_all_str_indices_in_list")
-        # def test_find_all_str_indices_in_list(self):
-        #     list_1 = ['a', 'a', 'c', 'd']
-        #     search_str = 'a'
-        #     expected_indices = [1, 2]
-        #     indices = utils.find_all_str_indices_in_list(list_1, search_str)
-        #     self.assertTrue(indices)
-        #     self.assertIsInstance(indices, list)
-        #     self.assertEqual(expected_indices, indices)
-        #
 
     def test_find_spreadsheet_columns_info(self):
         self.assertTrue(1, "Testing find_spreadsheet_columns_info")

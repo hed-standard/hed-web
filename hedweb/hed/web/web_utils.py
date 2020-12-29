@@ -113,6 +113,25 @@ def file_extension_is_valid(filename, accepted_file_extensions = None):
         return False
 
 
+def find_all_str_indices_in_list(list_of_strs, str_value):
+    """Find the indices of a string value in a list.
+
+    Parameters
+    ----------
+    list_of_strs: list
+        A list containing strings.
+    str_value: string
+        A string value.
+
+    Returns
+    -------
+    list
+        A list containing all of the indices where a string value occurs in a string list.
+
+    """
+    return [index + 1 for index, value in enumerate(list_of_strs) if
+            value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
+
 def find_hed_version_in_uploaded_file(form_request_object, key_name=common_constants.HED_XML_FILE):
     """Finds the version number in an HED XML other.
 
@@ -177,6 +196,8 @@ def generate_download_file_response(download_file_name):
     try:
         def generate():
             full_filename = os.path.join(app_config['UPLOAD_FOLDER'], download_file_name)
+            # upload_folder = current_app.config
+            # full_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], download_file_name)
             with open(full_filename, 'r', encoding='utf-8') as download_file:
                 yield download_file_name + ".....\n"
                 for line in download_file:

@@ -6,29 +6,9 @@ from flask import current_app
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 
 from hed.web.constants import common_constants, error_constants, spreadsheet_constants
-from hed.web.web_utils import save_file_to_upload_folder
+from hed.web.web_utils import save_file_to_upload_folder, find_all_str_indices_in_list
 
 app_config = current_app.config
-
-
-def find_all_str_indices_in_list(list_of_strs, str_value):
-    """Find the indices of a string value in a list.
-
-    Parameters
-    ----------
-    list_of_strs: list
-        A list containing strings.
-    str_value: string
-        A string value.
-
-    Returns
-    -------
-    list
-        A list containing all of the indices where a string value occurs in a string list.
-
-    """
-    return [index + 1 for index, value in enumerate(list_of_strs) if
-            value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
 def find_spreadsheet_columns_info(form_request_object):
@@ -64,29 +44,6 @@ def find_spreadsheet_columns_info(form_request_object):
     finally:
         delete_file_if_it_exist(spreadsheet_file_path)
     return spreadsheet_columns_info
-
-
-def find_str_index_in_list(list_of_strs, str_value):
-    """Find the index of a string value in a list.
-
-    Parameters
-    ----------
-    list_of_strs: list
-        A list containing strings.
-    str_value: string
-        A string value.
-
-    Returns
-    -------
-    integer
-        An positive integer if the string value was found in the list. A -1 is returned if the string value was not
-        found.
-
-    """
-    try:
-        return [s.lower().replace(' ', '') for s in list_of_strs].index(str_value.lower().replace(' ', '')) + 1
-    except ValueError:
-        return -1
 
 
 def find_worksheets_info(form_request_object):
@@ -263,9 +220,9 @@ def get_spreadsheet_specific_tag_column_indices(column_names):
         alternative_specific_tag_column_names = spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
             specific_tag_column_name]
         for alternative_specific_tag_column_name in alternative_specific_tag_column_names:
-            specific_tag_column_index = find_str_index_in_list(column_names, alternative_specific_tag_column_name)
-            if specific_tag_column_index != -1:
-                specific_tag_column_indices[specific_tag_column_name] = specific_tag_column_index
+            indices = find_all_str_indices_in_list(column_names, alternative_specific_tag_column_name)
+            if indices:
+                specific_tag_column_indices[specific_tag_column_name] = indices[0]
     return specific_tag_column_indices
 
 
