@@ -6,7 +6,8 @@ from hed.web import validation
 from hed.web import schema
 from hed.web.constants import error_constants
 from hed.web.constants import page_constants, route_constants, blueprint_constants
-from hed.web.web_utils import handle_http_error
+from hed.web.web_utils import find_hed_version_in_uploaded_file, find_major_hed_versions, \
+    generate_download_file_response, handle_http_error
 import traceback
 
 import hed.util.file_util
@@ -49,7 +50,7 @@ def download_file_in_upload_directory(filename):
         The contents of a other in the upload directory to send to the client.
 
     """
-    download_response = utils.generate_download_file_response(filename)
+    download_response = generate_download_file_response(filename)
     if isinstance(download_response, str):
         handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
     return download_response
@@ -82,7 +83,7 @@ def get_duplicate_tag_results():
                              "Invalid duplicate tag check. This should not happen.", as_text=True)
 
 
-@route_blueprint.route(route_constants.EEG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+@route_blueprint.route(route_constants.EEG_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_eeg_events_validation_results():
     """Validate the hed strings associated with EEG events after submission from HEDTools EEGLAB plugin and
     return json string containing the output.
@@ -105,9 +106,7 @@ def get_eeg_events_validation_results():
 
 @route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
 def get_hed_version_in_file():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
+    """Finds the information about the HED version of a file and returns as JSON.
 
     Parameters
     ----------
@@ -118,7 +117,7 @@ def get_hed_version_in_file():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = utils.find_hed_version_in_file(request)
+    hed_info = find_hed_version_in_uploaded_file(request)
     if error_constants.ERROR_KEY in hed_info:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
     return json.dumps(hed_info)
@@ -139,7 +138,7 @@ def get_major_hed_versions():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = utils.find_major_hed_versions()
+    hed_info = find_major_hed_versions()
     if error_constants.ERROR_KEY in hed_info:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, hed_info[error_constants.ERROR_KEY])
     return json.dumps(hed_info)

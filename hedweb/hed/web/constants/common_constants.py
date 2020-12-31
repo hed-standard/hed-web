@@ -16,9 +16,9 @@ HED_SCHEMA_FILE = 'hed-schema-file'
 HED_SCHEMA_PATH = 'hed-schema-path'
 HED_SCHEMA_URL = 'hed-schema-url'
 HED_STRINGS = 'hed-strings'
-
-HED_XML_FILE = 'hed-xml-file'
 HED_VERSION = 'hed-version'
+HED_XML_FILE = 'hed-xml-file'
+
 ISSUE_COUNT = 'issue-count'
 REQUIRED_TAG_COLUMN_INDICES = 'required-tag-column-indices'
 SPREADSHEET_DISPLAY_NAME = 'spreadsheet-display-name'
