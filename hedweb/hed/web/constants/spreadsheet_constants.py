@@ -7,4 +7,4 @@ SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY = {'Category': ['Categories', 'Category', '
                                                   'Short Label', 'Short Labels'],
                                         'Long': ['Long', 'Long name', 'Long names']}
 SPREADSHEET_FILE_EXTENSION_TO_DELIMITER_DICTIONARY = {'.txt': '\t', '.tsv': '\t'}
-OTHER_HED_VERSION_OPTION = 'Other'
+

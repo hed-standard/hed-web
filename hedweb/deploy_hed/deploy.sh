@@ -40,8 +40,9 @@ cp -r "${VALIDATOR_CODE_DIR}" "${CODE_DEPLOY_DIR}"
 switch_to_web_directory()
 {
 echo Switching to web directory...
-cd "${DEPLOY_DIR}"
+cd "${DEPLOY_DIR}" || error_exit "Cannot access $DEPLOY_DIR"
 }
+
 build_new_container()
 {
 echo Building new container...
@@ -57,15 +58,14 @@ docker rm -f $CONTAINER_NAME
 run_new_container()
 {
 echo Running new container...
-docker run --restart=always --name $CONTAINER_NAME -d -p $HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
+docker run --restart=always --name $CONTAINER_NAME -d -p 127.0.0.1:$HOST_PORT:$CONTAINER_PORT $IMAGE_NAME
 }
 
 cleanup_directory()
 {
 echo Cleaning up directory...
 rm -rf "${GIT_DIR}"
-rm -rf "${GIT_HED_DIR}"
-cd "${ROOT_DIR}"
+cd "${ROOT_DIR}" || error_exit "Cannot clean up directories"
 }
 
 error_exit()
@@ -74,7 +74,30 @@ error_exit()
 	exit 1
 }
 
+output_paths()
+{
+echo "The relevant deployment information is:"
+echo "Root directory: ${ROOT_DIR}"
+echo "Docker image name: $IMAGE_NAME"
+echo "Docker image name: ${IMAGE_NAME}"
+echo "Docker container name: ${CONTAINER_NAME}"
+echo "Git repo: ${GIT_REPO_URL}"
+echo "Local repository: ${GIT_DIR}"
+echo "Host port: ${HOST_PORT}"
+echo "Container port: ${CONTAINER_PORT}"
+echo "Local deployment directory: ${DEPLOY_DIR}"
+echo "Local code deployment directory: ${CODE_DEPLOY_DIR}"
+echo "Configuration file: ${CONFIG_FILE}"
+echo "WSGI file: ${WSGI_FILE}"
+echo "Local web code directory: ${WEB_CODE_DIR}"
+echo "Local validator code directory: ${VALIDATOR_CODE_DIR}"
+}
+
+
 ##### Main
+echo "Starting...."
+output_paths
+echo "....."
 if [ -z "$1" ]; then
 echo No branch specified... Using master branch
 else
@@ -88,4 +111,3 @@ build_new_container
 delete_old_container
 run_new_container
 cleanup_directory
-
