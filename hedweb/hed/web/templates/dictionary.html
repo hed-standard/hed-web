@@ -2,7 +2,7 @@
 {% from "hed-pulldown.html" import create_hed_pulldown %}
 {% block content %}
     <h2>Validate JSON dictionary containing HED tags (in progress)</h2>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form-helper.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form.css') }}">
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
@@ -11,7 +11,7 @@
             <label class="btn-group file-browse-group dictionary-btn-group">
                 <button for="dictionary-file">Browse ...</button>
                 <label id="dictionary-display-name"></label>
-                <input type="file" name="dictionary-file" id="dictionary-file"/>
+                <input type="file" name="dictionary-file" id="dictionary-file" multiple/>
             </label>
             <p class="flash" id="dictionary-flash"></p>
         </div>

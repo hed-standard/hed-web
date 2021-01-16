@@ -2,7 +2,7 @@
 {% from "hed-pulldown.html" import create_hed_pulldown %}
 {% block content %}
     <h2>Validate spreadsheet containing HED tags</h2>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form-helper.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form.css') }}">
     <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
