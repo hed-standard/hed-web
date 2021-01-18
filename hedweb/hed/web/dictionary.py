@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web import web_utils
@@ -188,6 +188,6 @@ def validate_dictionary(validation_arguments):
     """
 
     json_dictionary = ColumnDefGroup(validation_arguments[common_constants.DICTIONARY_PATH])
-    hed_dictionary = HedDictionary(validation_arguments[common_constants.HED_XML_FILE])
-    json_dictionary.validate_entries(hed_dictionary)
+    hed_schema = HedSchema(validation_arguments[common_constants.HED_XML_FILE])
+    json_dictionary.validate_entries(hed_schema)
     return json_dictionary

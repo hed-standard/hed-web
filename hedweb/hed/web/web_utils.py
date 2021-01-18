@@ -7,7 +7,7 @@ from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
 from hed.util.file_util import get_file_extension, delete_file_if_it_exist
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants
 
 app_config = current_app.config
@@ -117,7 +117,7 @@ def find_hed_version_in_uploaded_file(form_request_object, key_name=common_const
     try:
         if key_name in form_request_object.files:
             hed_file_path = save_file_to_upload_folder(form_request_object.files[key_name])
-            hed_info[common_constants.HED_VERSION] = HedDictionary.get_hed_xml_version(hed_file_path)
+            hed_info[common_constants.HED_VERSION] = HedSchema.get_hed_xml_version(hed_file_path)
     except:
         hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
     return hed_info

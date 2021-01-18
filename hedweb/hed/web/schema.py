@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from flask import current_app, Response
 
 from hed.schema import xml2wiki, wiki2xml
-from hed.util.hed_dictionary import HedDictionary
+from hed.util.hed_schema import HedSchema
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 from hed.util.exceptions import SchemaFileError
 
@@ -110,7 +110,7 @@ def get_schema_conversion(schema_local_path):
             conversion_function = wiki2xml.convert_hed_wiki_2_xml
         else:
             raise ValueError(f"Invalid extension type: {input_extension}")
-        converted_schema_path, errors = conversion_function(None, schema_local_path)
+        converted_schema_path, errors = conversion_function(None, schema_local_path, check_for_issues=False)
     except ValueError as error:
         errors = format(error)
         converted_schema_path = ''
@@ -197,9 +197,9 @@ def run_schema_duplicate_tag_detection(form_request_object):
 
         if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
             return f"Invalid file name {hed_file_path}"
-        hed_dict = HedDictionary(hed_file_path)
-        if hed_dict.has_duplicate_tags():
-            dup_tag_file = write_text_iter_to_file(hed_dict.dupe_tag_iter(True))
+        hed_schema = HedSchema(hed_file_path)
+        if hed_schema.has_duplicate_tags():
+            dup_tag_file = write_text_iter_to_file(hed_schema.dupe_tag_iter(True))
             download_response = generate_download_file_response(dup_tag_file, f"Duplicate tags for: {hed_file_path}")
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
