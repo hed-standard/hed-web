@@ -1,23 +1,23 @@
 const SCHEMA_XML_EXTENSION = 'xml';
 const SCHEMA_MEDIAWIKI_EXTENSION = 'mediawiki';
-const DEFAULT_XML_URL = "https://raw.githubusercontent.com/hed-standard/hed-specification/HED-restructure/hedxml/HED7.1.1.xml";
+const DEFAULT_XML_URL = "https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.1.1.xml";
 
-$(document).ready(function () {
+$(function () {
     prepareSchemaForm();
 });
 
 /**
  * Checks if the HED file uploaded has a valid extension.
  */
-$('#schema-file').change(function () {
-    updateSchemaFileLabel($('#schema-file').val());
+$('#schema-file').on('change', function () {
+    updateFileLabel($('#schema-file').val(), '#schema-file-display-name');
     $('#schema-file-option').prop('checked', true);
     clearSchemaSubmitFlash()
     updateFormGui();
 });
 
-$('#schema-url').change(function () {
-    updateSchemaUrlLabel($('#schema-url').val());
+$('#schema-url').on('change', function () {
+    updateFileLabel($('#schema-url').val(), '#schema-url-display-name');
     $('#schema-url-option').prop('checked', true);
     clearSchemaSubmitFlash()
     updateFormGui();
@@ -38,20 +38,20 @@ $('#schema-conversion-submit').click(function () {
 /**
  * Submits the form for tag comparison if we have a valid file.
  */
-$('#schema-duplicate-tag-submit').click(function () {
+$('#schema-check-submit').on('click', function () {
    if (getSchemaFilename() === "") {
         flashMessageOnScreen('No valid source schema file.  See above.', 'error',
             'schema-submit-flash')
     } else {
-        submitSchemaDuplicateTagForm();
+        submitSchemaComplianceCheckForm();
     }
 });
 
-$('#schema-file-option').change(function () {
+$('#schema-file-option').on('change', function () {
     updateFormGui();
 });
 
-$('#schema-url-option').change(function () {
+$('#schema-url-option').on('change',function () {
     updateFormGui();
 });
 
@@ -71,37 +71,6 @@ function convertToOutputName(original_filename) {
     }
 
     return basename + "." + new_extension
-}
-
-function convertToResultsName(original_filename) {
-    let file_parts = splitExt(original_filename);
-    let basename = file_parts[0]
-    return "duplicate_tags_" + basename + ".txt"
-}
-
-/**
- * Compares the file extension of the file at the specified path to an Array of accepted file extensions.
- * @param {String} filePath - A path to a file.
- * @param {Array} acceptedFileExtensions - An array of accepted file extensions.
- * @returns {boolean} - True if the file has an accepted file extension.
- */
-function fileHasValidExtension(filePath, acceptedFileExtensions) {
-    let fileExtension = filePath.split('.').pop();
-    if ($.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * Flash a message on the screen.
- * @param {String} message - The message that will be flashed on the screen.
- * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
- */
-function flashMessageOnScreen(message, category, flashMessageElementId) {
-    let flashMessage = document.getElementById(flashMessageElementId);
-    flashMessage.innerHTML = message;
-    setFlashMessageCategory(flashMessage, category);
 }
 
 function getSchemaFilename() {
@@ -166,23 +135,6 @@ function resetForm() {
     $('#schema-file-option').prop('checked', false);
 }
 
-/**
- * Flash a message on the screen.
- * @param {Object} flashMessage - The li element containing the flash message.
- * @param {String} category - The category of the message. The categories are 'error', 'success', and 'other'.
- */
-function setFlashMessageCategory(flashMessage, category) {
-    if ("error" === category) {
-        flashMessage.style.backgroundColor = 'lightcoral';
-    } else if ("success" === category) {
-        flashMessage.style.backgroundColor = 'palegreen';
-    } else if ("warning" === category) {
-        flashMessage.style.backgroundColor = 'darkorange';
-    } else {
-        flashMessage.style.backgroundColor = '#f0f0f5';
-    }
-}
-
 function splitExt(filename) {
     const index = filename.lastIndexOf('.');
     return (-1 !== index) ? [filename.substring(0, index), filename.substring(index + 1)] : [filename, ''];
@@ -224,16 +176,16 @@ function submitSchemaConversionForm() {
     ;
 }
 
-function submitSchemaDuplicateTagForm() {
+function submitSchemaComplianceCheckForm() {
     let schemaForm = document.getElementById("schema-form");
     let formData = new FormData(schemaForm);
-    let download_display_name = convertToResultsName(getSchemaFilename())
+    let download_display_name = convertToResultsName(getSchemaFilename(), 'HED3G_format_issues')
     resetFlashMessages(false);
-    flashMessageOnScreen('Searching for duplicates in schema...', 'success',
+    flashMessageOnScreen('Checking schema for HED-3G compliance...', 'success',
         'schema-submit-flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_duplicate_tag_results')}}",
+            url: "{{url_for('route_blueprint.get_schema_compliance_check_results')}}",
             data: formData,
             contentType: false,
             processData: false,
@@ -243,7 +195,7 @@ function submitSchemaDuplicateTagForm() {
                       flashMessageOnScreen('', 'success', 'schema-submit-flash');
                       triggerDownloadBlob(downloaded_file, download_display_name);
                   } else {
-                      flashMessageOnScreen('No duplicate tags found.', 'success',
+                      flashMessageOnScreen('No HED-3G compliance issues found.', 'success',
                           'schema-submit-flash');
                   }
             },
@@ -253,26 +205,13 @@ function submitSchemaDuplicateTagForm() {
                     flashMessageOnScreen(download_response.responseText, 'error',
                         'schema-submit-flash');
                 } else {
-                    flashMessageOnScreen('XML could not be processed',
+                    flashMessageOnScreen('Schema could not be processed',
                         'error','schema-submit-flash');
                 }
             }
         }
     )
     ;
-}
-
-
-/**
- * Trigger the "save as" dialog for a text blob to save as a file with display name.
- */
-function triggerDownloadBlob(download_text_blob, display_name) {
-    const url = window.URL.createObjectURL(new Blob([download_text_blob]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', display_name);
-    document.body.appendChild(link);
-    link.click();
 }
 
 function updateFormGui() {

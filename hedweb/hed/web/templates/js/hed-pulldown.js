@@ -5,7 +5,7 @@ const HED_OTHER_VERSION_OPTION = 'Other';
  * Event handler function when the HED version drop-down menu changes. If Other is selected the file browser
  * underneath it will appear. If another option is selected then it will disappear.
  */
-$('#hed-version').change(function () {
+$('#hed-version').on('change',function () {
     if ($(this).val() === HED_OTHER_VERSION_OPTION) {
         $('#hed-other-version').show();
     } else {
@@ -17,18 +17,25 @@ $('#hed-version').change(function () {
 /**
  * Checks if the HED file uploaded has a valid extension.
  */
-$('#hed-xml-file').change(function () {
+$('#hed-xml-file').on('change', function () {
     let hedSchema = $('#hed-xml-file');
     let hedPath = hedSchema.val();
     let hedFile = hedSchema[0].files[0];
     if (fileHasValidExtension(hedPath, XML_FILE_EXTENSIONS)) {
         getVersionFromHEDFile(hedFile);
-        updateHEDFileLabel(hedPath);
+        updateFileLabel(hedPath, '#hed-display-name');
     } else {
         flashMessageOnScreen('Please upload a valid HED file (.xml)', 'error',
             'hed-flash')
     }
-});
+})
+
+/**
+ * Resets the flash messages that aren't related to the form submission.
+ */
+function clearHEDFlashMessage() {
+    flashMessageOnScreen('', 'success', 'hed-flash');
+}
 
 
 /**
@@ -115,13 +122,4 @@ function populateHEDVersionsDropdown(hedVersions) {
     }
     hedVersionDropdown.append('<option value=' + HED_OTHER_VERSION_OPTION + '>' + HED_OTHER_VERSION_OPTION +
         '</option>');
-}
-
-/**
- * Updates the HED file label.
- * @param {String} hedPath - The path to the HED XML file.
- */
-function updateHEDFileLabel(hedPath) {
-    let hedFilename = hedPath.split('\\').pop();
-    $('#hed-display-name').text(hedFilename);
 }

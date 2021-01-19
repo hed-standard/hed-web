@@ -101,3 +101,12 @@ export function triggerDownloadBlob(download_text_blob, display_name) {
     document.body.appendChild(link);
     link.click();
 }
+
+/**
+ * Updates the dictionary file label.
+ * @param {String} filePath - The path to the dictionary.
+ */
+export function updateFileLabel(filePath, displayName) {
+    let filename = filePath.split('\\').pop();
+    $(displayName).text(filename);
+}

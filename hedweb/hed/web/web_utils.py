@@ -2,7 +2,7 @@ import os
 import pathlib
 import tempfile
 import traceback
-
+from urllib.parse import urlparse
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
@@ -11,29 +11,6 @@ from hed.util.hed_schema import HedSchema
 from hed.web.constants import common_constants, error_constants
 
 app_config = current_app.config
-
-
-def check_if_option_in_form(form_request_object, option_name, target_value):
-    """Checks if the given option has a specific value. This is used for radio buttons.
-
-    Parameters
-    ----------
-    form_request_object: Request
-        A Request object produced by the post of a form
-    option_name: str
-        String containing the name of the radio button group in the web form
-    target_value: str
-        String containing the name of the selected radio button option
-
-    Returns
-    -------
-    Bool
-        True if the target radio button has been set and false otherwise
-    """
-
-    if option_name in form_request_object.values and form_request_object.values[option_name] == target_value:
-        return True
-    return False
 
 
 def convert_number_str_to_list(number_str):
@@ -123,6 +100,76 @@ def find_hed_version_in_uploaded_file(form_request_object, key_name=common_const
     return hed_info
 
 
+def form_has_file(form_request_object, file_field, valid_extensions):
+    """Checks to see if a file name with valid extension is present in the request object.
+
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from the schema form.
+    file_field: str
+        Name of the form field containing the file name
+    valid_extensions: list of str
+        List of valid extensions
+
+    Returns
+    -------
+    boolean
+        True if a file is present in a request object.
+
+    """
+    if file_field in form_request_object.files and \
+            file_extension_is_valid(form_request_object.files[file_field].filename, valid_extensions):
+        return True
+    else:
+        return False
+
+
+def form_has_option(form_request_object, option_name, target_value):
+    """Checks if the given option has a specific value. This is used for radio buttons.
+
+    Parameters
+    ----------
+    form_request_object: Request
+        A Request object produced by the post of a form
+    option_name: str
+        String containing the name of the radio button group in the web form
+    target_value: str
+        String containing the name of the selected radio button option
+
+    Returns
+    -------
+    Bool
+        True if the target radio button has been set and false otherwise
+    """
+
+    if option_name in form_request_object.values and form_request_object.values[option_name] == target_value:
+        return True
+    return False
+
+
+def form_has_url(form_request_object, url_field, valid_extensions):
+    """Checks to see if the url_field has a value with a valid extension.
+
+    Parameters
+    ----------
+    form_request_object: Request object
+        A Request object containing user data from a form.
+    url_field: str
+        The name of the value field in the form containing the URL to be parsed.
+    valid_extensions: list of str
+        List of valid extensions
+
+    Returns
+    -------
+    boolean
+        True if a URL is present in request object.
+
+    """
+    parsed_url = urlparse(form_request_object.form.get(url_field))
+    return file_extension_is_valid(parsed_url.path, valid_extensions)
+
+
 def generate_download_file_response(download_file, display_name=None, header=None):
     """Generates a download other response.
 
@@ -210,8 +257,7 @@ def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extens
     """
     uploaded_file_name = ''
     original_file_name = ''
-    if file_key in form_request_object.files and \
-            file_extension_is_valid(form_request_object.files[file_key].filename, valid_extensions):
+    if form_has_file(form_request_object, file_key, valid_extensions):
         uploaded_file_name = save_file_to_upload_folder(form_request_object.files[file_key])
         original_file_name = form_request_object.files[file_key].filename
     return uploaded_file_name, original_file_name

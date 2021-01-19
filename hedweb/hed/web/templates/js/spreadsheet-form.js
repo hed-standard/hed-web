@@ -18,11 +18,11 @@ $('#spreadsheet-file').on('change', function () {
         resetForm();
     }
     else if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
-        updateSpreadsheetFileLabel(spreadsheetPath);
+        updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
         getWorksheetsInfo(spreadsheetFile);
     }
     else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
-        updateSpreadsheetFileLabel(spreadsheetPath);
+        updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
         clearWorksheetSelectbox();
         getColumnsInfo(spreadsheetFile, '');
     } else {
@@ -432,13 +432,4 @@ function tagColumnsTextboxIsValid() {
         }
     }
     return valid;
-}
-
-/**
- * Updates the spreadsheet file label.
- * @param {String} spreadsheetPath - The path to the spreadsheet.
- */
-function updateSpreadsheetFileLabel(spreadsheetPath) {
-    let spreadsheetFilename = spreadsheetPath.split('\\').pop();
-    $('#spreadsheet-display-name').text(spreadsheetFilename);
 }

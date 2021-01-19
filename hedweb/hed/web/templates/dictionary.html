@@ -1,21 +1,14 @@
 {% extends "layout.html" %}
+{% from "json-input.html" import create_json_input %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+
 {% block content %}
-    <h2>Validate JSON dictionary containing HED tags (in progress)</h2>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form.css') }}">
+    <h2>Validate JSON dictionary containing HED tags</h2>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dictionary-form.css') }}">
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <div class="form-group">
-            <label for="dictionary-file">Select JSON-formatted dictionaries:</label><br>
-            <label class="btn-group file-browse-group dictionary-btn-group">
-                <button for="dictionary-file">Browse ...</button>
-                <label id="dictionary-display-name"></label>
-                <input type="file" name="dictionary-file" id="dictionary-file" multiple/>
-            </label>
-            <p class="flash" id="dictionary-flash"></p>
-        </div>
-
+        {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
         <div class="form-group">
@@ -36,6 +29,7 @@
     <script type="module">
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/json-input.js' %}
         {%  include 'js/dictionary-form.js' %}
     </script>
 {% endblock %}

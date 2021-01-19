@@ -32,13 +32,13 @@ def generate_arguments_from_validation_form(form_request_object):
     """
     hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
     uploaded_file_name, original_file_name = \
-        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.DICTIONARY_FILE,
+        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.JSON_FILE,
                                                    file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
                        common_constants.HED_DISPLAY_NAME: hed_display_name,
-                       common_constants.DICTIONARY_PATH: uploaded_file_name,
-                       common_constants.DICTIONARY_FILE: original_file_name}
+                       common_constants.JSON_PATH: uploaded_file_name,
+                       common_constants.JSON_FILE: original_file_name}
     input_arguments[common_constants.CHECK_FOR_WARNINGS] = utils.get_optional_form_field(
         form_request_object, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
     return input_arguments
@@ -128,7 +128,7 @@ def report_dictionary_validation_status(form_request_object):
         def_group = validate_dictionary(input_arguments)
         validation_issues = def_group.get_validation_issues()
         if validation_issues:
-            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.DICTIONARY_FILE],
+            issue_file = save_issues_to_upload_folder(input_arguments[common_constants.JSON_FILE],
                                                       validation_issues)
             download_response = web_utils.generate_download_file_response(issue_file)
             if isinstance(download_response, str):
@@ -141,7 +141,7 @@ def report_dictionary_validation_status(form_request_object):
     except Exception as e:
         return "Unexpected processing error: " + str(e)
     finally:
-        delete_file_if_it_exist(input_arguments[common_constants.DICTIONARY_PATH])
+        delete_file_if_it_exist(input_arguments[common_constants.JSON_PATH])
         # delete_file_if_it_exist(input_arguments[common_constants.HED_XML_FILE])
     return ""
 
@@ -187,7 +187,7 @@ def validate_dictionary(validation_arguments):
         Contains a representation of the JSON dictionary and validation issues.
     """
 
-    json_dictionary = ColumnDefGroup(validation_arguments[common_constants.DICTIONARY_PATH])
+    json_dictionary = ColumnDefGroup(validation_arguments[common_constants.JSON_PATH])
     hed_schema = HedSchema(validation_arguments[common_constants.HED_XML_FILE])
     json_dictionary.validate_entries(hed_schema)
     return json_dictionary

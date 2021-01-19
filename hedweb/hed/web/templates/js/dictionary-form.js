@@ -4,52 +4,15 @@ $(function () {
     prepareDictionaryValidationForm();
 });
 
-/**
- * Dictionary event handler function. Checks if the file uploaded has a valid dictionary extension.
- */
-$('#dictionary-file').on('change',function () {
-    let dictionaryPath = $('#dictionary-file').val();
-    resetFlashMessages();
-    if (cancelWasPressedInChromeFileUpload(dictionaryPath)) {
-        resetForm();
-    }
-    else if (fileHasValidExtension(dictionaryPath, DICTIONARY_FILE_EXTENSIONS)) {
-        updateDictionaryFileLabel(dictionaryPath);
-    } else {
-        resetForm();
-        flashMessageOnScreen('Please upload a JSON dictionary (.json)',
-            'error', 'dictionary-flash');
-    }
-});
 
 /**
  * Submits the form if the tag columns textbox is valid.
  */
 $('#dictionary-validation-submit').on('click', function () {
-    if (dictionaryIsSpecified() && hedSpecifiedWhenOtherIsSelected()) {
+    if (jsonIsSpecified() && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
-
-/**
- * Clears the dictionary file label.
- */
-function clearDictionaryFileLabel() {
-    $('#dictionary-display-name').text('');
-}
-
-/**
- * Checks to see if a dictionary has been specified.
- */
-function dictionaryIsSpecified() {
-    let dictionaryFile = $('#dictionary-file');
-    if (dictionaryFile[0].files.length === 0) {
-        flashMessageOnScreen('Dictionary is not specified.', 'error',
-            'dictionary-flash');
-        return false;
-    }
-    return true;
-}
 
 
 /**
@@ -57,7 +20,7 @@ function dictionaryIsSpecified() {
  * components will be hidden and populated.
  */
 function prepareDictionaryValidationForm() {
-    resetForm();
+    resetDictionaryForm();
     getHEDVersions()
     hideOtherHEDVersionFileUpload();
 }
@@ -66,17 +29,17 @@ function prepareDictionaryValidationForm() {
  * Resets the flash messages that aren't related to the form submission.
  */
 function resetFlashMessages() {
-    flashMessageOnScreen('', 'success', 'dictionary-flash');
-    flashMessageOnScreen('', 'success', 'hed-flash');
+    clearJsonFlashMessage();
+    clearHEDFlashMessage();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
 }
 
 /**
  * Resets the fields in the form.
  */
-function resetForm() {
+function resetDictionaryForm() {
     $('#dictionary-form')[0].reset();
-    clearDictionaryFileLabel();
+    clearJsonFileLabel();
     hideOtherHEDVersionFileUpload()
 }
 
@@ -87,10 +50,9 @@ function resetForm() {
 function submitForm() {
     let dictionaryForm = document.getElementById("dictionary-form");
     let formData = new FormData(dictionaryForm);
-    let prefix = 'validation_issues';
 
-    let dictionaryFile = $('#dictionary-file')[0].files[0].name;
-    let display_name = convertToResultsName(dictionaryFile, prefix)
+    let dictionaryFile = getJsonFileLabel();
+    let display_name = convertToResultsName(dictionaryFile, 'validation_issues')
     resetFlashMessages();
     flashMessageOnScreen('Dictionary is being validated ...', 'success',
         'dictionary-validation-submit-flash')
