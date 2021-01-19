@@ -8,8 +8,8 @@ TAG_COLUMNS = 'tag-columns'
 TAG_COLUMN_INDICES = 'tag-column-indices'
 
 DOWNLOAD_FILE = 'download-file'
-DICTIONARY_FILE = 'dictionary-file'
-DICTIONARY_PATH = 'dictionary-path'
+JSON_FILE = 'json-file'
+JSON_PATH = 'json-path'
 ERROR_COUNT = 'error-count'
 
 HED_DISPLAY_NAME = 'hed-display-name'

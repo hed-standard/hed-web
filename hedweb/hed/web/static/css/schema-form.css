@@ -11,17 +11,24 @@
     margin-left: 1rem;
 }
 
-.form-group input[type="text"], .form-group input[type="file"], .form-group select, .form-group button {
+.form-group input[type="text"], .form-group input[type="file"], .form-group select {
     height: 2.35rem;
     font-size: 18px;
     margin-left: 0.6rem !important;
 }
 
 .form-group button {
-    width: 10rem;
+    height: 2.35rem;
+    width: 15rem;
+    font-size: 18px;
+    margin-left: 0.6rem !important;
 }
 
-.form-group button[id="schema-conversion-submit"], .form-group button[id="schema-duplicate-tag-submit"]{
+.form-group button[id="schema-conversion-submit"]{
+    width: 15rem;
+}
+
+.form-group button[id="schema-check-submit"]{
     width: 15rem;
 }
 

@@ -83,8 +83,8 @@ def get_dictionary_validation_results():
             return ""
 
 
-@route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_duplicate_tag_results():
+@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_compliance_check_results():
     """Check the HED specification in the form after submission and return an attachment other containing the output.
 
     Parameters
@@ -96,7 +96,7 @@ def get_duplicate_tag_results():
         A serialized JSON string containing the hed specification to check. If the conversion fails then a
         500 error message is returned.
     """
-    comparison_response = schema.run_schema_duplicate_tag_detection(request)
+    comparison_response = schema.run_schema_compliance_check(request)
     # Success
     if isinstance(comparison_response, Response):
         return comparison_response

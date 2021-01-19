@@ -2,7 +2,6 @@ import os
 import os.path
 from urllib.parse import urlparse
 from shutil import move
-from hed.schema import duplicate_nodes
 from hed.schema import constants
 from hed.util.file_util import delete_file_if_it_exist, url_to_file, get_file_extension, write_text_iter_to_file
 
