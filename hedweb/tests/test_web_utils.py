@@ -29,16 +29,16 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_check_if_option_in_form(self):
-        self.assertTrue(1, "Testing check_if_option_in_form")
-        from hed.web.web_utils import check_if_option_in_form
+        self.assertTrue(1, "Testing form_has_option")
+        from hed.web.web_utils import form_has_option
         mock_form = mock.Mock()
         mock_dict = {'upload': 'me', 'download:': 'them'}
         mock_form.values = mock_dict
-        self.assertTrue(check_if_option_in_form(mock_form, 'upload', 'me'),
+        self.assertTrue(form_has_option(mock_form, 'upload', 'me'),
                         "True if option_name has target_value")
-        self.assertFalse(check_if_option_in_form(mock_form, 'upload', 'them'),
+        self.assertFalse(form_has_option(mock_form, 'upload', 'them'),
                          "False if option_name is not target_value")
-        self.assertFalse(check_if_option_in_form(mock_form, 'temp', 'them'),
+        self.assertFalse(form_has_option(mock_form, 'temp', 'them'),
                          "False if invalid option name")
 
     def test_convert_number_str_to_list(self):

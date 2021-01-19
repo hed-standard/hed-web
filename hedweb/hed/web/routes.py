@@ -6,9 +6,7 @@ import traceback
 import hed.util.file_util
 from hed.util import hed_cache
 
-from hed.web import utils
-from hed.web import spreadsheet
-from hed.web import schema
+from hed.web import dictionary, spreadsheet, schema, utils
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exist, find_hed_version_in_uploaded_file, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error
@@ -74,20 +72,19 @@ def get_dictionary_validation_results():
         500 error message is returned.
     """
 
-    return "Dictionary validation is not yet implemented"
-    # validation_response = spreadsheet.report_spreadsheet_validation_status(request)
-    # # Success
-    # if isinstance(validation_response, Response):
-    #     return validation_response
-    # if isinstance(validation_response, str):
-    #     if validation_response:
-    #         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
-    #     else:
-    #         return ""
+    validation_response = dictionary.report_dictionary_validation_status(request)
+    # Success
+    if isinstance(validation_response, Response):
+        return validation_response
+    if isinstance(validation_response, str):
+        if validation_response:
+            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
+        else:
+            return ""
 
 
-@route_blueprint.route(route_constants.SCHEMA_DUPLICATE_TAG_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_duplicate_tag_results():
+@route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_schema_compliance_check_results():
     """Check the HED specification in the form after submission and return an attachment other containing the output.
 
     Parameters
@@ -99,7 +96,7 @@ def get_duplicate_tag_results():
         A serialized JSON string containing the hed specification to check. If the conversion fails then a
         500 error message is returned.
     """
-    comparison_response = schema.run_schema_duplicate_tag_detection(request)
+    comparison_response = schema.run_schema_compliance_check(request)
     # Success
     if isinstance(comparison_response, Response):
         return comparison_response
