@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% from "hed-pulldown.html" import create_hed_pulldown %}
+{% from "json-input.html" import create_json_input %}
 {% from "spreadsheet-input.html" import spreadsheet_input %}
 {% block content %}
     <h2>Validate spreadsheet containing HED tags</h2>
@@ -8,7 +9,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ spreadsheet_input() }}
-
+        {{ create_json_input() }}
         {{ create_hed_pulldown() }}
 
         <div class="form-group">
@@ -34,6 +35,7 @@
         {%  include 'js/events-form.js' %}
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/json-input.js' %}
         {%  include 'js/spreadsheet-input.js' %}
 
     </script>
