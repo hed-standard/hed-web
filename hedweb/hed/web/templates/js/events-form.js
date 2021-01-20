@@ -1,41 +1,16 @@
 
 $(function () {
-    prepareSpreadsheetForm();
+    prepareEventsForm();
 });
 
 /**
- * Submits the form if the tag columns textbox is valid.
+ * Submits the form if there is a spreadsheet file and an available hed schema
  */
-$('#spreadsheet-validation-submit').on('click', function () {
-    if (spreadsheetIsSpecified() && tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
+$('#events-validation-submit').on('click', function () {
+    if (spreadsheetIsSpecified()  && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
-
-
-/**
- * Clears tag column text boxes.
- */
-function clearTagColumnTextboxes() {
-    $('.textbox-group input[type="text"]').val('');
-}
-
-/**
- * Flash a message showing the number of column columns that contain tags.
- * @param {Array} tagColumnIndices - An array of indices of columns containing tags
- * @param {Array} requiredTagColumnIndices - An array of indices of columns containing required tags
- * contain tags.
- */
-function flashTagColumnCountMessage(tagColumnIndices, requiredTagColumnIndices) {
-    let numberOfTagColumns = (tagColumnIndices.length + Object.keys(requiredTagColumnIndices).length).toString();
-    if (numberOfTagColumns === '0') {
-        flashMessageOnScreen('Warning: No tag column(s) found... Using the 2nd column', 'warning',
-            'tag-columns-flash');
-    } else {
-        flashMessageOnScreen(numberOfTagColumns + ' tag column(s) found', 'success',
-            'tag-columns-flash');
-    }
-}
 
 /**
  * Gets the spreadsheet columns.
@@ -57,8 +32,6 @@ function getColumnsInfo(spreadsheetFile, worksheetName) {
         dataType: 'json',
         success: function (columnsInfo) {
             setComponentsRelatedToColumns(columnsInfo);
-            flashTagColumnCountMessage(columnsInfo['tag-column-indices'],
-                columnsInfo['required-tag-column-indices']);
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON.message);
@@ -88,37 +61,14 @@ function getWorksheetsInfo(workbookFile) {
             populateWorksheetSelectbox(worksheetsInfo['worksheet-names']);
             setComponentsRelatedToColumns(worksheetsInfo);
             flashWorksheetNumberMessage(worksheetsInfo['worksheet-names']);
-            flashTagColumnCountMessage(worksheetsInfo['tag-column-indices'],
-                worksheetsInfo['required-tag-column-indices']);
         },
         error: function (jqXHR) {
             console.log(jqXHR);
             // console.log(jqXHR.responseJSON.message);
             flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
-                'spreadsheet-validation-submit-flash');
+                'events-validation-submit-flash');
         }
     });
-}
-
-
-/**
- * Populate the required tag column textboxes from the tag column indices found in the spreadsheet columns.
- * @param {object} requiredTagColumnIndices - A dictionary containing the required tag column indices found
- * in the spreadsheet. The keys are the column names and the values are the indices.
- */
-function populateRequiredTagColumnTextboxes(requiredTagColumnIndices) {
-    for (let key in requiredTagColumnIndices) {
-        $('#' + key.toLowerCase() + '-column').val(requiredTagColumnIndices[key].toString());
-    }
-}
-
-/**
- * Populate the tag column textbox from the tag column indices found in the spreadsheet columns.
- * @param {Array} tagColumnIndices - An integer array of tag column indices found in the spreadsheet
- * columns.
- */
-function populateTagColumnsTextbox(tagColumnIndices) {
-    $('#tag-columns').val(tagColumnIndices.sort().map(String));
 }
 
 
@@ -126,7 +76,7 @@ function populateTagColumnsTextbox(tagColumnIndices) {
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
-function prepareSpreadsheetForm() {
+function prepareEventsForm() {
     resetForm();
     getHEDVersions()
     hideColumnNames();
@@ -139,9 +89,8 @@ function prepareSpreadsheetForm() {
 function resetFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
-    resetTagColumnMessages();
     flashMessageOnScreen('', 'success', 'hed-flash');
-    flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
+    flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
 }
 
 /**
@@ -156,26 +105,11 @@ function resetForm() {
 }
 
 /**
- * Resets the flash messages that aren't related to the form submission.
- */
-function resetTagColumnMessages() {
-    flashMessageOnScreen('', 'success', 'tag-columns-flash');
-}
-
-/**
  * Sets the components related to Excel worksheet columns when they are all empty.
  */
 function setComponentsRelatedToEmptyColumnNames() {
-    clearTagColumnTextboxes();
     setHasColumnNamesCheckbox(false);
     hideColumnNames();
-}
-
-/**
- * Sets the components related to the spreadsheet tag column indices when they are empty.
- */
-function setComponentsRelatedToEmptyTagColumnIndices() {
-    $('#tag-columns').val('2');
 }
 
 /**
@@ -194,19 +128,10 @@ function setComponentsRelatedToNonEmptyColumnNames(columnNames) {
  * This information contains the names of the columns and column indices that contain HED tags.
  */
 function setComponentsRelatedToColumns(columnsInfo) {
-    clearTagColumnTextboxes();
     if (columnNamesAreEmpty(columnsInfo['column-names'])) {
         setComponentsRelatedToEmptyColumnNames();
     } else {
         setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
-    }
-    if (tagColumnsIndicesAreEmpty(columnsInfo['tag-column-indices'])) {
-        setComponentsRelatedToEmptyTagColumnIndices();
-    } else {
-        populateTagColumnsTextbox(columnsInfo['tag-column-indices']);
-    }
-    if (Object.keys(columnsInfo['required-tag-column-indices']).length !== 0) {
-        populateRequiredTagColumnTextboxes(columnsInfo['required-tag-column-indices']);
     }
 }
 
@@ -218,18 +143,6 @@ function setHasColumnNamesCheckbox(value) {
     $('#has-column-names').prop('checked', value);
 }
 
-/**
- * Checks to see if the worksheet tag column indices are empty.
- * @param {Array} tagColumnsIndices - An array containing the tag column indices based on the
- *                columns found in the spreadsheet.
- * @returns {boolean} - True if the spreadsheet tag column indices array is empty.
- */
-function tagColumnsIndicesAreEmpty(tagColumnsIndices) {
-    if (tagColumnsIndices.length > 0) {
-        return false;
-    }
-    return true;
-}
 
 /**
  * Submit the form and return the validation results. If there are issues then they are returned in an attachment
@@ -247,10 +160,10 @@ function submitForm() {
     let display_name = convertToResultsName(spreadsheetFile, prefix)
     resetFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
-        'spreadsheet-validation-submit-flash')
+        'events-validation-submit-flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_spreadsheet_validation_results')}}",
+            url: "{{url_for('route_blueprint.get_events_validation_results')}}",
             data: formData,
             contentType: false,
             processData: false,
@@ -258,43 +171,24 @@ function submitForm() {
             success: function (downloaded_file) {
                   if (downloaded_file) {
                       flashMessageOnScreen('', 'success',
-                          'spreadsheet-validation-submit-flash');
+                          'events-validation-submit-flash');
                       triggerDownloadBlob(downloaded_file, display_name);
                   } else {
                       flashMessageOnScreen('No validation errors found.', 'success',
-                          'spreadsheet-validation-submit-flash');
+                          'events-validation-submit-flash');
                   }
             },
             error: function (download_response) {
                 console.log(download_response.responseText);
                 if (download_response.responseText.length < 100) {
                     flashMessageOnScreen(download_response.responseText, 'error',
-                        'spreadsheet-validation-submit-flash');
+                        'events-validation-submit-flash');
                 } else {
                     flashMessageOnScreen('Spreadsheet could not be processed',
-                        'error','spreadsheet-validation-submit-flash');
+                        'error','events-validation-submit-flash');
                 }
             }
         }
     )
     ;
-}
-
-/**
- * Checks to see if the tag columns textbox has valid input. Valid input is an integer or a comma-separated list of
- * integers that are the column indices in a Excel worksheet that contain HED tags.
- * @returns {boolean} - True if the tags columns textbox is valid.
- */
-function tagColumnsTextboxIsValid() {
-    let otherTagColumns = $('#tag-columns').val().trim();
-    let valid = true;
-    if (!isEmptyStr(otherTagColumns)) {
-        let pattern = new RegExp('^([ \\d]+,)*[ \\d]+$');
-        let valid = pattern.test(otherTagColumns);
-        if (!valid) {
-            flashMessageOnScreen('Tag column(s) must be a number or a comma-separated list of numbers',
-                'error', 'tag-columns-flash')
-        }
-    }
-    return valid;
 }

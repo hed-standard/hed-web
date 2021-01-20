@@ -52,7 +52,7 @@ function submitForm() {
     let formData = new FormData(dictionaryForm);
 
     let dictionaryFile = getJsonFileLabel();
-    let display_name = convertToResultsName(dictionaryFile, 'validation_issues')
+    let display_name = convertToResultsName(dictionaryFile, 'issues')
     resetFlashMessages();
     flashMessageOnScreen('Dictionary is being validated ...', 'success',
         'dictionary-validation-submit-flash')

@@ -12,6 +12,9 @@ JSON_FILE = 'json-file'
 JSON_PATH = 'json-path'
 ERROR_COUNT = 'error-count'
 
+EVENTS_VALIDATION_SUBMIT = 'events-validation-submit'
+EVENTS_SUBMIT_FLASH = 'events-validation-submit-flash'
+
 HED_DISPLAY_NAME = 'hed-display-name'
 HED_MAJOR_VERSIONS = 'hed-major-versions'
 HED_OTHER_VERSION = 'hed-other-version'
