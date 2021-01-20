@@ -1,35 +1,6 @@
-const EXCEL_FILE_EXTENSIONS = ['xlsx', 'xls'];
-const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
 
 $(function () {
     prepareSpreadsheetForm();
-});
-
-
-/**
- * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
- */
-$('#spreadsheet-file').on('change', function () {
-    let spreadsheet = $('#spreadsheet-file');
-    let spreadsheetPath = spreadsheet.val();
-    let spreadsheetFile = spreadsheet[0].files[0];
-    resetFlashMessages();
-    if (cancelWasPressedInChromeFileUpload(spreadsheetPath)) {
-        resetForm();
-    }
-    else if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
-        updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
-        getWorksheetsInfo(spreadsheetFile);
-    }
-    else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
-        updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
-        clearWorksheetSelectbox();
-        getColumnsInfo(spreadsheetFile, '');
-    } else {
-        resetForm();
-        flashMessageOnScreen('Please upload a excel or text spreadsheet (.xlsx, .xls, .tsv, .txt)',
-            'error', 'spreadsheet-flash');
-    }
 });
 
 /**
@@ -41,23 +12,6 @@ $('#spreadsheet-validation-submit').on('click', function () {
     }
 });
 
-/**
- * Gets the information associated with the Excel worksheet that was newly selected. This information contains
- * the names of the columns and column indices that contain HED tags.
- */
-$('#worksheet-name').on('change', function () {
-    let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
-    let worksheetName = $('#worksheet-name option:selected').text();
-    resetFlashMessages();
-    getColumnsInfo(spreadsheetFile, worksheetName);
-});
-
-/**
- * Clears the spreadsheet file label.
- */
-function clearSpreadsheetFileLabel() {
-    $('#spreadsheet-display-name').text('');
-}
 
 /**
  * Clears tag column text boxes.
@@ -66,21 +20,14 @@ function clearTagColumnTextboxes() {
     $('.textbox-group input[type="text"]').val('');
 }
 
-/**
- * Clears the worksheet select box.
- */
-function clearWorksheetSelectbox() {
-    $('#worksheet-name').empty();
-}
-
-/**
- * Checks to see if a dictionary is empty
- * @param {Array} dictionary - A dictionary
- * @returns {boolean} - True if the dictionary is empty. False, if otherwise.
- */
-function dictionaryIsEmpty(dictionary) {
-    return Object.keys(dictionary).length === 0;
-}
+// /**
+//  * Checks to see if a dictionary is empty
+//  * @param {Array} dictionary - A dictionary
+//  * @returns {boolean} - True if the dictionary is empty. False, if otherwise.
+//  */
+// function dictionaryIsEmpty(dictionary) {
+//     return Object.keys(dictionary).length === 0;
+// }
 
 /**
  * Flash a message showing the number of column columns that contain tags.
@@ -97,16 +44,6 @@ function flashTagColumnCountMessage(tagColumnIndices, requiredTagColumnIndices) 
         flashMessageOnScreen(numberOfTagColumns + ' tag column(s) found', 'success',
             'tag-columns-flash');
     }
-}
-
-/**
- * Flash a message showing the number of worksheets in an Excel workbook.
- * @param {Array} worksheetNames - An array containing the names of Excel workbook worksheets.
- */
-function flashWorksheetNumberMessage(worksheetNames) {
-    let numberOfWorksheets = worksheetNames.length.toString();
-    flashMessageOnScreen(numberOfWorksheets + ' worksheet(s) found',
-        'success', 'worksheet-flash');
 }
 
 /**
@@ -172,29 +109,6 @@ function getWorksheetsInfo(workbookFile) {
     });
 }
 
-/**
- * Hides  columns section in the form.
- */
-function hideColumnNamesTable() {
-    $('#column-names').hide();
-}
-
-
-/**
- * Populates a table containing the worksheet columns.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- */
-function populateColumnNamesTable(columnNames) {
-    let columnNamesTable = $('#columns-names-table');
-    let columnNamesRow = $('<tr/>');
-    let numberOfColumnNames = columnNames.length;
-    columnNamesTable.empty();
-    for (let i = 0; i < numberOfColumnNames; i++) {
-        columnNamesRow.append('<td>' + columnNames[i] + '</td>');
-    }
-    columnNamesTable.append(columnNamesRow);
-}
-
 
 /**
  * Populate the required tag column textboxes from the tag column indices found in the spreadsheet columns.
@@ -216,18 +130,6 @@ function populateTagColumnsTextbox(tagColumnIndices) {
     $('#tag-columns').val(tagColumnIndices.sort().map(String));
 }
 
-/**
- * Populate the Excel worksheet select box.
- * @param {Array} worksheetNames - An array containing the Excel worksheet names.
- */
-function populateWorksheetSelectbox(worksheetNames) {
-    let worksheetSelectbox = $('#worksheet-name');
-    let numberOfWorksheetNames = worksheetNames.length;
-    worksheetSelectbox.empty();
-    for (let i = 0; i < numberOfWorksheetNames; i++) {
-        worksheetSelectbox.append(new Option(worksheetNames[i], worksheetNames[i]));
-    }
-}
 
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
@@ -236,7 +138,7 @@ function populateWorksheetSelectbox(worksheetNames) {
 function prepareSpreadsheetForm() {
     resetForm();
     getHEDVersions()
-    hideColumnNamesTable();
+    hideColumnNames();
     hideOtherHEDVersionFileUpload();
 }
 
@@ -246,7 +148,7 @@ function prepareSpreadsheetForm() {
 function resetFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
-    flashMessageOnScreen('', 'success', 'tag-columns-flash');
+    resetTagColumnMessages();
     flashMessageOnScreen('', 'success', 'hed-flash');
     flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
 }
@@ -258,8 +160,15 @@ function resetForm() {
     $('#spreadsheet-form')[0].reset();
     clearSpreadsheetFileLabel();
     clearWorksheetSelectbox();
-    hideColumnNamesTable();
+    hideColumnNames();
     hideOtherHEDVersionFileUpload()
+}
+
+/**
+ * Resets the flash messages that aren't related to the form submission.
+ */
+function resetTagColumnMessages() {
+    flashMessageOnScreen('', 'success', 'tag-columns-flash');
 }
 
 /**
@@ -267,8 +176,8 @@ function resetForm() {
  */
 function setComponentsRelatedToEmptyColumnNames() {
     clearTagColumnTextboxes();
-    setHasColumnNamesCheckboxToFalse();
-    hideColumnNamesTable();
+    setHasColumnNamesCheckbox(false);
+    hideColumnNames();
 }
 
 /**
@@ -283,9 +192,8 @@ function setComponentsRelatedToEmptyTagColumnIndices() {
  * @param {Array} columnNames - An array containing the spreadsheet column names.
  */
 function setComponentsRelatedToNonEmptyColumnNames(columnNames) {
-    populateColumnNamesTable(columnNames);
-    setHasColumnNamesCheckboxToTrue();
-    $('#column-names').show();
+    showColumnNames(columnNames)
+    setHasColumnNamesCheckbox(true);
 }
 
 /**
@@ -306,51 +214,17 @@ function setComponentsRelatedToColumns(columnsInfo) {
     } else {
         populateTagColumnsTextbox(columnsInfo['tag-column-indices']);
     }
-    if (!dictionaryIsEmpty(columnsInfo['required-tag-column-indices'])) {
+    if (Object.keys(columnsInfo['required-tag-column-indices']).length !== 0) {
         populateRequiredTagColumnTextboxes(columnsInfo['required-tag-column-indices']);
     }
 }
 
 /**
  * Sets the spreadsheet has column names checkbox to false.
+ * @param {boolean} Box is checked if true and unchecked if false
  */
-function setHasColumnNamesCheckboxToFalse() {
-    $('#has-column-names').prop('checked', false);
-}
-
-/**
- * Sets the spreadsheet has column names checkbox to true.
- */
-function setHasColumnNamesCheckboxToTrue() {
-    $('#has-column-names').prop('checked', true);
-}
-
-/**
- * Checks to see if the spreadsheet columns are empty.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- * @returns {boolean} - True if the spreadsheet columns are all empty.
- */
-function columnNamesAreEmpty(columnNames) {
-    let numberOfColumnNames = columnNames.length;
-    for (let i = 0; i < numberOfColumnNames; i++) {
-        if (!isEmptyStr(columnNames[i].trim())) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * Checks to see if a spreadsheet has been specified.
- */
-function spreadsheetIsSpecified() {
-    let spreadsheetFile = $('#spreadsheet-file');
-    if (spreadsheetFile[0].files.length === 0) {
-        flashMessageOnScreen('Spreadsheet is not specified.', 'error',
-            'spreadsheet-flash');
-        return false;
-    }
-    return true;
+function setHasColumnNamesCheckbox(value) {
+    $('#has-column-names').prop('checked', value);
 }
 
 /**

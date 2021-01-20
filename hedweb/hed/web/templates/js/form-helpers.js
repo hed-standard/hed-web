@@ -9,6 +9,21 @@ export function cancelWasPressedInChromeFileUpload(filePath) {
 }
 
 /**
+ * Checks to see if any entries in an array of names are empty.
+ * @param {Array} names - An array containing a list of names.
+ * @returns {boolean} - True if any of the names in the array are all empty.
+ */
+export function columnNamesAreEmpty(names) {
+    let numberOfNames = names.length;
+    for (let i = 0; i < numberOfNames; i++) {
+        if (!isEmptyStr(names[i].trim())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * Converts a path and prefix to a text results name
  * @param {String} filename - Pathname of the original file
  * @param {String} prefix - Prefix to be appended to the file name of original file
@@ -103,8 +118,9 @@ export function triggerDownloadBlob(download_text_blob, display_name) {
 }
 
 /**
- * Updates the dictionary file label.
+ * Updates a file label.
  * @param {String} filePath - The path to the dictionary.
+ * @param {String} displayName - The ID of the label field to set
  */
 export function updateFileLabel(filePath, displayName) {
     let filename = filePath.split('\\').pop();
