@@ -35,7 +35,7 @@ function getColumnsInfo(spreadsheetFile, worksheetName) {
         },
         error: function (jqXHR) {
             console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
+            flashMessageOnScreen('Event annotations could not be processed.', 'error',
                 'spreadsheet-flash');
         }
     });
@@ -65,7 +65,7 @@ function getWorksheetsInfo(workbookFile) {
         error: function (jqXHR) {
             console.log(jqXHR);
             // console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
+            flashMessageOnScreen('Event annotations could not be processed.', 'error',
                 'events-validation-submit-flash');
         }
     });
@@ -97,7 +97,7 @@ function resetFlashMessages() {
  * Resets the fields in the form.
  */
 function resetForm() {
-    $('#spreadsheet-form')[0].reset();
+    $('#events-form')[0].reset();
     clearSpreadsheetFileLabel();
     clearWorksheetSelectbox();
     hideColumnNames();
@@ -149,8 +149,8 @@ function setHasColumnNamesCheckbox(value) {
  * file.
  */
 function submitForm() {
-    let spreadsheetForm = document.getElementById("spreadsheet-form");
-    let formData = new FormData(spreadsheetForm);
+    let eventsForm = document.getElementById("events-form");
+    let formData = new FormData(eventsForm);
     let worksheetName = $('#worksheet-name option:selected').text();
     let prefix = 'issues';
     if(worksheetName) {
@@ -184,7 +184,7 @@ function submitForm() {
                     flashMessageOnScreen(download_response.responseText, 'error',
                         'events-validation-submit-flash');
                 } else {
-                    flashMessageOnScreen('Spreadsheet could not be processed',
+                    flashMessageOnScreen('Event annotations could not be processed',
                         'error','events-validation-submit-flash');
                 }
             }

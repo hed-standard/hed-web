@@ -49,14 +49,14 @@ $('#worksheet-name').on('change', function () {
 /**
  * Clears the spreadsheet file label.
  */
-export function clearSpreadsheetFileLabel() {
+function clearSpreadsheetFileLabel() {
     $('#spreadsheet-display-name').text('');
 }
 
 /**
  * Clears the worksheet select box.
  */
-export function clearWorksheetSelectbox() {
+function clearWorksheetSelectbox() {
     $('#worksheet-name').empty();
 }
 
@@ -64,7 +64,7 @@ export function clearWorksheetSelectbox() {
  * Flash a message showing the number of worksheets in an Excel workbook.
  * @param {Array} worksheetNames - An array containing the names of Excel workbook worksheets.
  */
-export function flashWorksheetNumberMessage(worksheetNames) {
+function flashWorksheetNumberMessage(worksheetNames) {
     let numberOfWorksheets = worksheetNames.length.toString();
     flashMessageOnScreen(numberOfWorksheets + ' worksheet(s) found',
         'success', 'worksheet-flash');
@@ -73,7 +73,7 @@ export function flashWorksheetNumberMessage(worksheetNames) {
 /**
  * Hides  columns section in the form.
  */
-export function hideColumnNames() {
+function hideColumnNames() {
     $('#column-names').hide();
 }
 
@@ -82,7 +82,7 @@ export function hideColumnNames() {
  * @param {Array} columnNames - An array containing the spreadsheet column names.
  * @param {String} tableID - String containing the ID of the table
  */
-export function populateTableHeaders(columnNames, tableID) {
+function populateTableHeaders(columnNames, tableID) {
     let columnTable = $('#columns-names-table');
     let columnNamesRow = $('<tr/>');
     let numberOfColumnNames = columnNames.length;
@@ -97,7 +97,7 @@ export function populateTableHeaders(columnNames, tableID) {
  * Populate the Excel worksheet select box.
  * @param {Array} worksheetNames - An array containing the Excel worksheet names.
  */
-export function populateWorksheetSelectbox(worksheetNames) {
+function populateWorksheetSelectbox(worksheetNames) {
     let worksheetSelectbox = $('#worksheet-name');
     let numberOfWorksheetNames = worksheetNames.length;
     worksheetSelectbox.empty();
@@ -109,7 +109,7 @@ export function populateWorksheetSelectbox(worksheetNames) {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-export function resetSpreadsheetFlashMessage() {
+function resetSpreadsheetFlashMessage() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
 }
 
@@ -117,7 +117,7 @@ export function resetSpreadsheetFlashMessage() {
  * Sets the components related to the spreadsheet columns when they are not empty.
  * @param {Array} columnNames - An array containing the spreadsheet column names.
  */
-export function showColumnNames(columnNames) {
+function showColumnNames(columnNames) {
     populateTableHeaders(columnNames);
     $('#column-names').show();
 }
@@ -125,7 +125,7 @@ export function showColumnNames(columnNames) {
 /**
  * Checks to see if a spreadsheet has been specified.
  */
-export function spreadsheetIsSpecified() {
+function spreadsheetIsSpecified() {
     let spreadsheetFile = $('#spreadsheet-file');
     if (spreadsheetFile[0].files.length === 0) {
         flashMessageOnScreen('Spreadsheet is not specified.', 'error',

@@ -4,12 +4,12 @@
 {% from "spreadsheet-input.html" import spreadsheet_input %}
 {% block content %}
     <h2>Validate spreadsheet containing HED tags</h2>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/spreadsheet-form.css') }}">
-    <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
+    <form id="events-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         {{ spreadsheet_input() }}
-        {{ create_json_input() }}
+
         {{ create_hed_pulldown() }}
 
         <div class="form-group">
@@ -32,11 +32,12 @@
         </div>
     </form>
     <script type="module">
-        {%  include 'js/events-form.js' %}
+
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/hed-pulldown.js' %}
         {%  include 'js/json-input.js' %}
         {%  include 'js/spreadsheet-input.js' %}
+        {%  include 'js/events-form.js' %}
 
     </script>
 

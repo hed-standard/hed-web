@@ -1,9 +1,7 @@
-const DICTIONARY_FILE_EXTENSIONS = ['json'];
 
 $(function () {
     prepareDictionaryValidationForm();
 });
-
 
 /**
  * Submits the form if the tag columns textbox is valid.
@@ -13,7 +11,6 @@ $('#dictionary-validation-submit').on('click', function () {
         submitForm();
     }
 });
-
 
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
@@ -54,8 +51,7 @@ function submitForm() {
     let dictionaryFile = getJsonFileLabel();
     let display_name = convertToResultsName(dictionaryFile, 'issues')
     resetFlashMessages();
-    flashMessageOnScreen('Dictionary is being validated ...', 'success',
-        'dictionary-validation-submit-flash')
+    flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-validation-submit-flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_dictionary_validation_results')}}",
@@ -65,22 +61,18 @@ function submitForm() {
             dataType: 'text',
             success: function (downloaded_file) {
                   if (downloaded_file) {
-                      flashMessageOnScreen('', 'success',
-                          'dictionary-validation-submit-flash');
+                      flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
                       triggerDownloadBlob(downloaded_file, display_name);
                   } else {
-                      flashMessageOnScreen('No validation errors found.', 'success',
-                          'dictionary-validation-submit-flash');
+                      flashMessageOnScreen('No errors found.', 'success', 'dictionary-validation-submit-flash');
                   }
             },
             error: function (download_response) {
                 console.log(download_response.responseText);
                 if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error',
-                        'dictionary-validation-submit-flash');
+                    flashMessageOnScreen(download_response.responseText, 'error', 'dictionary-validation-submit-flash');
                 } else {
-                    flashMessageOnScreen('Dictionary could not be processed',
-                        'error','dictionary-validation-submit-flash');
+                    flashMessageOnScreen('Dictionary not processed', 'error','dictionary-validation-submit-flash');
                 }
             }
         }
