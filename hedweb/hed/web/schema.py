@@ -6,7 +6,7 @@ from flask import current_app, Response
 
 from hed.schema import xml2wiki, wiki2xml, schema_validator
 from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension, write_errors_to_file
-from hed.util.exceptions import SchemaFileError
+from hed.util.exceptions import HedFileError
 
 from hed.web.web_utils import file_extension_is_valid, form_has_file, form_has_option, form_has_url, \
     handle_http_error, save_file_to_upload_folder, generate_download_file_response
@@ -95,9 +95,9 @@ def run_schema_compliance_check(form_request_object):
         issues = schema_validator.validate_schema(hed_file_path)
 
         if issues:
-            #issue_file = write_text_iter_to_file(issues)
             issue_file = write_errors_to_file(issues, extension=".txt")
-            download_response = generate_download_file_response(issue_file, f"HED-3G format issues for: {hed_file_path}")
+            download_response = \
+                generate_download_file_response(issue_file, f"HED-3G format issues for: {hed_file_path}")
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
@@ -105,7 +105,7 @@ def run_schema_compliance_check(form_request_object):
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
         return error_constants.INVALID_URL_ERROR
-    except SchemaFileError as e:
+    except HedFileError as e:
         return e.message
     except Exception as e:
         return "Unexpected processing error: " + str(e)
@@ -136,7 +136,7 @@ def run_schema_conversion(form_request_object):
             return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
         else:
             raise Exception("Unable to download schema file for unknown reasons")
-    except SchemaFileError as e:
+    except HedFileError as e:
         return e.message
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
