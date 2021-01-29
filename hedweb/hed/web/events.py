@@ -123,7 +123,7 @@ def validate_events(validation_arguments):
         json_def = None
     if spreadsheet:
         input_object = EventFileInput(spreadsheet, worksheet_name=worksheet, json_def_files=json_def, hed_schema=schema)
-        validator = HedValidator(input_object, hed_schema=schema,
+        validator = HedValidator(hed_schema=schema,
                                  check_for_warnings=validation_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
         spreadsheet_issues = validator.get_validation_issues()
         if spreadsheet_issues:
