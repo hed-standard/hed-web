@@ -9,7 +9,9 @@ from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web import web_utils
+from hed.web.web_utils import convert_number_str_to_list, generate_issues_filename, generate_download_file_response, \
+    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, handle_http_error,\
+    save_file_to_upload_folder, save_issues_to_upload_folder
 from hed.web import utils
 
 app_config = current_app.config
@@ -28,9 +30,9 @@ def generate_arguments_from_validation_form(form_request_object):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = web_utils.get_hed_path_from_pull_down(form_request_object)
+    hed_file_path, hed_display_name = get_hed_path_from_pull_down(form_request_object)
     uploaded_file_name, original_file_name = \
-        web_utils.get_uploaded_file_path_from_form(form_request_object, common_constants.SPREADSHEET_FILE,
+        get_uploaded_file_path_from_form(form_request_object, common_constants.SPREADSHEET_FILE,
                                                    file_constants.SPREADSHEET_FILE_EXTENSIONS)
 
     validation_input_arguments = {common_constants.HED_XML_FILE: hed_file_path,
@@ -38,7 +40,7 @@ def generate_arguments_from_validation_form(form_request_object):
                                   common_constants.SPREADSHEET_PATH: uploaded_file_name,
                                   common_constants.SPREADSHEET_FILE: original_file_name}
     validation_input_arguments[common_constants.TAG_COLUMNS] = \
-        web_utils.convert_number_str_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
+        convert_number_str_to_list(form_request_object.form[common_constants.TAG_COLUMNS])
     validation_input_arguments[common_constants.COLUMN_PREFIX_DICTIONARY] = \
         utils.get_specific_tag_columns_from_form(form_request_object)
     validation_input_arguments[common_constants.WORKSHEET_NAME] = \
@@ -74,7 +76,7 @@ def report_eeg_events_validation_status(request):
     check_for_warnings = form_data["check_for_warnings"] == '1' if "check_for_warnings" in form_data else False
     # if hed_xml_file was submitted, it's accessed by request.files, otherwise empty
     if "hed-xml-file" in request.files and get_file_extension(request.files["hed-xml-file"].filename) == "xml":
-        hed_xml_file = web_utils.save_file_to_upload_folder(request.files["hed-xml-file"])
+        hed_xml_file = save_file_to_upload_folder(request.files["hed-xml-file"])
     else:
         hed_xml_file = ''
 
@@ -114,16 +116,27 @@ def report_spreadsheet_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_validation_form(form_request_object)
-        hed_validator = validate_spreadsheet(input_arguments)
-        validation_issues = hed_validator.get_validation_issues()
-        if validation_issues:
-            issues_filename = web_utils.generate_issues_filename(common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
+        file_input = HedFileInput(input_arguments[common_constants.SPREADSHEET_PATH],
+                                         worksheet_name=input_arguments[common_constants.WORKSHEET_NAME],
+                                         tag_columns=input_arguments[common_constants.TAG_COLUMNS],
+                                         has_column_names=input_arguments[common_constants.HAS_COLUMN_NAMES],
+                                         column_prefix_dictionary=input_arguments[
+                                             common_constants.COLUMN_PREFIX_DICTIONARY])
+
+        hed_validator = HedValidator(
+                            check_for_warnings=input_arguments[common_constants.CHECK_FOR_WARNINGS],
+                            hed_xml_file=input_arguments[common_constants.HED_XML_FILE])
+
+        issues = hed_validator.validate_input(file_input)
+        issue_str = hed_validator.get_printable_issue_string(issues)
+        if issue_str:
+            issues_filename = generate_issues_filename(common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
                                                                  input_arguments[common_constants.SPREADSHEET_FILE],
                                                                  input_arguments[common_constants.WORKSHEET_NAME])
-            issue_file = web_utils.save_issues_to_upload_folder(validation_issues, issues_filename)
-            download_response = web_utils.generate_download_file_response(issue_file)
+            issue_file = save_issues_to_upload_folder(issue_str, issues_filename)
+            download_response = generate_download_file_response(issue_file)
             if isinstance(download_response, str):
-                return web_utils.handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+                return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR

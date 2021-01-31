@@ -364,3 +364,26 @@ def save_issues_to_upload_folder(issues, filename):
             issues_file.write(val_issue['message'] + "\n")
     issues_file.close()
     return issues_file_path
+
+def save_text_to_upload_folder(text, filename):
+    """Saves the issues found the upload folder as filename.
+
+    Parameters
+    ----------
+    issues: string
+        A string containing the validation issues.
+    filename: str
+        File name of the issue folder
+
+    Returns
+    -------
+    string
+        The name of the validation output other.
+
+    """
+
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    with open(file_path, 'w', encoding='utf-8') as text_file:
+        text_file.write(text)
+    text_file.close()
+    return file_path
