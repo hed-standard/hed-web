@@ -10,7 +10,7 @@ from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_schema import HedSchema
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.web_utils import generate_issues_filename, generate_download_file_response, \
+from hed.web.web_utils import generate_filename, generate_download_file_response, \
     handle_http_error, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_file_to_upload_folder, save_text_to_upload_folder
 from hed.web.utils import get_optional_form_field
@@ -108,19 +108,25 @@ def report_dictionary_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_dictionary_form(form_request_object)
-        dict_path = input_arguments.get(common_constants.JSON_PATH, '')
-        hed_schema = input_arguments.get(common_constants.HED_XML_FILE, '')
-        issues = validate_dictionary(dict_path, hed_schema)
-        if issues:
-            display_name = input_arguments.get(common_constants.JSON_FILE, '')
-            header = f'HED validation errors for {display_name}\n'
-            file_name= generate_issues_filename(display_name, 'validation_errors_')
-            temp_file = write_strings_to_file([issues], extension='.txt')
-            #issue_file = save_text_to_upload_folder(issues, file_name)
-            download_response = generate_download_file_response(temp_file, display_name=file_name, header=header)
+        display_name = input_arguments.get(common_constants.JSON_FILE, '')
+        issue_str = validate_dictionary(input_arguments, display_name=display_name)
+        if issue_str:
+            issues_filename = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+            print("The issue file name is:", issues_filename)
+            issue_file = save_text_to_upload_folder(issue_str, issues_filename)
+            download_response = generate_download_file_response(issue_file, display_name=issues_filename)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
+            # display_name = input_arguments.get(common_constants.JSON_FILE, '')
+            # header = f'HED validation errors for {display_name}\n'
+            # file_name= generate_filename(display_name, 'validation_errors_')
+            # temp_file = write_strings_to_file([issues], extension='.txt')
+            # #issue_file = save_text_to_upload_folder(issues, file_name)
+            # download_response = generate_download_file_response(temp_file, display_name=file_name, header=header)
+            # if isinstance(download_response, str):
+            #     return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+            # return download_response
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
@@ -132,15 +138,17 @@ def report_dictionary_validation_status(form_request_object):
     return ""
 
 
-def validate_dictionary(dict_path, hed_schema):
+def validate_dictionary(input_arguments, hed_schema=None, display_name=None):
     """Validates the dictionary and returns a
 
     Parameters
     ----------
-    dict_path: str
-        Path of the dictionary.
-    hed_schema: str
-        Version number or path of the HED schema to be used
+    input_arguments: dict
+        Dictionary containing standard input form arguments
+    hed_schema: str or HedSchema
+        Version number or path or HedSchema object to be used
+    display_name: str
+        Display filename for showing in messages
 
     Returns
     -------
@@ -148,8 +156,14 @@ def validate_dictionary(dict_path, hed_schema):
         Text blob containing the issues or empty if none.
     """
 
-    json_dictionary = ColumnDefGroup(dict_path)
-    hed = HedSchema(hed_schema)
-    issues = json_dictionary.validate_entries(hed_schema=hed)
-    issue_str = json_dictionary.get_printable_issue_string(issues)
-    return issue_str
+    json_dictionary = ColumnDefGroup(input_arguments.get(common_constants.JSON_PATH, ''))
+    if not hed_schema:
+        hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+    issues = json_dictionary.validate_entries(hed_schema=hed_schema)
+    if not issues:
+        return ''
+    if display_name:
+        title = f'HED validation errors for {display_name}\n'
+    else:
+        title = None
+    return json_dictionary.get_printable_issue_string(issues, title=title)

@@ -191,6 +191,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     """
     if not display_name:
         display_name = download_file
+    print("In generate:", display_name)
     try:
         if not download_file:
             return f"No download file given"
@@ -211,8 +212,8 @@ def generate_download_file_response(download_file, display_name=None, header=Non
         return traceback.format_exc()
 
 
-def generate_issues_filename(basename, prefix, suffix=''):
-    """Generates a filename for the attachment of the form prefix_basename_suffix.txt.
+def generate_filename(basename, prefix=None, suffix=None, extension=None):
+    """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
 
     Parameters
     ----------
@@ -227,12 +228,23 @@ def generate_issues_filename(basename, prefix, suffix=''):
     string
         The name of the attachment other containing the issues.
     """
-    filename = secure_filename(prefix)
+    filename = ''
+    pieces = []
+    if prefix:
+        pieces.append(secure_filename(prefix))
     if basename:
-        filename = filename + '_' + secure_filename(basename).rsplit('.')[0]
+        pieces.append(secure_filename(basename).rsplit('.')[0])
     if suffix:
-        return filename + '_' + secure_filename(suffix) + file_constants.TEXT_EXTENSION
-    return filename + file_constants.TEXT_EXTENSION
+        pieces.append(secure_filename(suffix))
+
+    if not pieces:
+        return ''
+    filename = pieces[0]
+    for name in pieces[1:]:
+        filename = filename + '_' + name
+    if extension:
+        filename = filename + '.' + secure_filename(extension)
+    return filename
 
 
 def get_hed_path_from_pull_down(form_request_object):
@@ -364,6 +376,7 @@ def save_issues_to_upload_folder(issues, filename):
             issues_file.write(val_issue['message'] + "\n")
     issues_file.close()
     return issues_file_path
+
 
 def save_text_to_upload_folder(text, filename):
     """Saves the issues found the upload folder as filename.

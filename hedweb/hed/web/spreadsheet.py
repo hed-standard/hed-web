@@ -9,9 +9,9 @@ from hed.validator.hed_validator import HedValidator
 from hed.util.hed_file_input import HedFileInput
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.web_utils import convert_number_str_to_list, generate_issues_filename, generate_download_file_response, \
+from hed.web.web_utils import convert_number_str_to_list, generate_filename, generate_download_file_response, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form, handle_http_error,\
-    save_file_to_upload_folder, save_issues_to_upload_folder
+    save_file_to_upload_folder, save_text_to_upload_folder
 from hed.web import utils
 
 app_config = current_app.config
@@ -116,24 +116,11 @@ def report_spreadsheet_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_validation_form(form_request_object)
-        file_input = HedFileInput(input_arguments[common_constants.SPREADSHEET_PATH],
-                                         worksheet_name=input_arguments[common_constants.WORKSHEET_NAME],
-                                         tag_columns=input_arguments[common_constants.TAG_COLUMNS],
-                                         has_column_names=input_arguments[common_constants.HAS_COLUMN_NAMES],
-                                         column_prefix_dictionary=input_arguments[
-                                             common_constants.COLUMN_PREFIX_DICTIONARY])
-
-        hed_validator = HedValidator(
-                            check_for_warnings=input_arguments[common_constants.CHECK_FOR_WARNINGS],
-                            hed_xml_file=input_arguments[common_constants.HED_XML_FILE])
-
-        issues = hed_validator.validate_input(file_input)
-        issue_str = hed_validator.get_printable_issue_string(issues)
+        display_name = input_arguments.get(common_constants.SPREADSHEET_DISPLAY_NAME, None)
+        issue_str = validate_spreadsheet(input_arguments, hed_validator=None, display_name=None)
         if issue_str:
-            issues_filename = generate_issues_filename(common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
-                                                                 input_arguments[common_constants.SPREADSHEET_FILE],
-                                                                 input_arguments[common_constants.WORKSHEET_NAME])
-            issue_file = save_issues_to_upload_folder(issue_str, issues_filename)
+            issues_filename = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, issues_filename)
             download_response = generate_download_file_response(issue_file)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
@@ -149,12 +136,12 @@ def report_spreadsheet_validation_status(form_request_object):
     return ""
 
 
-def validate_spreadsheet(validation_arguments):
+def validate_spreadsheet(input_arguments, hed_validator=None, display_name=None):
     """Validates the spreadsheet.
 
     Parameters
     ----------
-    validation_arguments: dictionary
+    input_arguments: dictionary
         A dictionary containing the arguments for the validation function.
 
     Returns
@@ -163,13 +150,21 @@ def validate_spreadsheet(validation_arguments):
         A HedValidator object containing the validation results.
     """
 
-    file_input_object = HedFileInput(validation_arguments[common_constants.SPREADSHEET_PATH],
-                                     worksheet_name=validation_arguments[common_constants.WORKSHEET_NAME],
-                                     tag_columns=validation_arguments[common_constants.TAG_COLUMNS],
-                                     has_column_names=validation_arguments[common_constants.HAS_COLUMN_NAMES],
-                                     column_prefix_dictionary=validation_arguments[
-                                         common_constants.COLUMN_PREFIX_DICTIONARY])
+    file_input = HedFileInput(input_arguments.get(common_constants.SPREADSHEET_PATH, None),
+                              worksheet_name=input_arguments.get(common_constants.WORKSHEET_NAME, None),
+                              tag_columns=input_arguments.get(common_constants.TAG_COLUMNS, None),
+                              has_column_names=input_arguments.get(common_constants.HAS_COLUMN_NAMES, None),
+                              column_prefix_dictionary=
+                              input_arguments.get(common_constants.COLUMN_PREFIX_DICTIONARY, None))
+    if not hed_validator:
+        hed_validator = HedValidator(hed_xml_file=input_arguments.get(common_constants.HED_XML_FILE, ''),
+                                     check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
 
-    return HedValidator(file_input_object,
-                        check_for_warnings=validation_arguments[common_constants.CHECK_FOR_WARNINGS],
-                        hed_xml_file=validation_arguments[common_constants.HED_XML_FILE])
+    issues = hed_validator.validate_input(file_input)
+    if not issues:
+        return ''
+    if display_name:
+        title = f'HED validation errors for {display_name}\n'
+    else:
+        title = None
+    return hed_validator.get_printable_issue_string(issues, title=title)

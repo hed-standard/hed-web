@@ -61,7 +61,7 @@ STRING = 'string'
 
 # Validation-specific constants
 VALIDATION_FORM = 'validation-form'
-VALIDATION_OUTPUT_FILE_PREFIX = 'validated'
+VALIDATION_OUTPUT_FILE_PREFIX = 'validation_errors'
 VALIDATION_SUBMIT = 'validation-submit'
 VALIDATION_SUBMIT_FLASH = 'validation-submit-flash'
 EEG_SUBMIT = 'eeg-submit'

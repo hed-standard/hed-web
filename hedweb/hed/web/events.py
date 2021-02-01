@@ -9,9 +9,11 @@ from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_schema import HedSchema
 
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.web_utils import generate_issues_filename, generate_download_file_response, \
+from hed.web.dictionary import validate_dictionary
+from hed.web.spreadsheet import validate_spreadsheet
+from hed.web.web_utils import generate_filename, generate_download_file_response, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form, handle_http_error, \
-    save_issues_to_upload_folder
+    save_text_to_upload_folder
 from hed.web.utils import get_optional_form_field
 
 app_config = current_app.config
@@ -71,18 +73,35 @@ def report_events_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_events_form(form_request_object)
-        validation_issues = validate_events(input_arguments)
-        if validation_issues:
-            issues_filename = \
-                generate_issues_filename(input_arguments.get(common_constants.SPREADSHEET_FILE, ''),
-                                         common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
-                                         input_arguments.get(common_constants.WORKSHEET_NAME, ''))
-
-            issue_file = save_issues_to_upload_folder(validation_issues, issues_filename)
+        hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+        hed_validator = HedValidator(hed_schema=hed_schema,
+                                     check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
+        json_display_name = input_arguments.get(common_constants.JSON_FILE, '')
+        issue_str = validate_dictionary(input_arguments, hed_schema=hed_schema, display_name=json_display_name)
+        display_name = input_arguments.get(common_constants.SPREADSHEET_DISPLAY_NAME, None)
+        issue_str = issue_str + validate_spreadsheet(input_arguments, hed_validator=hed_validator,
+                                                     display_name=display_name)
+        if issue_str:
+            final_name = json_display_name
+            issues_filename = generate_filename(final_name, suffix='validation_errors', extension='.txt')
+            issue_file = save_text_to_upload_folder(issue_str, issues_filename)
             download_response = generate_download_file_response(issue_file)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response
+        # input_arguments = generate_arguments_from_events_form(form_request_object)
+        # validation_issues = validate_events(input_arguments)
+        # if validation_issues:
+        #     issues_filename = \
+        #         generate_filename(input_arguments.get(common_constants.SPREADSHEET_FILE, ''),
+        #                           common_constants.VALIDATION_OUTPUT_FILE_PREFIX,
+        #                           input_arguments.get(common_constants.WORKSHEET_NAME, ''))
+        #
+        #     issue_file = save_issues_to_upload_folder(validation_issues, issues_filename)
+        #     download_response = generate_download_file_response(issue_file)
+        #     if isinstance(download_response, str):
+        #         return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
+        #     return download_response
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
@@ -91,41 +110,42 @@ def report_events_validation_status(form_request_object):
         return "Unexpected processing error: " + str(e)
     finally:
         delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
+        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
     return ""
 
 
-def validate_events(validation_arguments):
-    """Validates the spreadsheet.
-
-    Parameters
-    ----------
-    validation_arguments: dictionary
-        A dictionary containing the arguments for the validation function.
-
-    Returns
-    -------
-    HedValidator object
-        A HedValidator object containing the validation results.
-    """
-
-    schema = HedSchema(validation_arguments.get(common_constants.HED_XML_FILE, ''))
-    worksheet = validation_arguments.get(common_constants.WORKSHEET_NAME, '')
-    spreadsheet = validation_arguments.get(common_constants.SPREADSHEET_PATH, '')
-    json = validation_arguments.get(common_constants.JSON_PATH, '')
-    issue_list = []
-    if json:
-        json_def = ColumnDefGroup(json)
-        display_name = validation_arguments.get(common_constants.JSON_FILE, '')
-        json_issues = json_def.validate_entries(hed_schema=schema, display_filename=display_name)
-        if json_issues:
-            issue_list = issue_list + json_issues
-    else:
-        json_def = None
-    if spreadsheet:
-        input_object = EventFileInput(spreadsheet, worksheet_name=worksheet, json_def_files=json_def, hed_schema=schema)
-        validator = HedValidator(hed_schema=schema,
-                                 check_for_warnings=validation_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
-        spreadsheet_issues = validator.get_validation_issues()
-        if spreadsheet_issues:
-            issue_list = issue_list + spreadsheet_issues
-    return issue_list
+# def validate_events(input_arguments, hed_schema=None, display_name=None)):
+#     """Validates the spreadsheet.
+#
+#     Parameters
+#     ----------
+#     input_arguments: dictionary
+#         A dictionary containing the arguments for the validation function.
+#
+#     Returns
+#     -------
+#     HedValidator object
+#         A HedValidator object containing the validation results.
+#     """
+#
+#     schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+#     worksheet = input_arguments.get(common_constants.WORKSHEET_NAME, '')
+#     spreadsheet = input_arguments.get(common_constants.SPREADSHEET_PATH, '')
+#     json = input_arguments.get(common_constants.JSON_PATH, '')
+#     issues = ''
+#     if json:
+#         json_def = ColumnDefGroup(json)
+#         display_name = input_arguments.get(common_constants.JSON_FILE, '')
+#         json_issues = json_def.validate_entries(hed_schema=schema, display_filename=display_name)
+#         if json_issues:
+#             issue_list = issue_list + json_issues
+#     else:
+#         json_def = None
+#     if spreadsheet:
+#         input_object = EventFileInput(spreadsheet, worksheet_name=worksheet, json_def_files=json_def, hed_schema=schema)
+#         validator = HedValidator(hed_schema=schema,
+#                                  check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
+#         spreadsheet_issues = validator.get_validation_issues()
+#         if spreadsheet_issues:
+#             issue_list = issue_list + spreadsheet_issues
+#     return issue_list

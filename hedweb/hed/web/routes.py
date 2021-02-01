@@ -70,7 +70,6 @@ def get_dictionary_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    x = request
     validation_response = report_dictionary_validation_status(request)
     return validation_response
     # validation_response = dictionary.report_dictionary_validation_status(request)
