@@ -82,8 +82,8 @@ def run_schema_compliance_check(form_request_object):
     """
     hed_file_path = ''
     try:
-        conversion_input_arguments = generate_input_from_schema_form(form_request_object)
-        hed_file_path = conversion_input_arguments.get(common_constants.SCHEMA_PATH, '')
+        input_arguments = generate_input_from_schema_form(form_request_object)
+        hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH, '')
         if hed_file_path and hed_file_path.endswith(".mediawiki"):
             new_file_path, errors = get_schema_conversion(hed_file_path)
             if new_file_path:
@@ -92,6 +92,7 @@ def run_schema_compliance_check(form_request_object):
 
         if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
             return f"Invalid file name {hed_file_path}"
+        display_name = input_arguments(common_constants.SCHEMA_DISPLAY_NAME)
         issues = schema_validator.validate_schema(hed_file_path)
         issue_str = schema_validator.get_printable_issue_string(issues)
         if issue_str:

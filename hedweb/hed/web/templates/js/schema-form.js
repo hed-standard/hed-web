@@ -146,7 +146,7 @@ function splitExt(filename) {
 function submitSchemaConversionForm() {
     let schemaForm = document.getElementById("schema-form");
     let formData = new FormData(schemaForm);
-    let download_display_name = convertToOutputName(getSchemaFilename())
+    let display_name = convertToOutputName(getSchemaFilename())
     resetFlashMessages(false);
     flashMessageOnScreen('Specification is being converted...', 'success',
         'schema-submit-flash')
@@ -157,17 +157,22 @@ function submitSchemaConversionForm() {
             contentType: false,
             processData: false,
             dataType: "text",
-            success: function (downloaded_file) {
-                  flashMessageOnScreen('', 'success', 'schema-submit-flash');
-                  triggerDownloadBlob(downloaded_file, download_display_name);
+            success: function (downloaded_file, status, xhr) {
+                if (downloaded_file) {
+                      let filename = getFilenameFromResponseHeader(xhr, display_name)
+                      triggerDownloadBlob(downloaded_file, filename);
+                      flashMessageOnScreen('', 'success', 'schema-submit-flash');
+                } else {
+                      flashMessageOnScreen('Unable to download converted file.', 'error',
+                          'spreadsheet-validation-submit-flash');
+                }
             },
             error: function (download_response) {
                 console.log(download_response.responseText);
                 if (download_response.responseText.length < 100) {
-                    flashMessageOnScreen(download_response.responseText, 'error',
-                        'schema-submit-flash');
+                    flashMessageOnScreen(download_response.responseText, 'error','schema-submit-flash');
                 } else {
-                    flashMessageOnScreen('XML could not be processed', 'error',
+                    flashMessageOnScreen('Schema could not be converted---check file validity', 'error',
                         'schema-submit-flash');
                 }
             }

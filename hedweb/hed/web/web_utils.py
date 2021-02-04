@@ -275,6 +275,10 @@ def get_hed_path_from_pull_down(form_request_object):
     return hed_file_path, hed_display_name
 
 
+def get_printable_issue_string(issues, title=title, )
+    error_reporter.ErrorHandler.get_printable_issue_string(validation_issues, title, severity, skip_filename)
+
+
 def get_uploaded_file_path_from_form(form_request_object, file_key, valid_extensions=None):
     """Gets the other paths of the uploaded files in the form.
 

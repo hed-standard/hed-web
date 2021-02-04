@@ -2,7 +2,6 @@ import json
 import traceback
 from urllib.error import URLError, HTTPError
 from flask import current_app
-from werkzeug.utils import secure_filename
 
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
@@ -116,12 +115,12 @@ def report_spreadsheet_validation_status(form_request_object):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_validation_form(form_request_object)
-        display_name = input_arguments.get(common_constants.SPREADSHEET_DISPLAY_NAME, None)
-        issue_str = validate_spreadsheet(input_arguments, hed_validator=None, display_name=None)
+        display_name = input_arguments.get(common_constants.SPREADSHEET_FILE, None)
+        issue_str = validate_spreadsheet(input_arguments, hed_validator=None, display_name=display_name)
         if issue_str:
             issues_filename = generate_filename(display_name, suffix='validation_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, issues_filename)
-            download_response = generate_download_file_response(issue_file)
+            download_response = generate_download_file_response(issue_file, display_name=issues_filename)
             if isinstance(download_response, str):
                 return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
             return download_response

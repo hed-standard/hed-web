@@ -35,6 +35,27 @@ function convertToResultsName(filename, prefix) {
 }
 
 /**
+ * Gets the file download name from a Response header
+ * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} default_name - The default name to use
+ * @returns {String} - Name of the save file
+ */
+function getFilenameFromResponseHeader(xhr, default_name) {
+    let disposition = xhr.getResponseHeader('Content-Disposition')
+    let filename = "";
+    if (disposition && disposition.indexOf('attachment') !== -1) {
+        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        let matches = filenameRegex.exec(disposition);
+        if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+        }
+    }
+    if (!filename) {
+        filename = default_name;
+    }
+    return filename
+}
+/**
  * Compares the file extension of the file at the specified path to an Array of accepted file extensions.
  * @param {String} filePath - A path to a file.
  * @param {Array} acceptedFileExtensions - An array of accepted file extensions.
