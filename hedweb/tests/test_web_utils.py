@@ -98,6 +98,12 @@ class Test(unittest.TestCase):
         self.assertIsInstance(indices, list)
         self.assertEqual(expected_indices, indices)
 
+    def test_form_has_file(self):
+
+    def test_has_option(self):
+
+    def test_form_has_url(self):
+
     def test_generate_download_file_response(self):
         from hed.web.web_utils import generate_download_file_response
         hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
@@ -157,6 +163,8 @@ class Test(unittest.TestCase):
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")
 
+    def test_printable_issue_string(self):
+
     def test_get_uploaded_file_path_from_form(self):
         self.assertTrue(1, "Testingget_uploaded_file_path_from_form")
 
@@ -165,9 +173,6 @@ class Test(unittest.TestCase):
         error_message = "Test"
 
         self.assertTrue(1, "Testing handle_http_error")
-
-    def test_find_hed_version_in_uploaded_file(self):
-            self.assertTrue(1, "Testing find_hed_version_in_uploaded_file")
 
     def test_save_file_to_upload_folder(self):
         from hed.web.web_utils import save_file_to_upload_folder, app_config
@@ -186,6 +191,9 @@ class Test(unittest.TestCase):
         # self.assertNotEqual(mock_file, '', "It should create an actual file in the upload directory")
         # self.assertTrue(os.path.isfile(temp_name), "File should exist after it is uploaded")
 
+    def test_save_issues_to_upload_folder(self):
+
+    def test_text_to_upload_folder(self):
 
 if __name__ == '__main__':
     unittest.main()

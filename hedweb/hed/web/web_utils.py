@@ -76,32 +76,6 @@ def find_all_str_indices_in_list(list_of_str, str_value):
             value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
 
 
-def find_hed_version_in_uploaded_file(request, key_name=common_constants.HED_XML_FILE):
-    """Finds the version number in an HED XML other.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data
-    key_name: str
-        Name of the key for the HED XML file in the request
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing the version number information.
-
-    """
-    hed_info = {}
-    try:
-        if key_name in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[key_name])
-            hed_info[common_constants.HED_VERSION] = HedSchema.get_hed_xml_version(hed_file_path)
-    except:
-        hed_info[error_constants.ERROR_KEY] = traceback.format_exc()
-    return hed_info
-
-
 def form_has_file(request, file_field, valid_extensions):
     """Checks to see if a file name with valid extension is present in the request object.
 
@@ -195,7 +169,6 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     """
     if not display_name:
         display_name = download_file
-    print("In generate:", display_name)
     try:
         if not download_file:
             return f"No download file given"
@@ -280,6 +253,35 @@ def get_hed_path_from_pull_down(request):
     return hed_file_path, hed_display_name
 
 
+def get_optional_form_field(request, form_field_name, type=''):
+    """Gets the specified optional form field if present.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+    form_field_name: string
+        The name of the optional form field.
+    type: str
+        Name of expected type: 'boolean' or 'string'
+
+    Returns
+    -------
+    boolean or string
+        A boolean or string value based on the form field type.
+
+    """
+    form_field_value = ''
+    if type == common_constants.BOOLEAN:
+        form_field_value = False
+        if form_field_name in request.form:
+            form_field_value = True
+    elif type == common_constants.STRING:
+        if form_field_name in request.form:
+            form_field_value = request.form[form_field_name]
+    return form_field_value
+
+
 def get_printable_issue_string(issues, display_name=None, title_string=''):
     """Returns a string suitable for text blob download
 
@@ -308,35 +310,6 @@ def get_printable_issue_string(issues, display_name=None, title_string=''):
     if not title:
         title = None
     return ErrorHandler.get_printable_issue_string(issues, title, skip_filename=True)
-
-
-def get_optional_form_field(request, form_field_name, type=''):
-    """Gets the specified optional form field if present.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from the validation form.
-    form_field_name: string
-        The name of the optional form field.
-    type: str
-        Name of expected type: 'boolean' or 'string'
-
-    Returns
-    -------
-    boolean or string
-        A boolean or string value based on the form field type.
-
-    """
-    form_field_value = ''
-    if type == common_constants.BOOLEAN:
-        form_field_value = False
-        if form_field_name in request.form:
-            form_field_value = True
-    elif type == common_constants.STRING:
-        if form_field_name in request.form:
-            form_field_value = request.form[form_field_name]
-    return form_field_value
 
 
 def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):

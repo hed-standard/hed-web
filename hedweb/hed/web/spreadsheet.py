@@ -10,7 +10,7 @@ from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import convert_number_str_to_list, generate_filename, get_printable_issue_string, \
     generate_download_file_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, \
     handle_http_error, save_text_to_upload_folder
-from hed.web import utils
+from hed.web import spreadsheet_utils
 
 app_config = current_app.config
 
@@ -33,13 +33,13 @@ def generate_input_from_validation_form(request):
         get_uploaded_file_path_from_form(request, common_constants.SPREADSHEET_FILE,
                                          file_constants.SPREADSHEET_FILE_EXTENSIONS)
 
-    validation_input_arguments = {
+    input_arguments = {
         common_constants.HED_XML_FILE: hed_file_path,
         common_constants.HED_DISPLAY_NAME: hed_display_name,
         common_constants.SPREADSHEET_PATH: uploaded_file_name,
         common_constants.SPREADSHEET_FILE: original_file_name,
         common_constants.TAG_COLUMNS: convert_number_str_to_list(request.form[common_constants.TAG_COLUMNS]),
-        common_constants.COLUMN_PREFIX_DICTIONARY: utils.get_specific_tag_columns_from_form(request),
+        common_constants.COLUMN_PREFIX_DICTIONARY: spreadsheet_utils.get_specific_tag_columns_from_form(request),
         common_constants.WORKSHEET_NAME: hed.web.web_utils.get_optional_form_field(request, common_constants.WORKSHEET_NAME,
                                                                                    common_constants.STRING),
         common_constants.HAS_COLUMN_NAMES:
@@ -47,7 +47,7 @@ def generate_input_from_validation_form(request):
         common_constants.CHECK_FOR_WARNINGS:
             hed.web.web_utils.get_optional_form_field(request, common_constants.CHECK_FOR_WARNINGS, common_constants.BOOLEAN)
     }
-    return validation_input_arguments
+    return input_arguments
 
 
 def report_spreadsheet_validation_status(request):
