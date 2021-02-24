@@ -4,7 +4,7 @@ import json
 import traceback
 
 from hed.util import hed_cache
-from hed.util.hed_schema import HedSchema
+from hed.schema import hed_schema_file
 from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import blueprint_constants, common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
@@ -135,7 +135,7 @@ def get_hed_version():
     try:
         if common_constants.HED_XML_FILE in request.files:
             hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
-            hed_info[common_constants.HED_VERSION] = HedSchema.get_hed_xml_version(hed_file_path)
+            hed_info[common_constants.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
     except:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
     return json.dumps(hed_info)

@@ -3,12 +3,13 @@ import json
 import traceback
 from flask import current_app
 
+from hed.schema import hed_schema_file
 from hed.util import hed_cache
 from hed.util.file_util import delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_types import ErrorContext
-from hed.util.hed_schema import HedSchema
+
 
 app_config = current_app.config
 
@@ -83,7 +84,7 @@ def get_validate_dictionary(params):
     """
     hed = params.get("hed_version", "")
     hed_file_path = hed_cache.get_path_from_hed_version(hed)
-    hed_schema = HedSchema(hed_file_path)
+    hed_schema = hed_schema_file.load_schema(hed_file_path)
     json_text = params.get("json_dictionary", "")
     json_dictionary = ColumnDefGroup(json_string=json_text)
     issues = json_dictionary.validate_entries(hed_schema)

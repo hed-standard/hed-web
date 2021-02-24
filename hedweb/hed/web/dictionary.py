@@ -1,10 +1,9 @@
 from urllib.error import URLError, HTTPError
 from flask import current_app
 
+from hed.schema import HedSchema, load_schema
 from hed.util.file_util import delete_file_if_it_exists
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_schema import HedSchema
-
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import generate_filename, generate_download_file_response, \
     handle_http_error, get_hed_path_from_pull_down, get_printable_issue_string, \
@@ -90,7 +89,7 @@ def validate_dictionary(input_arguments, hed_schema=None, return_response=True):
 
     json_dictionary = ColumnDefGroup(input_arguments.get(common_constants.JSON_PATH, ''))
     if not hed_schema:
-        hed_schema = HedSchema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+        hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
         display_name = input_arguments.get(common_constants.JSON_FILE, '')

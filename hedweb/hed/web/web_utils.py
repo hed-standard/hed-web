@@ -9,8 +9,7 @@ from flask import current_app, jsonify, Response
 from hed.util import hed_cache
 from hed.util.error_reporter import ErrorHandler
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.util.hed_schema import HedSchema
-from hed.web.constants import common_constants, error_constants
+from hed.web.constants import common_constants
 
 app_config = current_app.config
 

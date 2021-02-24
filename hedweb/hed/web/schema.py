@@ -4,7 +4,8 @@ from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
 from flask import current_app, Response
 
-from hed.schema import xml2wiki, wiki2xml, schema_validator
+from hed import schema
+from hed.schema import hed_schema_file, schema_validator
 from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension
 from hed.util.exceptions import HedFileError
 
@@ -48,31 +49,6 @@ def generate_input_from_schema_form(request):
     return arguments
 
 
-def get_schema_conversion(schema_local_path):
-    """Runs the appropriate xml<>mediawiki converter depending on input filetype.
-
-    returns: A dictionary with converter.constants filled in.
-    """
-
-    try:
-        if not schema_local_path:
-            raise ValueError(f"Invalid input schema path")
-        input_extension = get_file_extension(schema_local_path)
-
-        if input_extension == file_constants.SCHEMA_XML_EXTENSION:
-            conversion_function = xml2wiki.convert_hed_xml_2_wiki
-        elif input_extension == file_constants.SCHEMA_WIKI_EXTENSION:
-            conversion_function = wiki2xml.convert_hed_wiki_2_xml
-        else:
-            raise ValueError(f"Invalid extension type: {input_extension}")
-        converted_schema_path, errors = conversion_function(None, schema_local_path, check_for_issues=False)
-    except ValueError as error:
-        errors = format(error)
-        converted_schema_path = ''
-
-    return converted_schema_path, errors
-
-
 def run_schema_compliance_check(request):
     """Run tag comparison(map_schema from converter)
 
@@ -86,7 +62,7 @@ def run_schema_compliance_check(request):
         input_arguments = generate_input_from_schema_form(request)
         hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH, '')
         if hed_file_path and hed_file_path.endswith(".mediawiki"):
-            new_file_path, errors = get_schema_conversion(hed_file_path)
+            new_file_path, errors = convert_schema(hed_file_path)
             if new_file_path:
                 delete_file_if_it_exists(hed_file_path)
                 hed_file_path = new_file_path
@@ -125,12 +101,17 @@ def run_schema_conversion(request):
         Non empty string is an error
         Response is a download success.
     """
-    hed_file_path = ''
+    schema_file_path = ''
     try:
         input_arguments = generate_input_from_schema_form(request)
-        hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH)
+        schema_file_path = input_arguments.get(common_constants.SCHEMA_PATH)
         display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
-        schema_file, issues = get_schema_conversion(hed_file_path)
+        input_extension = get_file_extension(schema_file_path)
+        save_wiki = input_extension == file_constants.SCHEMA_XML_EXTENSION
+        schema_file, issues = hed_schema_file.convert_schema_to_format(local_hed_file=schema_file_path,
+                                                                       check_for_issues=False,
+                                                                       display_filename=display_name,
+                                                                       save_as_mediawiki=save_wiki)
         if issues:
             issue_str = get_printable_issue_string(issues, display_name, 'Schema conversion errors for ')
             file_name = generate_filename(display_name, suffix='conversion_errors', extension='.txt')
@@ -158,4 +139,4 @@ def run_schema_conversion(request):
     except:
         return traceback.format_exc()
     finally:
-        delete_file_if_it_exists(hed_file_path)
+        delete_file_if_it_exists(schema_file_path)
