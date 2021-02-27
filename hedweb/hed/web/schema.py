@@ -4,13 +4,13 @@ from urllib.error import URLError, HTTPError
 from urllib.parse import urlparse
 from flask import current_app, Response
 
-from hed import schema
-from hed.schema import hed_schema_file, schema_validator
+from hed.schema.hed_schema_file import load_schema, convert_schema_to_format
+from hed.util.error_reporter import get_printable_issue_string
 from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension
 from hed.util.exceptions import HedFileError
 
-from hed.web.web_utils import file_extension_is_valid, form_has_file, form_has_option, form_has_url, \
-    generate_download_file_response, generate_filename, get_printable_issue_string, \
+from hed.web.web_utils import form_has_file, form_has_option, form_has_url, \
+    generate_download_file_response, generate_filename,  \
     handle_http_error, save_file_to_upload_folder, save_text_to_upload_folder
 
 from hed.web.constants import common_constants, error_constants, file_constants
@@ -61,20 +61,12 @@ def run_schema_compliance_check(request):
     try:
         input_arguments = generate_input_from_schema_form(request)
         hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH, '')
-        if hed_file_path and hed_file_path.endswith(".mediawiki"):
-            new_file_path, errors = convert_schema(hed_file_path)
-            if new_file_path:
-                delete_file_if_it_exists(hed_file_path)
-                hed_file_path = new_file_path
-
-        if not hed_file_path or not file_extension_is_valid(hed_file_path, [file_constants.SCHEMA_XML_EXTENSION]):
-            return f"Invalid file name {hed_file_path}"
-
-        issues = schema_validator.validate_schema(hed_file_path)
+        this_schema = load_schema(hed_file_path)
+        issues = this_schema.check_compliance()
         if issues:
             display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
-            issue_str = get_printable_issue_string(issues, display_name, 'Schema HED 3G compliance errors for ')
-            file_name = generate_filename(display_name, suffix='schema_errors', extension='.txt')
+            issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
+            file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, file_name)
             download_response = generate_download_file_response(issue_file, display_name=file_name, category='warning',
                                                                 msg='Schema is not HED 3G compliant')
@@ -108,12 +100,10 @@ def run_schema_conversion(request):
         display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
         input_extension = get_file_extension(schema_file_path)
         save_wiki = input_extension == file_constants.SCHEMA_XML_EXTENSION
-        schema_file, issues = hed_schema_file.convert_schema_to_format(local_hed_file=schema_file_path,
-                                                                       check_for_issues=False,
-                                                                       display_filename=display_name,
-                                                                       save_as_mediawiki=save_wiki)
+        schema_file, issues = convert_schema_to_format(local_hed_file=schema_file_path, check_for_issues=False,
+                                                       display_filename=display_name, save_as_mediawiki=save_wiki)
         if issues:
-            issue_str = get_printable_issue_string(issues, display_name, 'Schema conversion errors for ')
+            issue_str = get_printable_issue_string(issues, f"Schema conversion errors for {display_name}")
             file_name = generate_filename(display_name, suffix='conversion_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, file_name)
             download_response = \

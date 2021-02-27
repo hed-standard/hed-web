@@ -2,11 +2,12 @@ from urllib.error import URLError, HTTPError
 from flask import current_app
 
 from hed.schema import HedSchema, load_schema
+from hed.util.error_reporter import get_printable_issue_string
 from hed.util.file_util import delete_file_if_it_exists
 from hed.util.column_def_group import ColumnDefGroup
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import generate_filename, generate_download_file_response, \
-    handle_http_error, get_hed_path_from_pull_down, get_printable_issue_string, \
+    handle_http_error, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_text_to_upload_folder, get_optional_form_field
 
 app_config = current_app.config
@@ -58,7 +59,7 @@ def report_dictionary_validation_status(request):
     input_arguments = []
     try:
         input_arguments = generate_arguments_from_dictionary_form(request)
-        return validate_dictionary(input_arguments, hed_schema=None)
+        return validate_dictionary(input_arguments)
     except HTTPError:
         return error_constants.NO_URL_CONNECTION_ERROR
     except URLError:
@@ -93,7 +94,7 @@ def validate_dictionary(input_arguments, hed_schema=None, return_response=True):
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
         display_name = input_arguments.get(common_constants.JSON_FILE, '')
-        issue_str = get_printable_issue_string(issues, display_name, 'HED validation errors')
+        issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
         if not return_response:
             return issue_str
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')

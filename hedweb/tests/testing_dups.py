@@ -1,10 +1,6 @@
-import os
 import json
 import os.path
-from urllib.parse import urlparse
-from shutil import move
-from hed.schema import constants
-from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension, write_text_iter_to_file
+
 
 if __name__ == '__main__':
     # hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')

@@ -1,11 +1,7 @@
-import os
-import json
 import os.path
-from urllib.parse import urlparse
-from shutil import move
 from hed.validator.hed_validator import HedValidator
-from hed.schema import constants
-from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension, write_text_iter_to_file
+from hed.util.error_reporter import get_printable_issue_string
+
 
 if __name__ == '__main__':
 
@@ -21,10 +17,10 @@ if __name__ == '__main__':
                    '(Participant ~ Action/Button press/Keyboard ~ Participant/Effect/Body part/Arm/Hand/Finger)'
 
     validation_issues = hed_validator_current.validate_input(hed_string_1)
-    print(HedValidator.get_printable_issue_string(validation_issues, title='[Example 1b] hed_string_1 has issues with the latest HED version'))
+    print(get_printable_issue_string(validation_issues, title='[Example 1b] hed_string_1 has issues with the latest HED version'))
 
     hed_list = [hed_string_1, hed_string_1]
 
     validation_issues = hed_validator_current.validate_input(hed_list)
-    print(HedValidator.get_printable_issue_string(validation_issues,
+    print(get_printable_issue_string(validation_issues,
                                                   title='[Example 1b] hed_string_1 has issues with the latest HED version'))

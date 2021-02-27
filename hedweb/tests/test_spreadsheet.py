@@ -1,28 +1,13 @@
 import os
+import shutil
 import unittest
-# from flask import current_app, jsonify, Response
-# from hed.web.utils import app_config
-# from hed.web.validation import generate_dictionary_validation_filename
-# from hed.web.app_factory import AppFactory
-# from hed.web.constants import file_constants, spreadsheet_constants
-
-
-
-def get_inputs():
-    spreadsheet-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
-    hed-file-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-    spreadsheet-file = 'ExcelMultipleSheets.xlsx'
-    worksheet_name ='LKT Events'
-    tag_columns = [2, 3]
-    other_columns = [4]
-    inputs = {'spreadsheet_path': spreadsheet_path, 'hed_file_path': hed_file_path,
-              'spreadsheet-file': spreadsheet_file, 'worksheet-name': worksheet_name,
-              'tag-columns': tag_columns, 'has-column-names': true,
-              'check-for-warnings:', true, 'column-prefix-dictionary': ''}
-    return inputs
+from unittest import mock
+from flask import Flask, current_app
+from hed.web.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
+    @classmethod
     def setUpClass(cls):
         cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
         app = AppFactory.create_app('config.TestConfig')
@@ -57,6 +42,21 @@ class Test(unittest.TestCase):
         # self.assertTrue(os.path.exists(hed_file), "The HED.xml file should exist in the data directory")
         # spreadsheet_path =
         # input_arguments = {''}
+
+
+def get_inputs():
+    spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
+    hed_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+    spreadsheet_file = 'ExcelMultipleSheets.xlsx'
+    worksheet_name ='LKT Events'
+    tag_columns = [2, 3]
+    other_columns = [4]
+    # inputs = {'spreadsheet_path': spreadsheet_path, 'hed_file_path': hed_file_path, \
+    #           'spreadsheet-file': spreadsheet_file, 'worksheet-name': worksheet_name, \
+    #           'tag-columns': tag_columns, 'has-column-names': true, \
+    #           'check-for-warnings:', True, 'column-prefix-dictionary': ''}
+    inputs = {}
+    return inputs
 
 
 if __name__ == '__main__':

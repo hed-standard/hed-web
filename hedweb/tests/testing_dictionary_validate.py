@@ -5,10 +5,8 @@ from urllib.parse import urlparse
 from shutil import move
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
-from hed.util.hed_schema import HedSchema
+from hed.schema.hed_schema_file import load_schema
 from hed.util.error_types import ErrorContext
-from hed.schema import constants
-from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_extension, write_text_iter_to_file
 
 if __name__ == '__main__':
 
@@ -19,7 +17,7 @@ if __name__ == '__main__':
 
     # Example 1
 
-    hed_schema = HedSchema(local_hed_file1)
+    hed_schema = load_schema(local_hed_file1)
     json_dictionary = ColumnDefGroup(json_file)
     issues = json_dictionary.validate_entries(hed_schema)
     issue_list = []
