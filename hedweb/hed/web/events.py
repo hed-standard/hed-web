@@ -2,10 +2,9 @@
 from urllib.error import URLError, HTTPError
 from flask import current_app
 
+from hed.schema.hed_schema_file import load_schema
 from hed.util.file_util import delete_file_if_it_exists
 from hed.validator.hed_validator import HedValidator
-from hed.schema import hed_schema_file
-
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.dictionary import validate_dictionary
 from hed.web.spreadsheet import validate_spreadsheet
@@ -72,7 +71,7 @@ def report_events_validation_status(request):
     input_arguments = []
     try:
         input_arguments = generate_input_from_events_form(request)
-        hed_schema = hed_schema_file.load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+        hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
         download_response = validate_dictionary(input_arguments, hed_schema=hed_schema)
         if download_response:
             return download_response

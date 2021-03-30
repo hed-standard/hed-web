@@ -8,9 +8,9 @@ from hed.schema import hed_schema_file
 from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
-    generate_download_file_response, handle_http_error
+    generate_download_file_response, handle_http_error, handle_error
 from hed.web.dictionary import report_dictionary_validation_status
-
+from hed.web.hedstring import hedstring_process
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
@@ -108,7 +108,7 @@ def get_hed_services_results():
     Returns
     -------
         string
-        A serialized JSON string containing information related to the EEG events' hed-strings.
+        A serialized JSON string containing information related to the EEG events' hedstrings.
         If the validation fails then a 500 error message is returned.
     """
     status = services.report_services_status(request)
@@ -116,6 +116,26 @@ def get_hed_services_results():
     if error_constants.ERROR_KEY in status:
         return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, status[error_constants.ERROR_KEY])
     return json.dumps(status)
+
+
+@route_blueprint.route(route_constants.HEDSTRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_hedstring_results():
+    """Process hed strings entered in a text box.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        Response
+
+    """
+    # return hedstring_process(request)
+
+    try:
+        return json.dumps(hedstring_process(request))
+    except Exception as e:
+        return handle_error(e)
 
 
 @route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
@@ -377,6 +397,23 @@ def render_hed_services_form():
 
     """
     return render_template(page_constants.HED_SERVICES_PAGE)
+
+
+@route_blueprint.route(route_constants.HEDSTRING_ROUTE, strict_slashes=False, methods=['GET'])
+def render_hed_string_form():
+    """Renders a form for different hedstring operations.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    Rendered template
+        A rendered template for the hed_string_form. If the HTTP method is a GET then the form will be
+        displayed. If the HTTP method is a POST then the form is submitted.
+
+    """
+    return render_template(page_constants.HEDSTRING_PAGE)
 
 
 @route_blueprint.route(route_constants.HED_TOOLS_HELP_ROUTE, strict_slashes=False, methods=['GET'])

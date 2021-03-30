@@ -1,4 +1,5 @@
 import os
+import json
 import pathlib
 import tempfile
 import traceback
@@ -305,14 +306,54 @@ def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     return uploaded_file_name, original_file_name
 
 
-def handle_http_error(error_code, error_message, as_text=False):
+def handle_error(e, hedInfo=None, title=None):
+    """Handles an error by logging and running an error as Response or simple string
+
+    Parameters
+    ----------
+    error_code: string
+        The code associated with the error.
+    message: string
+        The message associated with the error.
+    return_response: Bool
+        If True returns a Response object.
+    Returns
+    -------
+    Response object or string
+
+    """
+
+    a = e.args
+    if hasattr(e, 'error_type'):
+        error_code = e.error_type
+    else:
+        error_code = type(e).__name__
+    if not hedInfo:
+        hedInfo = {}
+    if not title:
+        title = ''
+    hedInfo['message'] = f"{title}[{error_code}: {e.message}]"
+    return json.dumps(hedInfo)
+
+    # error_message = f"{error_code}: {message}"
+    # current_app.logger.error(error_message)
+    # if not return_response:
+    #     return error_message
+    #
+    # response = Response("Error occurred", [('Content-Type', 'text/plain')])
+    # response.status = error_message
+    # response.status_code = error_code
+    # return response
+
+
+def handle_http_error(error_code, message, as_text=False):
     """Handles an http error.
 
     Parameters
     ----------
     error_code: string
         The code associated with the error.
-    error_message: string
+    message: string
         The message associated with the error.
     as_text: Bool
         If we should encode this as text or json.
@@ -322,9 +363,12 @@ def handle_http_error(error_code, error_message, as_text=False):
         A tuple containing a HTTP response object and a code.
 
     """
+    error_message = f"{error_code}: [{message}]"
     current_app.logger.error(error_message)
     if as_text:
         return error_message, error_code
+    # return jsonify(message=error_message, error_code=error_code), error_code
+    x = jsonify(message=error_message)
     return jsonify(message=error_message), error_code
 
 

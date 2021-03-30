@@ -1,10 +1,10 @@
 from urllib.error import URLError, HTTPError
 from flask import current_app
 
-from hed.schema import HedSchema, load_schema
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.file_util import delete_file_if_it_exists
 from hed.util.column_def_group import ColumnDefGroup
+from hed.util.file_util import delete_file_if_it_exists
+from hed.util.error_reporter import get_printable_issue_string
+from hed.schema.hed_schema_file import load_schema
 from hed.web.constants import common_constants, error_constants, file_constants
 from hed.web.web_utils import generate_filename, generate_download_file_response, \
     handle_http_error, get_hed_path_from_pull_down, \

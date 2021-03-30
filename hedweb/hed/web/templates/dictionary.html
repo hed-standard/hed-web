@@ -8,24 +8,25 @@
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-         <div class="form-group">
-
-        {{ create_json_input() }}
-        {{ create_hed_pulldown() }}
-
         <div class="form-group">
-            <label>Specify additional options:</label><br>
-            <div class="checkbox-group">
-                <div class="inline-field">
-                    <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
-                    <label for="check-for-warnings">Include warnings in output file</label>
+
+            {{ create_json_input() }}
+            {{ create_hed_pulldown() }}
+
+            <div class="form-group">
+                <label>Specify additional options:</label><br>
+                <div class="checkbox-group">
+                    <div class="inline-field">
+                        <input type="checkbox" name="check-for-warnings" id="check-for-warnings">
+                        <label for="check-for-warnings">Include warnings in output file</label>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <button id="dictionary-validation-submit" type="button">Validate</button>
-            <p class="flash" id="dictionary-validation-submit-flash"></p>
+            <div class="form-group">
+                <button id="dictionary-validation-submit" type="button">Validate</button>
+                <p class="flash" id="dictionary-validation-submit-flash"></p>
+            </div>
         </div>
     </form>
     <script type="module">
