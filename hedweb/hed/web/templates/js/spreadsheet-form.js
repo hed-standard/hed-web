@@ -140,7 +140,7 @@ function resetFormFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
     resetTagColumnMessages();
-    flashMessageOnScreen('', 'success', 'hed-flash');
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
     flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
 }
 

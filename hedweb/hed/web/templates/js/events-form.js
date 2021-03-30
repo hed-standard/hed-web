@@ -89,7 +89,7 @@ function prepareForm() {
 function resetFormFlashMessages() {
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'worksheet-flash');
-    flashMessageOnScreen('', 'success', 'hed-flash');
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
     flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
 }
 

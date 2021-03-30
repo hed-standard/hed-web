@@ -151,21 +151,20 @@ def get_hed_version():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    hed_info = {}
+
     try:
+        hed_info = {}
         if common_constants.HED_XML_FILE in request.files:
             hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
             hed_info[common_constants.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
-    except:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
-    return json.dumps(hed_info)
+        return json.dumps(hed_info)
+    except Exception as e:
+        return handle_error(e)
 
 
 @route_blueprint.route(route_constants.HED_MAJOR_VERSION_ROUTE, methods=['GET'])
 def get_major_hed_versions():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
+    """Gets a list of major hed versions from the hed_cache and returns as a serialized JSON string
 
     Parameters
     ----------
@@ -173,16 +172,16 @@ def get_major_hed_versions():
     Returns
     -------
     string
-        A serialized JSON string containing information related to the spreadsheet columns.
+        A serialized JSON string containing a list of the HED versions.
 
     """
-    hed_info = {}
+
     try:
         hed_cache.cache_all_hed_xml_versions()
-        hed_info[common_constants.HED_MAJOR_VERSIONS] = hed_cache.get_all_hed_versions()
-    except:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, traceback.format_exc())
-    return json.dumps(hed_info)
+        hed_info = {common_constants.HED_MAJOR_VERSIONS: hed_cache.get_all_hed_versions()}
+        return json.dumps(hed_info)
+    except Exception as e:
+        return handle_error(e)
 
 
 @route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
