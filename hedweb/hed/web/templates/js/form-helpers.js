@@ -117,6 +117,23 @@ function getResponseFailure(download, xhr, display_name, flash_location) {
 }
 
 /**
+ * Gets standard failure response for download
+ * @param {String} download - Downloaded string response blob
+ * @param {Object} xhr - Dictionary containing Response header information
+ * @param {String} display_name - Name used for the downloaded blob file
+ * @param {String} flash_location - ID of the flash location element for displaying response Message
+ */
+function getResponseFailureNew(download, xhr, display_name, flash_location) {
+    let info = xhr.getResponseHeader('Message')
+    let category =  xhr.getResponseHeader('Category')
+    if (info) {
+        flashMessageOnScreen(info, category, flash_location);
+    } else {
+        flashMessageOnScreen('Unknown processing error occurred for ' + display_name, 'error', flash_location);
+    }
+}
+
+/**
  * Gets standard response with download
  * @param {String} download - Downloaded string response blob
  * @param {Object} xhr - Dictionary containing Response header information
@@ -136,6 +153,21 @@ function getResponseSuccess(download, xhr, display_name, flash_location) {
         }
     } else {
         flashMessageOnScreen('No errors found.', 'success', flash_location);
+    }
+}
+
+
+function getResponseSuccessNew(download, xhr, display_name, flash_location) {
+    if (download) {
+        let filename = getFilenameFromResponseHeader(xhr, display_name)
+        triggerDownloadBlob(download, filename);
+    }
+    let info = xhr.getResponseHeader('Message')
+    let category =  xhr.getResponseHeader('Category')
+    if (info) {
+        flashMessageOnScreen(info, category, flash_location);
+    } else {
+        flashMessageOnScreen('', 'success', flash_location);
     }
 }
 

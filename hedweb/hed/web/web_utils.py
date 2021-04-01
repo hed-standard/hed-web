@@ -8,8 +8,9 @@ from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
 
 from hed.util import hed_cache
+from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.web.constants import common_constants
+from hed.web.constants import common_constants, error_constants
 
 app_config = current_app.config
 
@@ -144,6 +145,49 @@ def form_has_url(request, url_field, valid_extensions):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
+def generate_download_file_response_new(download_file, display_name=None, header=None, category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_file: str
+        Local path of the file to be downloaded into the response.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    if not display_name:
+        display_name = download_file
+
+    if not download_file:
+        raise HedFileError(error_constants.FILE_DOES_NOT_EXIST, f"No download file given", "")
+
+    if not pathlib.Path(download_file).is_file():
+        raise HedFileError(error_constants.FILE_INVALID, f"File {download_file} not found", "")
+
+    def generate():
+        with open(download_file, 'r', encoding='utf-8') as download:
+            if header:
+                yield header
+            for line in download:
+                yield line
+            delete_file_if_it_exists(download_file)
+        return Response(generate(), mimetype='text/plain charset=utf-8',
+                        headers={'Content-Disposition': f"attachment filename={display_name}",
+                                 'Category': category, 'Message': msg})
+
+
 def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
@@ -187,6 +231,74 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                                  'Category': category, 'Message': msg})
     except:
         return traceback.format_exc()
+
+
+def generate_download_file_response_new(download_file, display_name=None, header=None, category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_file: str
+        Local path of the file to be downloaded into the response.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    if not display_name:
+        display_name = download_file
+
+    if not download_file:
+        raise HedFileError(error_constants.FILE_INVALID, f"No download file given", "")
+
+    if not pathlib.Path(download_file).is_file():
+        raise HedFileError(error_constants.FILE_DOES_NOT_EXIST, f"File {download_file} not found", "")
+
+    def generate():
+        with open(download_file, 'r', encoding='utf-8') as download:
+            if header:
+                yield header
+            for line in download:
+                yield line
+            delete_file_if_it_exists(download_file)
+
+    return Response(generate(), mimetype='text/plain charset=utf-8',
+                    headers={'Content-Disposition': f"attachment filename={display_name}",
+                             'Category': category, 'Message': msg})
+
+def generate_text_response(download_text, header=None, category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_file: str
+        Local path of the file to be downloaded into the response.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    return Response(download_text, mimetype='text/plain charset=utf-8', headers={'Category': category, 'Message': msg})
 
 
 def generate_filename(basename, prefix=None, suffix=None, extension=None):
@@ -323,7 +435,6 @@ def handle_error(e, hedInfo=None, title=None):
 
     """
 
-    a = e.args
     if hasattr(e, 'error_type'):
         error_code = e.error_type
     else:
@@ -345,7 +456,6 @@ def handle_error(e, hedInfo=None, title=None):
     # response.status_code = error_code
     # return response
 
-
 def handle_http_error(error_code, message, as_text=False):
     """Handles an http error.
 
@@ -362,6 +472,7 @@ def handle_http_error(error_code, message, as_text=False):
     boolean
         A tuple containing a HTTP response object and a code.
 
+
     """
     error_message = f"{error_code}: [{message}]"
     current_app.logger.error(error_message)
@@ -370,6 +481,38 @@ def handle_http_error(error_code, message, as_text=False):
     # return jsonify(message=error_message, error_code=error_code), error_code
     x = jsonify(message=error_message)
     return jsonify(message=error_message), error_code
+
+
+def handle_http_error_new(ex):
+    """Handles an http error.
+
+    Parameters
+    ----------
+    ex: Exception
+        A class that extends python Exception class
+    message: string
+        The message associated with the error.
+    as_text: Bool
+        If we should encode this as text or json.
+    Returns
+    -------
+    boolean
+        A tuple containing a HTTP response object and a code.
+
+
+    """
+    if hasattr(ex, 'error_type'):
+        error_code = ex.error_type
+    else:
+        error_code = type(ex).__name__
+    if hasattr(ex, 'message'):
+        message = ex.message
+    else:
+        message = "Error of unknown cause"
+
+    error_message = f"{error_code}: [{message}]"
+    current_app.logger.error(error_message)
+    return generate_text_response('', category='error', msg=error_message)
 
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):

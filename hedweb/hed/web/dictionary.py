@@ -6,8 +6,8 @@ from hed.util.file_util import delete_file_if_it_exists
 from hed.util.error_reporter import get_printable_issue_string
 from hed.schema.hed_schema_file import load_schema
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.web_utils import generate_filename, generate_download_file_response, \
-    handle_http_error, get_hed_path_from_pull_down, \
+from hed.web.web_utils import generate_filename, generate_download_file_response, generate_download_file_response_new, \
+    generate_text_response, handle_http_error, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_text_to_upload_folder, get_optional_form_field
 
 app_config = current_app.config
@@ -105,3 +105,38 @@ def validate_dictionary(input_arguments, hed_schema=None, return_response=True):
             return handle_http_error(error_constants.NOT_FOUND_ERROR, download_response)
         return download_response
     return ""
+
+
+def validate_dictionary_new(input_arguments, hed_schema=None, return_response=True):
+    """Validates the dictionary and returns a response or a printable string depending on return_response value
+
+    Parameters
+    ----------
+    input_arguments: dict
+        Dictionary containing standard input form arguments
+    hed_schema: str or HedSchema
+        Version number or path or HedSchema object to be used
+    return_response: bool
+        If true, return a Response. If false return a printable issue string
+
+    Returns
+    -------
+    Response or str
+        Either a Response or a printable issue string
+    """
+
+    json_dictionary = ColumnDefGroup(input_arguments.get(common_constants.JSON_PATH, ''))
+    if not hed_schema:
+        hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+    issues = json_dictionary.validate_entries(hed_schema)
+    if issues:
+        display_name = input_arguments.get(common_constants.JSON_FILE, '')
+        issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
+        if not return_response:
+            return issue_str
+        file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
+        issue_file = save_text_to_upload_folder(issue_str, file_name)
+        return generate_download_file_response_new(issue_file, display_name=file_name, category='warning',
+                                                   msg='JSON dictionary had validation errors')
+    else:
+        return generate_text_response("", msg='JSON dictionary had no validation errors')

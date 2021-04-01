@@ -8,7 +8,8 @@ from hed.schema import hed_schema_file
 from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
-    generate_download_file_response, handle_http_error, handle_error
+    generate_download_file_response, handle_http_error, handle_http_error_new, handle_error
+from hed.web import dictionary
 from hed.web.dictionary import report_dictionary_validation_status
 from hed.web.hedstring import hedstring_process
 app_config = current_app.config
@@ -31,7 +32,7 @@ def delete_file_in_upload_directory(filename):
     if delete_file_if_it_exists(os.path.join(app_config['UPLOAD_FOLDER'], filename)):
         return Response(status=error_constants.NO_CONTENT_SUCCESS)
     else:
-        return handle_http_error(error_constants.NOT_FOUND_ERROR, error_constants.FILE_DOES_NOT_EXIST)
+        return handle_http_error(error_constants.NOT_FOUND_ERROR, error_constants.FILE_DOES_NOT_EXIST_NOW)
 
 
 @route_blueprint.route(route_constants.DOWNLOAD_FILE_ROUTE, strict_slashes=False, methods=['GET'])
@@ -56,6 +57,19 @@ def download_file_in_upload_directory(filename, header=None):
         handle_http_error(error_constants.NOT_FOUND_ERROR, download_response, as_text=True)
     return download_response
 
+# @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+# def get_dictionary_validation_results_old():
+#     """Validate the JSON dictionary in the form after submission and return an attachment containing the output.
+#     Parameters
+#     ----------
+#     Returns
+#     -------
+#         download file
+#         A text file with the validation errors.
+#     """
+#     validation_response = report_dictionary_validation_status(request)
+#     return validation_response
+
 
 @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_dictionary_validation_results():
@@ -69,8 +83,16 @@ def get_dictionary_validation_results():
         download file
         A text file with the validation errors.
     """
-    validation_response = report_dictionary_validation_status(request)
-    return validation_response
+    input_arguments = {}
+    try:
+        input_arguments = dictionary.generate_arguments_from_dictionary_form(request)
+        a = dictionary.validate_dictionary_new(input_arguments)
+        return a
+        # return dictionary.validate_dictionary_new(input_arguments)
+    except Exception as ex:
+        return handle_http_error_new(ex)
+    finally:
+        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.EVENTS_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])

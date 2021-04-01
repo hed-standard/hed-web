@@ -60,10 +60,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'dictionary-validation-submit-flash')
+                getResponseSuccessNew(download, xhr, display_name, 'dictionary-validation-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'dictionary-validation-submit-flash')
+                getResponseFailureNew(download, xhr, display_name, 'dictionary-validation-submit-flash')
             }
         }
     )
