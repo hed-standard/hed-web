@@ -158,10 +158,10 @@ function submitSchemaConversionForm() {
             processData: false,
             dataType: "text",
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
+                getResponseSuccessNew(download, xhr, display_name, 'schema-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
+                getResponseFailureNew(download, xhr, display_name, 'schema-submit-flash')
             }
         }
     )

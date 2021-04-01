@@ -276,17 +276,14 @@ def generate_download_file_response_new(download_file, display_name=None, header
                     headers={'Content-Disposition': f"attachment filename={display_name}",
                              'Category': category, 'Message': msg})
 
-def generate_text_response(download_text, header=None, category='success', msg=''):
+
+def generate_text_response(download_text, category='success', msg=''):
     """Generates a download other response.
 
     Parameters
     ----------
-    download_file: str
-        Local path of the file to be downloaded into the response.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
+    download_text: str
+        Text to be downloaded as part of the response.
     category: str
         Category of the message to be displayed ('Success', 'Error', 'Warning')
     msg: str
@@ -298,7 +295,10 @@ def generate_text_response(download_text, header=None, category='success', msg='
         A response object containing the downloaded file.
 
     """
-    return Response(download_text, mimetype='text/plain charset=utf-8', headers={'Category': category, 'Message': msg})
+    headers = {'Category': category, 'Message': msg}
+    if len(download_text) > 0:
+        headers['Content-Length'] = len(download_text)
+    return Response(download_text, mimetype='text/plain charset=utf-8', headers = headers)
 
 
 def generate_filename(basename, prefix=None, suffix=None, extension=None):

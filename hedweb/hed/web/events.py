@@ -4,9 +4,10 @@ from flask import current_app
 
 from hed.schema.hed_schema_file import load_schema
 from hed.util.file_util import delete_file_if_it_exists
+from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hed.web.constants import common_constants, error_constants, file_constants
-from hed.web.dictionary import validate_dictionary
+from hed.web.dictionary import validate_dictionary_new, validate_dictionary
 from hed.web.spreadsheet import validate_spreadsheet
 from hed.web.web_utils import get_hed_path_from_pull_down, get_uploaded_file_path_from_form, get_optional_form_field
 
@@ -54,7 +55,38 @@ def generate_input_from_events_form(request):
     return input_arguments
 
 
-def report_events_validation_status(request):
+def report_events_validation_status(input_arguments):
+    """Reports the spreadsheet validation status.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+
+    Returns
+    -------
+    string
+        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
+        500 error message is returned.
+    """
+
+    hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
+    download_response = validate_dictionary_new(input_arguments, hed_schema=hed_schema)
+    if not hasattr(download_response, 'headers'):
+        raise HedFileError('DictionaryNotValidated',
+                           'Dictionary could not be validated so event validation incomplete', '')
+    response = getattr(download_response, 'response')
+    headers = getattr(download_response, 'headers')
+    if headers.getlist('Content-Disposition'):
+        return download_response
+    if headers.getlist('Content-Length') and int(headers.getlist('Content-Length')[0]) > 0:
+        return download_response
+    hed_validator = HedValidator(hed_schema=hed_schema,
+                                 check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
+    return validate_spreadsheet(input_arguments, hed_validator)
+
+
+def report_events_validation_status_old(request):
     """Reports the spreadsheet validation status.
 
     Parameters

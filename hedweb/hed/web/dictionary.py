@@ -107,7 +107,7 @@ def validate_dictionary(input_arguments, hed_schema=None, return_response=True):
     return ""
 
 
-def validate_dictionary_new(input_arguments, hed_schema=None, return_response=True):
+def validate_dictionary_new(input_arguments, hed_schema=None):
     """Validates the dictionary and returns a response or a printable string depending on return_response value
 
     Parameters
@@ -116,13 +116,11 @@ def validate_dictionary_new(input_arguments, hed_schema=None, return_response=Tr
         Dictionary containing standard input form arguments
     hed_schema: str or HedSchema
         Version number or path or HedSchema object to be used
-    return_response: bool
-        If true, return a Response. If false return a printable issue string
 
     Returns
     -------
-    Response or str
-        Either a Response or a printable issue string
+    Response
+        Response object containing the results of the dictionary validation.
     """
 
     json_dictionary = ColumnDefGroup(input_arguments.get(common_constants.JSON_PATH, ''))
@@ -132,8 +130,6 @@ def validate_dictionary_new(input_arguments, hed_schema=None, return_response=Tr
     if issues:
         display_name = input_arguments.get(common_constants.JSON_FILE, '')
         issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
-        if not return_response:
-            return issue_str
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
         issue_file = save_text_to_upload_folder(issue_str, file_name)
         return generate_download_file_response_new(issue_file, display_name=file_name, category='warning',

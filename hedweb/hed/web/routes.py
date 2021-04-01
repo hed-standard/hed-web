@@ -9,7 +9,7 @@ from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error, handle_http_error_new, handle_error
-from hed.web import dictionary
+from hed.web import dictionary, events, schema
 from hed.web.dictionary import report_dictionary_validation_status
 from hed.web.hedstring import hedstring_process
 app_config = current_app.config
@@ -86,9 +86,7 @@ def get_dictionary_validation_results():
     input_arguments = {}
     try:
         input_arguments = dictionary.generate_arguments_from_dictionary_form(request)
-        a = dictionary.validate_dictionary_new(input_arguments)
-        return a
-        # return dictionary.validate_dictionary_new(input_arguments)
+        return dictionary.validate_dictionary_new(input_arguments)
     except Exception as ex:
         return handle_http_error_new(ex)
     finally:
@@ -108,15 +106,16 @@ def get_events_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_response = events.report_events_validation_status(request)
-    # Success
-    if isinstance(validation_response, Response):
-        return validation_response
-    if isinstance(validation_response, str):
-        if validation_response:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
-        else:
-            return ""
+    input_arguments = {}
+    try:
+        input_arguments = events.generate_input_from_events_form(request)
+        a = events.report_events_validation_status(input_arguments)
+        return a
+    except Exception as ex:
+        return handle_http_error_new(ex)
+    finally:
+        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
+        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -246,16 +245,16 @@ def get_schema_conversion_results():
         A serialized JSON string containing information related file to convert. If the conversion fails then a
         500 error message is returned.
     """
-    conversion_response = schema.run_schema_conversion(request)
-    # Success
-    if isinstance(conversion_response, Response):
-        return conversion_response
-    if isinstance(conversion_response, str):
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, conversion_response, as_text=True)
-
-    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                             "Invalid response type in get_duplicate_tag_results.  This should not happen.",
-                             as_text=True)
+    input_arguments = {}
+    try:
+        input_arguments = schema.generate_input_from_schema_form(request)
+        a = events.report_events_validation_status(input_arguments)
+        return a
+    except Exception as ex:
+        return handle_http_error_new(ex)
+    finally:
+        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
+        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_COLUMN_INFO_ROUTE, methods=['POST'])

@@ -105,6 +105,40 @@ function submitHedStringForm() {
     )
 }
 
+function submitHedStringFormNew() {
+    let stringForm = document.getElementById("hedstring-form");
+    let formData = new FormData(stringForm);
+
+    //let dictionaryFile = getJsonFileLabel();
+    //let display_name = convertToResultsName(dictionaryFile, 'issues')
+    resetFormFlashMessages();
+    flashMessageOnScreen('HED string is being processed ...', 'success', 'hedstring-submit-flash')
+    $.ajax({
+            type: 'POST',
+            url: "{{url_for('route_blueprint.get_hedstring_results')}}",
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function (hedInfo) {
+                resetFormFlashMessages();
+                if (hedInfo['hedstring-result']) {
+                    $('#hedstring-result').val(hedInfo['hedstring-result'])
+                    flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')
+                } else if (hedInfo['message'])
+                    flashMessageOnScreen(hedInfo['message'], 'error', 'hedstring-submit-flash')
+                else {
+                    flashMessageOnScreen('Server could not respond to this request', 'error', 'hedstring-submit-flash')
+                }
+            },
+            error: function (jqXHR) {
+                console.log(jqXHR.responseJSON.message);
+                flashMessageOnScreen(jqXHR.responseJSON.message, 'error', 'hedstring-submit-flash')
+            }
+        }
+    )
+}
+
 
 function updateFormGui() {
      let filename = getSchemaFilename();
