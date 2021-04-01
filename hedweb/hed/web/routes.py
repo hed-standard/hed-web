@@ -9,8 +9,7 @@ from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error, handle_http_error_new, handle_error
-from hed.web import dictionary, events, schema
-from hed.web.dictionary import report_dictionary_validation_status
+from hed.web import dictionary, events, schema, spreadsheet
 from hed.web.hedstring import hedstring_process
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -56,19 +55,6 @@ def download_file_in_upload_directory(filename, header=None):
     if not download_response or isinstance(download_response, str):
         handle_http_error(error_constants.NOT_FOUND_ERROR, download_response, as_text=True)
     return download_response
-
-# @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-# def get_dictionary_validation_results_old():
-#     """Validate the JSON dictionary in the form after submission and return an attachment containing the output.
-#     Parameters
-#     ----------
-#     Returns
-#     -------
-#         download file
-#         A text file with the validation errors.
-#     """
-#     validation_response = report_dictionary_validation_status(request)
-#     return validation_response
 
 
 @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -292,15 +278,14 @@ def get_spreadsheet_validation_results():
         A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
         500 error message is returned.
     """
-    validation_response = spreadsheet.report_spreadsheet_validation_status(request)
-    # Success
-    if isinstance(validation_response, Response):
-        return validation_response
-    if isinstance(validation_response, str):
-        if validation_response:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, validation_response, as_text=True)
-        else:
-            return ""
+    input_arguments = {}
+    try:
+        input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
+        return spreadsheet.validate_spreadsheet(input_arguments)
+    except Exception as ex:
+        return handle_http_error_new(ex)
+    finally:
+        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
 
 
 @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])

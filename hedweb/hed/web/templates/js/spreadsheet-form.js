@@ -256,10 +256,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseSuccessNew(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseFailureNew(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
             }
         }
     )

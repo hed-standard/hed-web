@@ -60,14 +60,13 @@ def report_events_validation_status(input_arguments):
 
     Parameters
     ----------
-    request: Request object
-        A Request object containing user data from the validation form.
+    input_arguments: dict
+        A dictionary of the values extracted from the form
 
     Returns
     -------
-    string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
+    Response
+         The validation results as a Response object
     """
 
     hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
@@ -84,41 +83,3 @@ def report_events_validation_status(input_arguments):
     hed_validator = HedValidator(hed_schema=hed_schema,
                                  check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
     return validate_spreadsheet(input_arguments, hed_validator)
-
-
-def report_events_validation_status_old(request):
-    """Reports the spreadsheet validation status.
-
-    Parameters
-    ----------
-    request: Request object
-        A Request object containing user data from the validation form.
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the worksheet columns. If the validation fails then a
-        500 error message is returned.
-    """
-    input_arguments = []
-    try:
-        input_arguments = generate_input_from_events_form(request)
-        hed_schema = load_schema(input_arguments.get(common_constants.HED_XML_FILE, ''))
-        download_response = validate_dictionary(input_arguments, hed_schema=hed_schema)
-        if download_response:
-            return download_response
-        hed_validator = HedValidator(hed_schema=hed_schema,
-                                     check_for_warnings=input_arguments.get(common_constants.CHECK_FOR_WARNINGS, False))
-        download_response = validate_spreadsheet(input_arguments, hed_validator)
-        if download_response:
-            return download_response
-    except HTTPError:
-        return error_constants.NO_URL_CONNECTION_ERROR
-    except URLError:
-        return error_constants.INVALID_URL_ERROR
-    except Exception as e:
-        return "Unexpected processing error: " + str(e)
-    finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
-        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
-    return ""
