@@ -10,7 +10,7 @@ from hed.util.file_util import delete_file_if_it_exists, url_to_file, get_file_e
 from hed.util.exceptions import HedFileError
 
 from hed.web.web_utils import form_has_file, form_has_option, form_has_url, \
-    generate_download_file_response, generate_filename,  \
+    generate_download_file_response, generate_filename, generate_text_response, \
     handle_http_error, save_file_to_upload_folder, save_text_to_upload_folder
 
 from hed.web.constants import common_constants, error_constants, file_constants
@@ -47,6 +47,55 @@ def generate_input_from_schema_form(request):
         url_parsed = urlparse(schema_url)
         arguments[common_constants.SCHEMA_DISPLAY_NAME] = basename(url_parsed.path)
     return arguments
+
+
+def schema_check(input_arguments):
+    """Run tag comparison(map_schema from converter)
+
+    returns: Response or string.
+        Empty string is success, but nothing to download.
+        Non empty string is an error
+        Response is a download success.
+    """
+
+    hed_file_path = input_arguments.get(common_constants.SCHEMA_PATH, '')
+    this_schema = load_schema(hed_file_path)
+    issues = this_schema.check_compliance()
+    if issues:
+        display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
+        issue_str = get_printable_issue_string(issues, f"Schema HED 3G compliance errors for {display_name}")
+        file_name = generate_filename(display_name, suffix='schema_3G_compliance_errors', extension='.txt')
+        issue_file = save_text_to_upload_folder(issue_str, file_name)
+        return generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                               msg='Schema is not HED 3G compliant')
+    else:
+        return generate_text_response("", msg='Spreadsheet had no validation errors')
+
+
+def schema_convert(input_arguments):
+    """Run conversion(wiki2xml or xml2wiki from converter)
+
+    returns: Response or string.
+        Non empty string is an error
+        Response is a download success.
+    """
+    schema_file_path = input_arguments.get(common_constants.SCHEMA_PATH)
+    display_name = input_arguments.get(common_constants.SCHEMA_DISPLAY_NAME)
+    input_extension = get_file_extension(schema_file_path)
+    save_wiki = input_extension == file_constants.SCHEMA_XML_EXTENSION
+    schema_file, issues = convert_schema_to_format(local_hed_file=schema_file_path, check_for_issues=False,
+                                                   display_filename=display_name, save_as_mediawiki=save_wiki)
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"Schema conversion errors for {display_name}")
+        file_name = generate_filename(display_name, suffix='conversion_errors', extension='.txt')
+        issue_file = save_text_to_upload_folder(issue_str, file_name)
+        return generate_download_file_response(issue_file, display_name=file_name, category='warning',
+                                               msg='Schema had validation errors and could not be converted')
+    else:
+        schema_name, schema_ext = splitext(schema_file)
+        file_name = generate_filename(display_name,  extension=schema_ext)
+        return generate_download_file_response(schema_file, display_name=file_name, category='success',
+                                               msg='Schema was successfully converted')
 
 
 def run_schema_compliance_check(request):

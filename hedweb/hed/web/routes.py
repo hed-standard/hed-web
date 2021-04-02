@@ -5,12 +5,12 @@ import traceback
 
 from hed.util import hed_cache
 from hed.schema import hed_schema_file
-from hed.web import events, spreadsheet, schema, services, spreadsheet_utils
 from hed.web.constants import common_constants, error_constants, page_constants, route_constants
 from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
     generate_download_file_response, handle_http_error, handle_http_error_new, handle_error
-from hed.web import dictionary, events, schema, spreadsheet
+from hed.web import dictionary, events, schema, spreadsheet, services, spreadsheet_utils
 from hed.web.hedstring import hedstring_process
+
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
@@ -204,18 +204,15 @@ def get_schema_compliance_check_results():
         A serialized JSON string containing the hed specification to check. If the conversion fails then a
         500 error message is returned.
     """
-    comparison_response = schema.run_schema_compliance_check(request)
-    # Success
-    if isinstance(comparison_response, Response):
-        return comparison_response
-    if isinstance(comparison_response, str):
-        if comparison_response:
-            return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, comparison_response, as_text=True)
-        else:
-            return ""
-
-    return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                             "Invalid duplicate tag check. This should not happen.", as_text=True)
+    input_arguments = {}
+    try:
+        input_arguments = schema.generate_input_from_schema_form(request)
+        a = schema.schema_check(input_arguments)
+        return a
+    except Exception as ex:
+        return handle_http_error_new(ex)
+    finally:
+        delete_file_if_it_exists(input_arguments.get(common_constants.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -234,13 +231,12 @@ def get_schema_conversion_results():
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        a = events.report_events_validation_status(input_arguments)
+        a = schema.schema_convert(input_arguments)
         return a
     except Exception as ex:
         return handle_http_error_new(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
-        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
+        delete_file_if_it_exists(input_arguments.get(common_constants.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
