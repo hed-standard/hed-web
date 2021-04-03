@@ -1,60 +1,17 @@
 from flask import render_template, Response, request, Blueprint, current_app
-import os
 import json
-import traceback
 
 from hed.util import hed_cache
 from hed.schema import hed_schema_file
-from hed.web.constants import common_constants, error_constants, page_constants, route_constants
-from hed.web.web_utils import delete_file_if_it_exists, save_file_to_upload_folder, \
-    generate_download_file_response, handle_http_error, handle_http_error_new, handle_error
-from hed.web import dictionary, events, schema, spreadsheet, services, spreadsheet_utils
-from hed.web.hedstring import hedstring_process
+from hed.web.constants import common, page_constants, route_constants
+from hed.web.web_utils import delete_file_no_exceptions, \
+   handle_http_error, handle_error, save_file_to_upload_folder
+from hed.web import dictionary, events, schema, spreadsheet, services
+from hed.web.hedstring import generate_arguments_from_hedstring_form, hedstring_process
+from hed.web.spreadsheet_utils import get_column_info_dictionary, get_worksheets_info_dictionary
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
-
-
-@route_blueprint.route(route_constants.DELETE_FILE_ROUTE, strict_slashes=False, methods=['GET'])
-def delete_file_in_upload_directory(filename):
-    """Deletes the specified other from the upload other.
-
-    Parameters
-    ----------
-    filename: string
-        The name of the other to delete from the upload other.
-
-    Returns
-    -------
-
-    """
-    if delete_file_if_it_exists(os.path.join(app_config['UPLOAD_FOLDER'], filename)):
-        return Response(status=error_constants.NO_CONTENT_SUCCESS)
-    else:
-        return handle_http_error(error_constants.NOT_FOUND_ERROR, error_constants.FILE_DOES_NOT_EXIST_NOW)
-
-
-@route_blueprint.route(route_constants.DOWNLOAD_FILE_ROUTE, strict_slashes=False, methods=['GET'])
-def download_file_in_upload_directory(filename, header=None):
-    """Downloads the specified file from the download folder.
-
-    Parameters
-    ----------
-    filename: str
-        The name of the file to download from the upload other.
-    header: str
-        Header string to be inserted in text files --- particularly files reporting errors or status
-
-    Returns
-    -------
-    File
-        The contents of a other in the upload directory to send to the client.
-
-    """
-    download_response = generate_download_file_response(filename, header)
-    if not download_response or isinstance(download_response, str):
-        handle_http_error(error_constants.NOT_FOUND_ERROR, download_response, as_text=True)
-    return download_response
 
 
 @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -72,11 +29,11 @@ def get_dictionary_validation_results():
     input_arguments = {}
     try:
         input_arguments = dictionary.generate_arguments_from_dictionary_form(request)
-        return dictionary.validate_dictionary_new(input_arguments)
+        return dictionary.dictionary_validate(input_arguments)
     except Exception as ex:
-        return handle_http_error_new(ex)
+        return handle_http_error(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.EVENTS_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -95,13 +52,13 @@ def get_events_validation_results():
     input_arguments = {}
     try:
         input_arguments = events.generate_input_from_events_form(request)
-        a = events.report_events_validation_status(input_arguments)
+        a = events.events_validate(input_arguments)
         return a
     except Exception as ex:
-        return handle_http_error_new(ex)
+        return handle_http_error(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
-        delete_file_if_it_exists(input_arguments.get(common_constants.JSON_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -118,11 +75,12 @@ def get_hed_services_results():
         A serialized JSON string containing information related to the EEG events' hedstrings.
         If the validation fails then a 500 error message is returned.
     """
-    status = services.report_services_status(request)
-
-    if error_constants.ERROR_KEY in status:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR, status[error_constants.ERROR_KEY])
-    return json.dumps(status)
+    try:
+        form_data = request.data
+        status = services.report_services_status(form_data)
+        return json.dumps(status)
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.HEDSTRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -140,9 +98,10 @@ def get_hedstring_results():
     # return hedstring_process(request)
 
     try:
-        return json.dumps(hedstring_process(request))
-    except Exception as e:
-        return handle_error(e)
+        input_arguments = generate_arguments_from_hedstring_form(request)
+        return json.dumps(hedstring_process(input_arguments))
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
@@ -161,12 +120,12 @@ def get_hed_version():
 
     try:
         hed_info = {}
-        if common_constants.HED_XML_FILE in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
-            hed_info[common_constants.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
+        if common.HED_XML_FILE in request.files:
+            hed_file_path = save_file_to_upload_folder(request.files[common.HED_XML_FILE])
+            hed_info[common.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
         return json.dumps(hed_info)
-    except Exception as e:
-        return handle_error(e)
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.HED_MAJOR_VERSION_ROUTE, methods=['GET'])
@@ -185,10 +144,10 @@ def get_major_hed_versions():
 
     try:
         hed_cache.cache_all_hed_xml_versions()
-        hed_info = {common_constants.HED_MAJOR_VERSIONS: hed_cache.get_all_hed_versions()}
+        hed_info = {common.HED_MAJOR_VERSIONS: hed_cache.get_all_hed_versions()}
         return json.dumps(hed_info)
-    except Exception as e:
-        return handle_error(e)
+    except Exception as ex:
+        return handle_error(ex)
 
 
 @route_blueprint.route(route_constants.SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -207,12 +166,11 @@ def get_schema_compliance_check_results():
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        a = schema.schema_check(input_arguments)
-        return a
+        return schema.schema_check(input_arguments)
     except Exception as ex:
-        return handle_http_error_new(ex)
+        return handle_http_error(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SCHEMA_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SCHEMA_CONVERSION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -231,12 +189,11 @@ def get_schema_conversion_results():
     input_arguments = {}
     try:
         input_arguments = schema.generate_input_from_schema_form(request)
-        a = schema.schema_convert(input_arguments)
-        return a
+        return schema.schema_convert(input_arguments)
     except Exception as ex:
-        return handle_http_error_new(ex)
+        return handle_http_error(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SCHEMA_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
@@ -254,11 +211,17 @@ def get_spreadsheet_columns_info():
         A serialized JSON string containing information related to the spreadsheet columns.
 
     """
-    spreadsheet_columns_info = spreadsheet_utils.find_spreadsheet_columns_info(request)
-    if error_constants.ERROR_KEY in spreadsheet_columns_info:
-        return handle_http_error(error_constants.INTERNAL_SERVER_ERROR,
-                                 spreadsheet_columns_info[error_constants.ERROR_KEY])
-    return json.dumps(spreadsheet_columns_info)
+    spreadsheet_path = ''
+    try:
+        spreadsheet_file = request.files.get(common.SPREADSHEET_FILE, '')
+        spreadsheet_path = save_file_to_upload_folder(spreadsheet_file)
+        worksheet_name = request.form.get(common.WORKSHEET_NAME, None)
+        columns_info = get_column_info_dictionary(spreadsheet_path, worksheet_name)
+        return json.dumps(columns_info)
+    except Exception as ex:
+        return handle_error(ex)
+    finally:
+        delete_file_no_exceptions(spreadsheet_path)
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -279,9 +242,9 @@ def get_spreadsheet_validation_results():
         input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
         return spreadsheet.validate_spreadsheet(input_arguments)
     except Exception as ex:
-        return handle_http_error_new(ex)
+        return handle_http_error(ex)
     finally:
-        delete_file_if_it_exists(input_arguments.get(common_constants.SPREADSHEET_PATH, ''))
+        delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
 
 
 @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
@@ -300,20 +263,17 @@ def get_worksheets_info():
         A serialized JSON string containing information related to the Excel worksheets.
 
     """
-    worksheets_info = {common_constants.WORKSHEET_NAMES: [], common_constants.COLUMN_NAMES: [],
-                       common_constants.TAG_COLUMN_INDICES: []}
-    workbook_file_path = ''
+
+    workbook_path = ''
     try:
-        if common_constants.SPREADSHEET_FILE in request.files:
-            workbook_file = request.files[common_constants.SPREADSHEET_FILE]
-            workbook_file_path = save_file_to_upload_folder(workbook_file)
-            if workbook_file_path:
-                worksheets_info = spreadsheet_utils.populate_worksheets_info_dictionary(worksheets_info, workbook_file_path)
-    except:
-        worksheets_info[error_constants.ERROR_KEY] = traceback.format_exc()
+        workbook_file = request.files.get(common.SPREADSHEET_FILE, None)
+        workbook_path = save_file_to_upload_folder(workbook_file)
+        worksheets_info = get_worksheets_info_dictionary(workbook_path)
+        return json.dumps(worksheets_info)
+    except Exception as ex:
+        return handle_error(ex)
     finally:
-        delete_file_if_it_exists(workbook_file_path)
-    return json.dumps(worksheets_info)
+        delete_file_no_exceptions(workbook_path)
 
 
 @route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])
@@ -401,7 +361,7 @@ def render_hed_services_form():
 
 
 @route_blueprint.route(route_constants.HEDSTRING_ROUTE, strict_slashes=False, methods=['GET'])
-def render_hed_string_form():
+def render_hedstring_form():
     """Renders a form for different hedstring operations.
 
     Parameters

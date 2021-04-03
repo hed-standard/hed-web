@@ -1,12 +1,10 @@
 /**
  * This code handles the input of a spreadsheet name and worksheet names and displays table headers. It has
  * the form handling for spreadsheet-input.html.
- * @type {string[]}
+ * @field_type {string[]}
  */
 const EXCEL_FILE_EXTENSIONS = ['xlsx', 'xls'];
 const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
-const spreadsheetInputIDs = ['spreadsheet-file', 'spreadsheet-display-name', 'spreadsheet-flash',
-                             'worksheet-name', 'columns-names-table']
 
 /**
  * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.

@@ -17,7 +17,7 @@ $('#spreadsheet-validation-submit').on('click', function () {
  * Clears tag column text boxes.
  */
 function clearTagColumnTextboxes() {
-    $('.textbox-group input[type="text"]').val('');
+    $('.textbox-group input[field_type="text"]').val('');
 }
 
 /**
@@ -212,7 +212,7 @@ function setComponentsRelatedToColumns(columnsInfo) {
 
 /**
  * Sets the spreadsheet has column names checkbox to false.
- * @param {boolean} Box is checked if true and unchecked if false
+ * @param {boolean} value - is checked if true and unchecked if false
  */
 function setHasColumnNamesCheckbox(value) {
     $('#has-column-names').prop('checked', value);
@@ -225,10 +225,7 @@ function setHasColumnNamesCheckbox(value) {
  * @returns {boolean} - True if the spreadsheet tag column indices array is empty.
  */
 function tagColumnsIndicesAreEmpty(tagColumnsIndices) {
-    if (tagColumnsIndices.length > 0) {
-        return false;
-    }
-    return true;
+    return tagColumnsIndices.length <= 0
 }
 
 /**
@@ -256,10 +253,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccessNew(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailureNew(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'spreadsheet-validation-submit-flash')
             }
         }
     )

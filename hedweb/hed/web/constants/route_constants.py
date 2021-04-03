@@ -2,10 +2,8 @@ ROUTE_BLUEPRINT = 'route_blueprint'
 
 ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
 COMMON_ERRORS_ROUTE = '/common-errors'
-DELETE_FILE_ROUTE = '/delete/<filename>'
 DICTIONARY_ROUTE = '/dictionary'
 DICTIONARY_VALIDATION_SUBMIT_ROUTE = '/dictionary-validation-submit'
-DOWNLOAD_FILE_ROUTE = '/download-file/<filename>'
 
 EVENTS_ROUTE = '/events'
 EVENTS_VALIDATION_SUBMIT_ROUTE = '/events-validation-submit'

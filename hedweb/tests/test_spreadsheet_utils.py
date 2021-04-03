@@ -23,9 +23,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.upload_directory)
 
-    def test_find_spreadsheet_columns_info(self):
-        self.assertTrue(1, "Testing find_spreadsheet_columns_info")
-
     def test_get_column_delimiter_based_on_file_extension(self):
         self.assertTrue(1, "Testing get_column_delimiter_based_on_file_extension")
     #     from hed.web.utils import get_column_delimiter_based_on_file_extension
@@ -38,6 +35,10 @@ class Test(unittest.TestCase):
     #     delimiter = get_column_delimiter_based_on_file_extension('test.xlsx')
     #     self.assertEqual('', delimiter, "Excel files should have an empty delimiter")
 
+    def test_get_column_info_dictionary(self):
+        from hed.web.spreadsheet_utils import get_excel_worksheet_names
+        self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
+
     def test_get_excel_worksheet_names(self):
         from hed.web.spreadsheet_utils import get_excel_worksheet_names
         self.excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
@@ -45,12 +46,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(worksheet_names), 3, "This excel file has three worksheets")
         self.assertIn('PVT Events', worksheet_names, "PVT Events is one of the worksheet names")
         self.assertNotIn('Temp', worksheet_names, "Temp is not one of the worksheet names")
-
-    def test_get_original_spreadsheet_filename(self):
-        self.assertTrue(1, "Testing get_original_filename")
-
-    def test_get_specific_tag_columns_from_form(self):
-        self.assertTrue(1, "Testing get_specific_tag_columns_from_form")
 
     def test_get_spreadsheet_other_tag_column_indices(self):
         self.assertTrue(1, "Testing get_spreadsheet_other_tag_column_indices")
@@ -85,12 +80,9 @@ class Test(unittest.TestCase):
     def test_get_worksheet_column_names(self):
         self.assertTrue(1, "Testing get_worksheet_column_names")
 
-    def test_populate_spreadsheet_columns_info_dictionary(self):
-        self.assertTrue(1, "Testing populate_spreadsheet_columns_info_dictionary")
-
-    def test_populate_worksheets_info_dictionary(self):
+    def test_get_worksheets_info_dictionary(self):
         info = {}
-        self.assertTrue(1, "Testing populate_worksheets_info_dictionary")
+        self.assertTrue(1, "Testing get_worksheets_info_dictionary")
 
 
 if __name__ == '__main__':

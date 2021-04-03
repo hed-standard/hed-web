@@ -98,86 +98,8 @@ function submitHedStringForm() {
                 }
             },
             error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
                 flashMessageOnScreen(jqXHR.responseJSON.message, 'error', 'hedstring-submit-flash')
             }
         }
     )
-}
-
-function submitHedStringFormNew() {
-    let stringForm = document.getElementById("hedstring-form");
-    let formData = new FormData(stringForm);
-
-    //let dictionaryFile = getJsonFileLabel();
-    //let display_name = convertToResultsName(dictionaryFile, 'issues')
-    resetFormFlashMessages();
-    flashMessageOnScreen('HED string is being processed ...', 'success', 'hedstring-submit-flash')
-    $.ajax({
-            type: 'POST',
-            url: "{{url_for('route_blueprint.get_hedstring_results')}}",
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: function (hedInfo) {
-                resetFormFlashMessages();
-                if (hedInfo['hedstring-result']) {
-                    $('#hedstring-result').val(hedInfo['hedstring-result'])
-                    flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')
-                } else if (hedInfo['message'])
-                    flashMessageOnScreen(hedInfo['message'], 'error', 'hedstring-submit-flash')
-                else {
-                    flashMessageOnScreen('Server could not respond to this request', 'error', 'hedstring-submit-flash')
-                }
-            },
-            error: function (jqXHR) {
-                console.log(jqXHR.responseJSON.message);
-                flashMessageOnScreen(jqXHR.responseJSON.message, 'error', 'hedstring-submit-flash')
-            }
-        }
-    )
-}
-
-
-function updateFormGui() {
-     let filename = getSchemaFilename();
-     let isXMLFilename = fileHasValidExtension(filename, [SCHEMA_XML_EXTENSION]);
-     let isMediawikiFilename = fileHasValidExtension(filename, [SCHEMA_MEDIAWIKI_EXTENSION]);
-
-     let hasValidFilename = false;
-     if (isXMLFilename) {
-        $('#schema-conversion-submit').html("Convert to mediawiki")
-        hasValidFilename = true;
-     } else if (isMediawikiFilename) {
-        $('#schema-conversion-submit').html("Convert to XML");
-        hasValidFilename = true;
-     } else {
-        $('#schema-conversion-submit').html("Convert Format");
-     }
-
-     let urlChecked = document.getElementById("schema-url-option").checked;
-     if (!urlChecked || hasValidFilename) {
-        flashMessageOnScreen("", 'success', 'schema-url-flash')
-     }
-     let uploadChecked = document.getElementById("schema-file-option").checked;
-     if (!uploadChecked || hasValidFilename) {
-        flashMessageOnScreen("", 'success', 'schema-file-flash')
-     }
-
-     if (filename && urlChecked && !hasValidFilename) {
-        flashMessageOnScreen('Please choose a valid schema url (.xml, .mediawiki)', 'error',
-        'schema-url-flash');
-     }
-
-     if (filename && uploadChecked && !hasValidFilename) {
-         flashMessageOnScreen('Please upload a valid schema file (.xml, .mediawiki)', 'error',
-        'schema-file-flash');
-     }
-
-     if (!uploadChecked && !urlChecked) {
-        flashMessageOnScreen('No source file specified.', 'error', 'schema-file-flash');
-     }
-
-     flashMessageOnScreen('', 'success', 'schema-submit-flash')
 }

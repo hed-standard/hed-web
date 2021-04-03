@@ -14,13 +14,13 @@ from hed.util.error_types import ErrorContext
 app_config = current_app.config
 
 
-def report_services_status(request):
+def report_services_status(form_data):
     """
     Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
 
     Parameters
     ----------
-    request: Request object
+    form_data: dict
         A Request object containing user data submitted by HEDTools.
         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
 
@@ -32,32 +32,25 @@ def report_services_status(request):
     """
     response = {"result": "", "error_type": "", "message": ""}
     hed_xml_file = ''
-    try:
-        form_data = request.data
-        form_string = form_data.decode()
-        param_dict = json.loads(form_string)
-        service = param_dict.get("service", "")
-        supported_services = get_services()
-        if not service:
-            response["error_type"] = 'HEDServiceMissing'
-            response["message"] = "Must specify a valid service"
-        elif service not in supported_services.keys():
-            response["error_type"] = 'HEDServiceNotSupported'
-            response["message"] = f"{service} not supported"
-        elif service == "get_services":
-            response["result"] = {"supported_services": supported_services}
-        elif service == "validate_json":
-            response["result"] = get_validate_dictionary(param_dict)
-        elif service == "validate_strings":
-            response["result"] = get_validate_strings(param_dict)
-        else:
-            response["errors"] = f"{service} not implemented"
-    except:
-        response["error_details"] = traceback.format_exc()
-        response["errors"] = "An exception thrown during execution of service"
-    finally:
-        delete_file_if_it_exists(hed_xml_file)
 
+    form_string = form_data.decode()
+    param_dict = json.loads(form_string)
+    service = param_dict.get("service", "")
+    supported_services = get_services()
+    if not service:
+        response["error_type"] = 'HEDServiceMissing'
+        response["message"] = "Must specify a valid service"
+    elif service not in supported_services.keys():
+        response["error_type"] = 'HEDServiceNotSupported'
+        response["message"] = f"{service} not supported"
+    elif service == "get_services":
+        response["result"] = {"supported_services": supported_services}
+    elif service == "validate_json":
+        response["result"] = get_validate_dictionary(param_dict)
+    elif service == "validate_strings":
+        response["result"] = get_validate_strings(param_dict)
+    else:
+        response["errors"] = f"{service} not implemented"
     return response
 
 

@@ -76,8 +76,7 @@ function convertToOutputName(original_filename) {
 function getSchemaFilename() {
     let checkRadio = document.querySelector('input[name="schema-upload-options"]:checked');
     if (checkRadio == null) {
-        flashMessageOnScreen('No source file specified.', 'error',
-            'schema-url-flash');
+        flashMessageOnScreen('No source file specified.', 'error', 'schema-url-flash');
         return "";
     }
     let checkRadioVal = checkRadio.id
@@ -85,8 +84,7 @@ function getSchemaFilename() {
     let schemaFileIsEmpty = schemaFile[0].files.length === 0;
     if (checkRadioVal === "schema-file-option") {
         if (schemaFileIsEmpty) {
-            flashMessageOnScreen('Schema file not specified.', 'error',
-                'schema-file-flash');
+            flashMessageOnScreen('Schema file not specified.', 'error', 'schema-file-flash');
             return '';
         }
 
@@ -158,10 +156,10 @@ function submitSchemaConversionForm() {
             processData: false,
             dataType: "text",
             success: function (download, status, xhr) {
-                getResponseSuccessNew(download, xhr, display_name, 'schema-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailureNew(download, xhr, display_name, 'schema-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
             }
         }
     )
@@ -183,10 +181,10 @@ function submitSchemaComplianceCheckForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccessNew(download, xhr, display_name, 'schema-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'schema-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailureNew(download, xhr, display_name, 'schema-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'schema-submit-flash')
             }
         }
     )

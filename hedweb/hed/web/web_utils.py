@@ -2,7 +2,6 @@ import os
 import json
 import pathlib
 import tempfile
-import traceback
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from flask import current_app, jsonify, Response
@@ -10,7 +9,7 @@ from flask import current_app, jsonify, Response
 from hed.util import hed_cache
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.web.constants import common_constants, error_constants
+from hed.web.constants import common, error_constants
 
 app_config = current_app.config
 
@@ -31,6 +30,13 @@ def convert_number_str_to_list(number_str):
     if number_str:
         return list(map(int, number_str.split(',')))
     return []
+
+
+def delete_file_no_exceptions(file_path):
+    try:
+        return delete_file_if_it_exists(file_path)
+    except Exception:
+        return False
 
 
 def file_extension_is_valid(filename, accepted_file_extensions=None):
@@ -145,49 +151,6 @@ def form_has_url(request, url_field, valid_extensions):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
-def generate_download_file_response_new(download_file, display_name=None, header=None, category='success', msg=''):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_file: str
-        Local path of the file to be downloaded into the response.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
-    category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    if not display_name:
-        display_name = download_file
-
-    if not download_file:
-        raise HedFileError(error_constants.FILE_DOES_NOT_EXIST, f"No download file given", "")
-
-    if not pathlib.Path(download_file).is_file():
-        raise HedFileError(error_constants.FILE_INVALID, f"File {download_file} not found", "")
-
-    def generate():
-        with open(download_file, 'r', encoding='utf-8') as download:
-            if header:
-                yield header
-            for line in download:
-                yield line
-            delete_file_if_it_exists(download_file)
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment filename={display_name}",
-                                 'Category': category, 'Message': msg})
-
-
 def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 
@@ -212,57 +175,12 @@ def generate_download_file_response(download_file, display_name=None, header=Non
     """
     if not display_name:
         display_name = download_file
-    try:
-        if not download_file:
-            return f"No download file given"
-
-        if not pathlib.Path(download_file).is_file():
-            return f"File {download_file} not found"
-
-        def generate():
-            with open(download_file, 'r', encoding='utf-8') as download:
-                if header:
-                    yield header
-                for line in download:
-                    yield line
-            delete_file_if_it_exists(download_file)
-        return Response(generate(), mimetype='text/plain charset=utf-8',
-                        headers={'Content-Disposition': f"attachment filename={display_name}",
-                                 'Category': category, 'Message': msg})
-    except:
-        return traceback.format_exc()
-
-
-def generate_download_file_response_new(download_file, display_name=None, header=None, category='success', msg=''):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_file: str
-        Local path of the file to be downloaded into the response.
-    display_name: str
-        Name to be assigned to the file in the response
-    header: str
-        Optional header -- header for download file blob
-    category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    if not display_name:
-        display_name = download_file
 
     if not download_file:
-        raise HedFileError(error_constants.FILE_INVALID, f"No download file given", "")
+        raise HedFileError('FileInvalid', f"No download file given", "")
 
     if not pathlib.Path(download_file).is_file():
-        raise HedFileError(error_constants.FILE_DOES_NOT_EXIST, f"File {download_file} not found", "")
+        raise HedFileError('FileDoesNotExist', f"File {download_file} not found", "")
 
     def generate():
         with open(download_file, 'r', encoding='utf-8') as download:
@@ -275,31 +193,6 @@ def generate_download_file_response_new(download_file, display_name=None, header
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",
                              'Category': category, 'Message': msg})
-
-
-def generate_text_response(download_text, category='success', msg=''):
-    """Generates a download other response.
-
-    Parameters
-    ----------
-    download_text: str
-        Text to be downloaded as part of the response.
-    category: str
-        Category of the message to be displayed ('Success', 'Error', 'Warning')
-    msg: str
-        Optional message to be displayed in the submit-flash-field
-
-    Returns
-    -------
-    response object
-        A response object containing the downloaded file.
-
-    """
-    headers = {'Category': category, 'Message': msg}
-    if len(download_text) > 0:
-        headers['Content-Length'] = len(download_text)
-    return Response(download_text, mimetype='text/plain charset=utf-8', headers = headers)
-
 
 def generate_filename(basename, prefix=None, suffix=None, extension=None):
     """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
@@ -336,6 +229,30 @@ def generate_filename(basename, prefix=None, suffix=None, extension=None):
     return filename
 
 
+def generate_text_response(download_text, category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_text: str
+        Text to be downloaded as part of the response.
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    headers = {'Category': category, 'Message': msg}
+    if len(download_text) > 0:
+        headers['Content-Length'] = len(download_text)
+    return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
+
+
 def get_hed_path_from_pull_down(request):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
@@ -348,23 +265,23 @@ def get_hed_path_from_pull_down(request):
     tuple: str, str
         The HED XML local path and the HED display file name
     """
-    if common_constants.HED_VERSION not in request.form:
+    if common.HED_VERSION not in request.form:
         hed_file_path = ''
         hed_display_name = ''
-    elif request.form[common_constants.HED_VERSION] != common_constants.HED_OTHER_VERSION_OPTION:
-        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common_constants.HED_VERSION])
+    elif request.form[common.HED_VERSION] != common.HED_OTHER_VERSION_OPTION:
+        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common.HED_VERSION])
         hed_display_name = os.path.basename(hed_file_path)
-    elif request.form[common_constants.HED_VERSION] == common_constants.HED_OTHER_VERSION_OPTION and \
-            common_constants.HED_XML_FILE in request.files:
-        hed_file_path = save_file_to_upload_folder(request.files[common_constants.HED_XML_FILE])
-        hed_display_name = request.files[common_constants.HED_XML_FILE].filename
+    elif request.form[common.HED_VERSION] == common.HED_OTHER_VERSION_OPTION and \
+            common.HED_XML_FILE in request.files:
+        hed_file_path = save_file_to_upload_folder(request.files[common.HED_XML_FILE])
+        hed_display_name = request.files[common.HED_XML_FILE].filename
     else:
         hed_file_path = ''
         hed_display_name = ''
     return hed_file_path, hed_display_name
 
 
-def get_optional_form_field(request, form_field_name, type=''):
+def get_optional_form_field(request, form_field_name, field_type=''):
     """Gets the specified optional form field if present.
 
     Parameters
@@ -373,7 +290,7 @@ def get_optional_form_field(request, form_field_name, type=''):
         A Request object containing user data from the validation form.
     form_field_name: string
         The name of the optional form field.
-    type: str
+    field_type: str
         Name of expected type: 'boolean' or 'string'
 
     Returns
@@ -383,11 +300,11 @@ def get_optional_form_field(request, form_field_name, type=''):
 
     """
     form_field_value = ''
-    if type == common_constants.BOOLEAN:
+    if field_type == common.BOOLEAN:
         form_field_value = False
         if form_field_name in request.form:
             form_field_value = True
-    elif type == common_constants.STRING:
+    elif field_type == common.STRING:
         if form_field_name in request.form:
             form_field_value = request.form[form_field_name]
     return form_field_value
@@ -418,86 +335,46 @@ def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     return uploaded_file_name, original_file_name
 
 
-def handle_error(e, hedInfo=None, title=None):
+def handle_error(ex, hed_info=None, title=None):
     """Handles an error by logging and running an error as Response or simple string
 
     Parameters
     ----------
-    error_code: string
-        The code associated with the error.
-    message: string
-        The message associated with the error.
-    return_response: Bool
-        If True returns a Response object.
+    ex: Exception
+        The exception raised.
+    hed_info: dict
+        A dictionary of information.
+    title: str
+        A title to be included with the message.
     Returns
     -------
-    Response object or string
+    str
 
     """
 
-    if hasattr(e, 'error_type'):
-        error_code = e.error_type
+    if hasattr(ex, 'error_type'):
+        error_code = ex.error_type
     else:
-        error_code = type(e).__name__
-    if not hedInfo:
-        hedInfo = {}
+        error_code = type(ex).__name__
+    if not hed_info:
+        hed_info = {}
     if not title:
         title = ''
-    hedInfo['message'] = f"{title}[{error_code}: {e.message}]"
-    return json.dumps(hedInfo)
-
-    # error_message = f"{error_code}: {message}"
-    # current_app.logger.error(error_message)
-    # if not return_response:
-    #     return error_message
-    #
-    # response = Response("Error occurred", [('Content-Type', 'text/plain')])
-    # response.status = error_message
-    # response.status_code = error_code
-    # return response
-
-def handle_http_error(error_code, message, as_text=False):
-    """Handles an http error.
-
-    Parameters
-    ----------
-    error_code: string
-        The code associated with the error.
-    message: string
-        The message associated with the error.
-    as_text: Bool
-        If we should encode this as text or json.
-    Returns
-    -------
-    boolean
-        A tuple containing a HTTP response object and a code.
+    hed_info['message'] = f"{title}[{error_code}: {ex.message}]"
+    return json.dumps(hed_info)
 
 
-    """
-    error_message = f"{error_code}: [{message}]"
-    current_app.logger.error(error_message)
-    if as_text:
-        return error_message, error_code
-    # return jsonify(message=error_message, error_code=error_code), error_code
-    x = jsonify(message=error_message)
-    return jsonify(message=error_message), error_code
-
-
-def handle_http_error_new(ex):
+def handle_http_error(ex):
     """Handles an http error.
 
     Parameters
     ----------
     ex: Exception
         A class that extends python Exception class
-    message: string
-        The message associated with the error.
-    as_text: Bool
-        If we should encode this as text or json.
     Returns
     -------
-    boolean
-        A tuple containing a HTTP response object and a code.
+    Response
+        A response object indicating the field_type of error
 
 
     """
@@ -516,6 +393,34 @@ def handle_http_error_new(ex):
 
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):
+    """Save a file_object to the upload folder.
+
+    Parameters
+    ----------
+    file_object: File object
+        A other object that points to a other that was first saved in a temporary location.
+    delete_on_close: bool
+        If true will delete after closing
+
+    Returns
+    -------
+    string
+        The path to the other that was saved to the temporary folder.
+
+    """
+
+    if file_object.filename:
+        file_extension = get_file_extension(file_object.filename)
+        temporary_upload_file = tempfile.NamedTemporaryFile(suffix=file_extension, delete=delete_on_close,
+                                                            dir=current_app.config['UPLOAD_FOLDER'])
+        for line in file_object:
+            temporary_upload_file.write(line)
+        return temporary_upload_file.name
+    else:
+        raise("UnableToUploadFile", "File could not uploaded", "UnknownFile")
+
+
+def save_file_to_upload_folder_no_exception(file_object, delete_on_close=False):
     """Save a other to the upload folder.
 
     Parameters
@@ -540,7 +445,7 @@ def save_file_to_upload_folder(file_object, delete_on_close=False):
             for line in file_object:
                 temporary_upload_file.write(line)
             file_path = temporary_upload_file.name
-    except:
+    except Exception:
         file_path = ''
     return file_path
 

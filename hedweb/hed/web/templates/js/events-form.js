@@ -34,9 +34,7 @@ function getColumnsInfo(spreadsheetFile, worksheetName) {
             setComponentsRelatedToColumns(columnsInfo);
         },
         error: function (jqXHR) {
-            console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Event annotations could not be processed.', 'error',
-                'spreadsheet-flash');
+            flashMessageOnScreen('Spreadsheet columns could not be determined.', 'error', 'spreadsheet-flash');
         }
     });
 }
@@ -63,9 +61,7 @@ function getWorksheetsInfo(workbookFile) {
             flashWorksheetNumberMessage(worksheetsInfo['worksheet-names']);
         },
         error: function (jqXHR) {
-            console.log(jqXHR);
-            // console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Event annotations could not be processed.', 'error',
+            flashMessageOnScreen('Worksheet names could not be determined.', 'error',
                 'events-validation-submit-flash');
         }
     });
@@ -169,10 +165,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccessNew(download, xhr, display_name, 'events-validation-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'events-validation-submit-flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailureNew(download, xhr, display_name, 'events-validation-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'events-validation-submit-flash')
             }
         }
     )
