@@ -1,71 +1,80 @@
-
+const EXCEL_FILE_EXTENSIONS = ['xlsx', 'xls'];
+const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
+const VALID_FILE_EXTENSIONS = ['xlsx', 'xls', 'tsv', 'txt']
 $(function () {
     prepareForm();
+});
+
+/**
+ * Spreadsheet event handler function. Checks if the file uploaded has a valid spreadsheet extension.
+ */
+$('#spreadsheet-file').on('change', function () {
+    let spreadsheet = $('#spreadsheet-file');
+    let spreadsheetPath = spreadsheet.val();
+    let spreadsheetFile = spreadsheet[0].files[0];
+    clearSpreadsheetFlashMessages();
+
+    if (!fileHasValidExtension(spreadsheetPath, VALID_FILE_EXTENSIONS)) {
+        clearForm();
+        flashMessageOnScreen('Upload a valid spreadsheet (.xlsx, .xls, .tsv, .txt)', 'error', 'spreadsheet-flash');
+        return
+    }
+    clearTagColumnTextboxes();
+    updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
+    if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
+        getWorksheetsInfo(spreadsheetFile);
+        showWorksheetSelect();
+    }
+    else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
+        $('#worksheet-name').empty();
+        getWorksheetsInfo(spreadsheetFile);
+        hideWorksheetSelect();
+    }
 });
 
 /**
  * Submits the form if the tag columns textbox is valid.
  */
 $('#spreadsheet-validation-submit').on('click', function () {
-    if (spreadsheetIsSpecified() && tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
+    if (fileIsSpecified('#spreadsheet-file', 'spreadsheet-flash', 'Spreadsheet is not specified.') &&
+        tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
 
+/**
+ * Gets the information associated with the Excel worksheet that was newly selected. This information contains
+ * the names of the columns and column indices that contain HED tags.
+ */
+$('#worksheet-name').on('change', function () {
+    let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
+    let worksheetName = $('#worksheet-name option:selected').text();
+    // $('#worksheet-name').val(worksheetName)
+    clearSpreadsheetFlashMessages();
+    getWorksheetsInfo(spreadsheetFile, worksheetName, false);
+});
 
 /**
- * Clears tag column text boxes.
+ * Clear the fields in the form.
  */
-function clearTagColumnTextboxes() {
-    $('.textbox-group input[field_type="text"]').val('');
+function clearForm() {
+    $('#spreadsheet-form')[0].reset();
+    $('#spreadsheet-display-name').text('');
+    $('#worksheet-name').empty();
+    clearTagColumnTextboxes();
+    hideColumnNames();
+    hideWorksheetSelect()
+    hideOtherHEDVersionFileUpload()
 }
 
 /**
- * Flash a message showing the number of column columns that contain tags.
- * @param {Array} tagColumnIndices - An array of indices of columns containing tags
- * @param {Array} requiredTagColumnIndices - An array of indices of columns containing required tags
- * contain tags.
+ * Clear the flash messages that aren't related to the form submission.
  */
-function flashTagColumnCountMessage(tagColumnIndices, requiredTagColumnIndices) {
-    let numberOfTagColumns = (tagColumnIndices.length + Object.keys(requiredTagColumnIndices).length).toString();
-    if (numberOfTagColumns === '0') {
-        flashMessageOnScreen('Warning: No tag column(s) found... Using the 2nd column', 'warning',
-            'tag-columns-flash');
-    } else {
-        flashMessageOnScreen(numberOfTagColumns + ' tag column(s) found', 'success',
-            'tag-columns-flash');
-    }
-}
-
-/**
- * Gets the spreadsheet columns.
- * @param {Object} spreadsheetFile - A spreadsheet file.
- * @param {String} worksheetName - An Excel worksheet name.
- */
-function getColumnsInfo(spreadsheetFile, worksheetName) {
-    let formData = new FormData();
-    formData.append('spreadsheet-file', spreadsheetFile);
-    if (typeof worksheetName !== 'undefined') {
-        formData.append('worksheet-name', worksheetName);
-    }
-    $.ajax({
-        type: 'POST',
-        url: "{{url_for('route_blueprint.get_spreadsheet_columns_info')}}",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (columnsInfo) {
-            setComponentsRelatedToColumns(columnsInfo);
-            flashTagColumnCountMessage(columnsInfo['tag-column-indices'],
-                columnsInfo['required-tag-column-indices']);
-        },
-        error: function (jqXHR) {
-            console.log(jqXHR.responseJSON.message);
-            flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
-                'spreadsheet-flash');
-        }
-    });
+function clearSpreadsheetFlashMessages() {
+    flashMessageOnScreen('', 'success', 'spreadsheet-flash');
+    flashMessageOnScreen('', 'success', 'tag-columns-flash');
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
+    flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
 }
 
 /**
@@ -73,160 +82,78 @@ function getColumnsInfo(spreadsheetFile, worksheetName) {
  * worksheets, the names of the columns in the first worksheet, and column indices that contain HED tags in the
  * first worksheet.
  * @param {Object} workbookFile - An Excel workbook file.
+ * @param {string} worksheetName - name of worksheet or undefined.
+ * @param {boolean} repopulate - if true repopulate the select pull down with worksheet names
  */
-function getWorksheetsInfo(workbookFile) {
+function getWorksheetsInfo(workbookFile, worksheetName=undefined, repopulate=true) {
     let formData = new FormData();
-    formData.append('spreadsheet-file', workbookFile);
+    formData.append('columns-file', workbookFile);
+    if (worksheetName !== undefined) {
+        formData.append('worksheet-selected', worksheetName)
+    }
     $.ajax({
         type: 'POST',
-        url: "{{url_for('route_blueprint.get_worksheets_info')}}",
+        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
         dataType: 'json',
         success: function (worksheetsInfo) {
-            populateWorksheetSelectbox(worksheetsInfo['worksheet-names']);
-            setComponentsRelatedToColumns(worksheetsInfo);
-            flashWorksheetNumberMessage(worksheetsInfo['worksheet-names']);
-            flashTagColumnCountMessage(worksheetsInfo['tag-column-indices'],
-                worksheetsInfo['required-tag-column-indices']);
+            if (repopulate) {
+                populateWorksheetDropdown(worksheetsInfo['worksheet-names']);
+            }
+            setComponentsRelatedToColumns(worksheetsInfo, true);
         },
         error: function (jqXHR) {
-            console.log(jqXHR);
-            // console.log(jqXHR.responseJSON.message);
             flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
-                'spreadsheet-validation-submit-flash');
+                'spreadsheet-flash');
         }
     });
 }
 
 
 /**
- * Populate the required tag column textboxes from the tag column indices found in the spreadsheet columns.
- * @param {object} requiredTagColumnIndices - A dictionary containing the required tag column indices found
- * in the spreadsheet. The keys are the column names and the values are the indices.
+ * Hides  worksheet select section in the form.
  */
-function populateRequiredTagColumnTextboxes(requiredTagColumnIndices) {
-    for (let key in requiredTagColumnIndices) {
-        $('#' + key.toLowerCase() + '-column').val(requiredTagColumnIndices[key].toString());
-    }
+function hideWorksheetSelect() {
+    $('#worksheet-select').hide();
 }
 
 /**
- * Populate the tag column textbox from the tag column indices found in the spreadsheet columns.
- * @param {Array} tagColumnIndices - An integer array of tag column indices found in the spreadsheet
- * columns.
+ * Populate the Excel worksheet select box.
+ * @param {Array} worksheetNames - An array containing the Excel worksheet names.
  */
-function populateTagColumnsTextbox(tagColumnIndices) {
-    $('#tag-columns').val(tagColumnIndices.sort().map(String));
+function populateWorksheetDropdown(worksheetNames) {
+    if (Array.isArray(worksheetNames) && worksheetNames.length > 0) {
+        let worksheetDropdown = $('#worksheet-name');
+        showWorksheetSelect();
+        worksheetDropdown.empty();
+        for (let i = 0; i < worksheetNames.length; i++) {
+            $('#worksheet-name').append(new Option(worksheetNames[i], worksheetNames[i]) );
+        }
+    }
 }
-
 
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
 function prepareForm() {
-    resetForm();
+    clearForm();
     getHEDVersions()
     hideColumnNames();
+    hideWorksheetSelect();
     hideOtherHEDVersionFileUpload();
 }
 
-/**
- * Resets the flash messages that aren't related to the form submission.
- */
-function resetFormFlashMessages() {
-    flashMessageOnScreen('', 'success', 'spreadsheet-flash');
-    flashMessageOnScreen('', 'success', 'worksheet-flash');
-    resetTagColumnMessages();
-    flashMessageOnScreen('', 'success', 'hed-select-flash');
-    flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
-}
 
 /**
- * Resets the fields in the form.
+ * Show the worksheet select section.
  */
-function resetForm() {
-    $('#spreadsheet-form')[0].reset();
-    clearSpreadsheetFileLabel();
-    clearWorksheetSelectbox();
-    hideColumnNames();
-    hideOtherHEDVersionFileUpload()
+function showWorksheetSelect() {
+    $('#worksheet-select').show();
 }
 
-/**
- * Resets the flash messages that aren't related to the form submission.
- */
-function resetTagColumnMessages() {
-    flashMessageOnScreen('', 'success', 'tag-columns-flash');
-}
-
-/**
- * Sets the components related to Excel worksheet columns when they are all empty.
- */
-function setComponentsRelatedToEmptyColumnNames() {
-    clearTagColumnTextboxes();
-    setHasColumnNamesCheckbox(false);
-    hideColumnNames();
-}
-
-/**
- * Sets the components related to the spreadsheet tag column indices when they are empty.
- */
-function setComponentsRelatedToEmptyTagColumnIndices() {
-    $('#tag-columns').val('2');
-}
-
-/**
- * Sets the components related to the spreadsheet columns when they are not empty.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- */
-function setComponentsRelatedToNonEmptyColumnNames(columnNames) {
-    showColumnNames(columnNames)
-    setHasColumnNamesCheckbox(true);
-}
-
-/**
- * Sets the components related to the Excel worksheet columns.
- * @param {JSON} columnsInfo - A JSON object containing information related to the spreadsheet
- * columns.
- * This information contains the names of the columns and column indices that contain HED tags.
- */
-function setComponentsRelatedToColumns(columnsInfo) {
-    clearTagColumnTextboxes();
-    if (columnNamesAreEmpty(columnsInfo['column-names'])) {
-        setComponentsRelatedToEmptyColumnNames();
-    } else {
-        setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
-    }
-    if (tagColumnsIndicesAreEmpty(columnsInfo['tag-column-indices'])) {
-        setComponentsRelatedToEmptyTagColumnIndices();
-    } else {
-        populateTagColumnsTextbox(columnsInfo['tag-column-indices']);
-    }
-    if (Object.keys(columnsInfo['required-tag-column-indices']).length !== 0) {
-        populateRequiredTagColumnTextboxes(columnsInfo['required-tag-column-indices']);
-    }
-}
-
-/**
- * Sets the spreadsheet has column names checkbox to false.
- * @param {boolean} value - is checked if true and unchecked if false
- */
-function setHasColumnNamesCheckbox(value) {
-    $('#has-column-names').prop('checked', value);
-}
-
-/**
- * Checks to see if the worksheet tag column indices are empty.
- * @param {Array} tagColumnsIndices - An array containing the tag column indices based on the
- *                columns found in the spreadsheet.
- * @returns {boolean} - True if the spreadsheet tag column indices array is empty.
- */
-function tagColumnsIndicesAreEmpty(tagColumnsIndices) {
-    return tagColumnsIndices.length <= 0
-}
 
 /**
  * Submit the form and return the validation results. If there are issues then they are returned in an attachment
@@ -235,14 +162,15 @@ function tagColumnsIndicesAreEmpty(tagColumnsIndices) {
 function submitForm() {
     let spreadsheetForm = document.getElementById("spreadsheet-form");
     let formData = new FormData(spreadsheetForm);
-    let worksheetName = $('#worksheet-name option:selected').text();
+    let worksheetName = $('#worksheet-select option:selected').text();
+    formData.append('worksheet-selected', worksheetName)
     let prefix = 'issues';
     if(worksheetName) {
         prefix = prefix + '_worksheet_' + worksheetName;
     }
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0].name;
     let display_name = convertToResultsName(spreadsheetFile, prefix)
-    resetFormFlashMessages();
+    clearSpreadsheetFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'spreadsheet-validation-submit-flash')
     $.ajax({
@@ -260,23 +188,4 @@ function submitForm() {
             }
         }
     )
-}
-
-/**
- * Checks to see if the tag columns textbox has valid input. Valid input is an integer or a comma-separated list of
- * integers that are the column indices in a Excel worksheet that contain HED tags.
- * @returns {boolean} - True if the tags columns textbox is valid.
- */
-function tagColumnsTextboxIsValid() {
-    let otherTagColumns = $('#tag-columns').val().trim();
-    let valid = true;
-    if (!isEmptyStr(otherTagColumns)) {
-        let pattern = new RegExp('^([ \\d]+,)*[ \\d]+$');
-        let valid = pattern.test(otherTagColumns);
-        if (!valid) {
-            flashMessageOnScreen('Tag column(s) must be a number or a comma-separated list of numbers',
-                'error', 'tag-columns-flash')
-        }
-    }
-    return valid;
 }

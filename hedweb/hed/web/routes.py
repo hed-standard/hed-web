@@ -8,10 +8,36 @@ from hed.web.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
 from hed.web import dictionary, events, schema, spreadsheet, services
 from hed.web.hedstring import generate_arguments_from_hedstring_form, hedstring_process
-from hed.web.spreadsheet_utils import get_column_info_dictionary, get_worksheets_info_dictionary
+from hed.web.spreadsheet_utils import generate_columns_info_input, get_columns_info, get_worksheet_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
+
+
+@route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
+def get_columns_info_results():
+    """Gets information related to the spreadsheet columns.
+
+    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    string
+        A serialized JSON string containing information related to the spreadsheet columns.
+
+    """
+    input_arguments = {}
+    try:
+        input_arguments = generate_columns_info_input(request)
+        columns_info = get_columns_info(input_arguments)
+        return json.dumps(columns_info)
+    except Exception as ex:
+        return handle_error(ex)
+    finally:
+        delete_file_no_exceptions(input_arguments.get(common.COLUMNS_PATH, ''))
 
 
 @route_blueprint.route(route_constants.DICTIONARY_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -126,6 +152,8 @@ def get_hed_version():
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
+    finally:
+        delete_file_no_exceptions(request.files[common.HED_XML_FILE])
 
 
 @route_blueprint.route(route_constants.HED_MAJOR_VERSION_ROUTE, methods=['GET'])
@@ -196,34 +224,6 @@ def get_schema_conversion_results():
         delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
-@route_blueprint.route(route_constants.SPREADSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
-def get_spreadsheet_columns_info():
-    """Gets information related to the spreadsheet columns.
-
-    This information contains the names of the spreadsheet columns and column indices that contain HED tags.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the spreadsheet columns.
-
-    """
-    spreadsheet_path = ''
-    try:
-        spreadsheet_file = request.files.get(common.SPREADSHEET_FILE, '')
-        spreadsheet_path = save_file_to_upload_folder(spreadsheet_file)
-        worksheet_name = request.form.get(common.WORKSHEET_NAME, None)
-        columns_info = get_column_info_dictionary(spreadsheet_path, worksheet_name)
-        return json.dumps(columns_info)
-    except Exception as ex:
-        return handle_error(ex)
-    finally:
-        delete_file_no_exceptions(spreadsheet_path)
-
-
 @route_blueprint.route(route_constants.SPREADSHEET_VALIDATION_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def get_spreadsheet_validation_results():
     """Validate the spreadsheet in the form after submission and return an attachment other containing the output.
@@ -247,33 +247,39 @@ def get_spreadsheet_validation_results():
         delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
 
 
-@route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
-def get_worksheets_info():
-    """Gets information related to the Excel worksheets.
-
-    This information contains the names of the worksheets in a workbook, the names of the columns in the first
-    worksheet, and column indices that contain HED tags in the first worksheet.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the Excel worksheets.
-
-    """
-
-    workbook_path = ''
-    try:
-        workbook_file = request.files.get(common.SPREADSHEET_FILE, None)
-        workbook_path = save_file_to_upload_folder(workbook_file)
-        worksheets_info = get_worksheets_info_dictionary(workbook_path)
-        return json.dumps(worksheets_info)
-    except Exception as ex:
-        return handle_error(ex)
-    finally:
-        delete_file_no_exceptions(workbook_path)
+# @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
+# def get_worksheets_info():
+#     """Gets information related to the Excel worksheets.
+#
+#     This information contains the names of the worksheets in a workbook, the names of the columns in the first
+#     worksheet, and column indices that contain HED tags in the first worksheet.
+#
+#     Parameters
+#     ----------
+#
+#     Returns
+#     -------
+#     string
+#         A serialized JSON string containing information related to the Excel worksheets.
+#
+#     """
+#
+#     file_path = ''
+#     try:
+#         x = request
+#         y = request.form
+#         z = request.files
+#         workbook_file = request.files.get(common.SPREADSHEET_FILE, None)
+#         file_path = save_file_to_upload_folder(workbook_file)
+#         worksheet_names = get_excel_worksheet_names(file_path)
+#         column_info = {common.WORKSHEET_NAMES: get_excel_worksheet_names(file_path)}
+#         column_info = get_column_info_dictionary(column_info, file_path, column_info[common.WORKSHEET_NAMES][0])
+#         return json.dumps(column_info)
+#
+#     except Exception as ex:
+#         return handle_error(ex)
+#     finally:
+#         delete_file_no_exceptions(file_path)
 
 
 @route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])

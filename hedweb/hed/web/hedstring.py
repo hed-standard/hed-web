@@ -27,14 +27,14 @@ def generate_arguments_from_hedstring_form(request):
                        common.HED_DISPLAY_NAME: hed_display_name,
                        common.HEDSTRING: request.form['hedstring-input'],
                        common.HEDSTRING_VALIDATE: False,
-                       common.HEDSTRING_LONG_TO_SHORT: False,
-                       common.HEDSTRING_SHORT_TO_LONG: False}
+                       common.HEDSTRING_TO_SHORT: False,
+                       common.HEDSTRING_TO_LONG: False}
     if form_has_option(request, common.HEDSTRING_OPTION, common.HEDSTRING_VALIDATE):
         input_arguments[common.HEDSTRING_VALIDATE] = True
-    elif form_has_option(request, common.HEDSTRING_OPTION, common.HEDSTRING_LONG_TO_SHORT):
-        input_arguments[common.HEDSTRING_LONG_TO_SHORT] = True
-    elif form_has_option(request, common.HEDSTRING_OPTION, common.HEDSTRING_SHORT_TO_LONG):
-        input_arguments[common.HEDSTRING_SHORT_TO_LONG] = True
+    elif form_has_option(request, common.HEDSTRING_OPTION, common.HEDSTRING_TO_SHORT):
+        input_arguments[common.HEDSTRING_TO_SHORT] = True
+    elif form_has_option(request, common.HEDSTRING_OPTION, common.HEDSTRING_TO_LONG):
+        input_arguments[common.HEDSTRING_TO_LONG] = True
     return input_arguments
 
 
@@ -57,9 +57,9 @@ def hedstring_process(input_arguments):
         raise HedError('EmptyHEDString', "Please enter a nonempty HED string to process")
     if input_arguments[common.HEDSTRING_VALIDATE]:
         return hedstring_validate(input_arguments)
-    elif input_arguments[common.HEDSTRING_LONG_TO_SHORT]:
+    elif input_arguments[common.HEDSTRING_TO_SHORT]:
         return hedstring_convert(input_arguments, short_to_long=False)
-    elif input_arguments[common.HEDSTRING_SHORT_TO_LONG]:
+    elif input_arguments[common.HEDSTRING_TO_LONG]:
         return hedstring_convert(input_arguments)
     else:
         raise HedError('UnknownProcessingMethod', "Select a hedstring processing method")

@@ -188,7 +188,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                 yield header
             for line in download:
                 yield line
-            delete_file_if_it_exists(download_file)
+            delete_file_no_exceptions(download_file)
 
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",

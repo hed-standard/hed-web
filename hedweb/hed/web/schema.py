@@ -66,7 +66,7 @@ def schema_check(input_arguments):
         return generate_download_file_response(issue_file, display_name=file_name, category='warning',
                                                msg='Schema is not HED 3G compliant')
     else:
-        return generate_text_response("", msg='Spreadsheet had no validation errors')
+        return generate_text_response("", msg='Schema had no HED-3G validation errors')
 
 
 def schema_convert(input_arguments):

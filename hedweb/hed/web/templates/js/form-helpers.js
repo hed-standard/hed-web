@@ -8,20 +8,6 @@ function cancelWasPressedInChromeFileUpload(filePath) {
     return isEmptyStr(filePath) && (window.chrome)
 }
 
-/**
- * Checks to see if any entries in an array of names are empty.
- * @param {Array} names - An array containing a list of names.
- * @returns {boolean} - True if any of the names in the array are all empty.
- */
-function columnNamesAreEmpty(names) {
-    let numberOfNames = names.length;
-    for (let i = 0; i < numberOfNames; i++) {
-        if (!isEmptyStr(names[i].trim())) {
-            return false;
-        }
-    }
-    return true;
-}
 
 /**
  * Converts a path and prefix to a text results name
@@ -46,7 +32,21 @@ function fileHasValidExtension(filePath, acceptedFileExtensions) {
     return $.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1
 }
 
-
+/**
+ * Checks to see if a file has been specified.
+ * @param {string} nameID - #id of the element holding the name
+ * @param {string} flashID - id of the flash element to display error message
+ * @param {string} errorMsg - error message to be displayed if file isn't in form
+ * @returns {boolean} - returns true if file is specified
+ */
+function fileIsSpecified(nameID, flashID, errorMsg) {
+    let theFile = $(nameID);
+    if (theFile[0].files.length === 0) {
+        flashMessageOnScreen(errorMsg, 'error', flashID);
+        return false;
+    }
+    return true;
+}
 
 /**
  * Flash a message on the screen.

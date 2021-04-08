@@ -49,7 +49,6 @@ function getHEDVersions() {
             processData: false,
             dataType: 'json',
             success: function (hedInfo) {
-                resetFormFlashMessages();
                 if (hedInfo['hed-major-versions']) {
                      populateHEDVersionsDropdown(hedInfo['hed-major-versions']);
                 } else if (hedInfo['message'])
@@ -82,7 +81,6 @@ function getVersionFromHEDFile(hedXMLFile) {
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            resetFormFlashMessages();
             if (hedInfo['hed-version']) {
                 flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'], 'success', 'hed-select-flash');
             } else if (hedInfo['message'])
@@ -129,6 +127,7 @@ function hideOtherHEDVersionFileUpload() {
  */
 function populateHEDVersionsDropdown(hedVersions) {
     let hedVersionDropdown = $('#hed-version');
+    $('#hed-version').empty()
     hedVersionDropdown.append('<option value=' + hedVersions[0] + '>' + hedVersions[0] + ' (Latest)</option>');
     for (let i = 1; i < hedVersions.length; i++) {
         hedVersionDropdown.append('<option value=' + hedVersions[i] + '>' + hedVersions[i] + '</option>');

@@ -3,7 +3,13 @@
 {% from "hed-pulldown.html" import create_hed_pulldown %}
 
 {% block content %}
-    <h2>Validate JSON dictionary containing HED tags</h2>
+    <h2>Validate BIDS-style JSON dictionary</h2>
+    <p>
+        <i>Upload a BIDS-style JSON events file, select a HED schema, and press Validate.<br>
+        You will see either a downloadable results file or a status message.
+        </i>
+    </p>
+
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="dictionary-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -14,7 +20,7 @@
             {{ create_hed_pulldown() }}
 
             <div class="form-group">
-                <label>Specify additional options:</label><br>
+                <h3>Specify additional options:</h3>
                 <div class="checkbox-group">
                     <div class="inline-field">
                         <input type="checkbox" name="check-for-warnings" id="check-for-warnings">

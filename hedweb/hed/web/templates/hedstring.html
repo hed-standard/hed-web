@@ -3,7 +3,13 @@
 {% from "hed-pulldown.html" import create_hed_pulldown %}
 
 {% block content %}
-    <h2>HED string utilities</h2>
+    <h2>HED string quick checks</h2>
+        <p>
+        <i>Enter or paste a HED string in the upper text box.<br>
+        Choose a HED schema version, pick an action, and press Process.<br>
+        You will see either the results in the lower text box or a status message below.
+        </i>
+    </p>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
     <form id="hedstring-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -30,19 +36,19 @@
         </div>
         <div class="form-group">
             <input class="radio-btn" type="radio" name="hedstring-option"
-                   id="hedstring-long-to-short" value="hedstring-long-to-short"
-                   aria-label="Select this button to convert hedstring from long form to short form">
-            <label class="secondary-label">Convert from long to short form</label>
+                   id="hedstring-to-short" value="hedstring-to-short"
+                   aria-label="Select this button to convert hedstring to short form">
+            <label class="secondary-label">Convert to short</label>
       </div>
         <div class="form-group">
             <input class="radio-btn" type="radio" name="hedstring-option"
-                   id="hedstring-short-to-long" value="hedstring-short-to-long"
-                   aria-label="Select this button to convert hedstring from short form to long form">
-            <label class="secondary-label">Convert from short to long form</label>
+                   id="hedstringto-long" value="hedstring-to-long"
+                   aria-label="Select this button to convert hedstring to long form">
+            <label class="secondary-label">Convert to long</label>
         </div>
 
         <div class="form-group">
-            <button id="hedstring-submit" type="button">Submit</button>
+            <button id="hedstring-submit" type="button">Process</button>
         </div>
 
         <div class="form-group">

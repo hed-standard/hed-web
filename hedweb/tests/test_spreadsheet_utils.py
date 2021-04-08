@@ -48,23 +48,23 @@ class Test(unittest.TestCase):
         self.assertNotIn('Temp', worksheet_names, "Temp is not one of the worksheet names")
 
     def test_get_spreadsheet_other_tag_column_indices(self):
-        self.assertTrue(1, "Testing get_spreadsheet_other_tag_column_indices")
+        self.assertTrue(1, "Testing get_other_tag_column_indices")
         # def test_get_spreadsheet_other_tag_column_indices(self):
         #     column_names = ['a,', spreadsheet_constants.OTHER_TAG_COLUMN_NAMES[0]]
         #     expected_indices = [2]
-        #     indices = utils.get_spreadsheet_other_tag_column_indices(column_names)
+        #     indices = utils.get_other_tag_column_indices(column_names)
         #     self.assertTrue(indices)
         #     self.assertIsInstance(indices, list)
         #     self.assertEqual(indices, expected_indices)
         #
 
     def test_get_spreadsheet_specific_tag_column_indices(self):
-        self.assertTrue(1, "Testing get_spreadsheet_specific_tag_column_indices")
+        self.assertTrue(1, "Testing get_specific_tag_column_indices")
         # def test_get_spreadsheet_specific_tag_column_indices(self):
         #     column_names = ['a,', spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES_DICTIONARY[
         #         spreadsheet_constants.SPECIFIC_TAG_COLUMN_NAMES[0]][0]]
         #     # print(column_names)
-        #     indices = utils.get_spreadsheet_specific_tag_column_indices(column_names)
+        #     indices = utils.get_specific_tag_column_indices(column_names)
         #     self.assertTrue(indices)
         #     self.assertIsInstance(indices, dict)
         #

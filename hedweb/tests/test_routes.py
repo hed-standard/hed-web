@@ -63,9 +63,9 @@ class Test(unittest.TestCase):
         response = self.app.test.post('/schema-conversion-submit')
         self.assertEqual(400, response.status_code, 'Converting schema requires data')
 
-    def test_get_spreadsheet_columns_info(self):
-        response = self.app.test.post('/get-spreadsheet-columns-info')
-        self.assertEqual(400, response.status_code, 'Returning spreadsheet column info requires data')
+    def test_get_columns_info(self):
+        response = self.app.test.post('/get-columns-info')
+        self.assertEqual(400, response.status_code, 'Returning column info requires data')
 
     def test_get_spreadsheet_validation_results(self):
         response = self.app.test.post('/spreadsheet-validation-submit')

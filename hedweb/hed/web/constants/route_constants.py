@@ -1,6 +1,9 @@
 ROUTE_BLUEPRINT = 'route_blueprint'
 
 ADDITIONAL_EXAMPLES_ROUTE = '/additional-examples'
+
+COLUMN_INFO_ROUTE = '/get-columns-info'
+
 COMMON_ERRORS_ROUTE = '/common-errors'
 DICTIONARY_ROUTE = '/dictionary'
 DICTIONARY_VALIDATION_SUBMIT_ROUTE = '/dictionary-validation-submit'
@@ -18,7 +21,7 @@ HED_VERSION_ROUTE = '/get-hed-version'
 SCHEMA_ROUTE = '/schema'
 SCHEMA_COMPLIANCE_CHECK_SUBMIT_ROUTE = '/schema-compliance-check-submit'
 SCHEMA_CONVERSION_SUBMIT_ROUTE = '/schema-conversion-submit'
-SPREADSHEET_COLUMN_INFO_ROUTE = '/get-spreadsheet-columns-info'
+
 SPREADSHEET_ROUTE = '/spreadsheet'
 SPREADSHEET_VALIDATION_SUBMIT_ROUTE = '/spreadsheet-validation-submit'
 WORKSHEET_COLUMN_INFO_ROUTE = '/get-worksheets-info'

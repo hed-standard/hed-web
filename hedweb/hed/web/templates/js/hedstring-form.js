@@ -15,13 +15,23 @@ $('#hedstring-submit').on('click', function () {
     }
 });
 
-/*$('#hedstring-validate').on('change', function () {
-    updateFormGui();
-});
+/**
+ * Resets the fields in the form.
+ */
+function clearForm() {
+    $('#hedstring-form')[0].reset();
+    clearFormFlashMessages();
+    hideOtherHEDVersionFileUpload()
+}
 
-$('#schema-url-option').on('change',function () {
-    updateFormGui();
-});*/
+/**
+ * Clear the flash messages that aren't related to the form submission.
+ */
+function clearFormFlashMessages() {
+    clearHEDFlashMessage();
+    flashMessageOnScreen('', 'success', 'hedstring-flash');
+    flashMessageOnScreen('', 'success', 'hedstring-submit-flash');
+}
 
 /**
  * Checks to see if a hedstring has been specified.
@@ -35,37 +45,15 @@ function hedStringIsSpecified() {
     return true;
 }
 
-
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
 function prepareForm() {
-    resetForm();
+    clearForm();
     getHEDVersions()
     hideOtherHEDVersionFileUpload()
 }
-
-/**
- * Resets the fields in the form.
- */
-function resetForm() {
-    $('#hedstring-form')[0].reset();
-    resetFormFlashMessages();
-    hideOtherHEDVersionFileUpload()
-}
-
-
-/**
- * Resets the flash messages that aren't related to the form submission.
- */
-function resetFormFlashMessages() {
-    clearHEDFlashMessage();
-    flashMessageOnScreen('', 'success', 'hedstring-flash');
-    flashMessageOnScreen('', 'success', 'hedstring-submit-flash');
-}
-
-
 
 /**
  * Submit the form and return the validation results. If there are issues then they are returned in an attachment
@@ -74,10 +62,7 @@ function resetFormFlashMessages() {
 function submitHedStringForm() {
     let stringForm = document.getElementById("hedstring-form");
     let formData = new FormData(stringForm);
-
-    //let dictionaryFile = getJsonFileLabel();
-    //let display_name = convertToResultsName(dictionaryFile, 'issues')
-    resetFormFlashMessages();
+    clearFormFlashMessages();
     flashMessageOnScreen('HED string is being processed ...', 'success', 'hedstring-submit-flash')
     $.ajax({
             type: 'POST',
@@ -87,7 +72,7 @@ function submitHedStringForm() {
             processData: false,
             dataType: 'json',
             success: function (hedInfo) {
-                resetFormFlashMessages();
+                clearFormFlashMessages();
                 if (hedInfo['hedstring-result']) {
                     $('#hedstring-result').val(hedInfo['hedstring-result'])
                     flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')

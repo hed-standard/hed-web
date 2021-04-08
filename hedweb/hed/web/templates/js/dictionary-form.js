@@ -7,37 +7,38 @@ $(function () {
  * Submits the form if the tag columns textbox is valid.
  */
 $('#dictionary-validation-submit').on('click', function () {
-    if (jsonIsSpecified() && hedSpecifiedWhenOtherIsSelected()) {
+    if (fileIsSpecified('#json-file', 'json-flash', 'JSON is not specified.' ) && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
 
 /**
- * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
- * components will be hidden and populated.
+ * Clear the fields in the form.
  */
-function prepareForm() {
-    resetForm();
-    getHEDVersions()
-    hideOtherHEDVersionFileUpload();
+function clearForm() {
+    $('#dictionary-form')[0].reset();
+    clearFormFlashMessages()
+    clearJsonFileLabel();
+    hideOtherHEDVersionFileUpload()
 }
 
 /**
- * Resets the flash messages that aren't related to the form submission.
+ * Clear the flash messages that aren't related to the form submission.
  */
-function resetFormFlashMessages() {
+function clearFormFlashMessages() {
     clearJsonFlashMessage();
     clearHEDFlashMessage();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
 }
 
 /**
- * Resets the fields in the form.
+ * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
+ * components will be hidden and populated.
  */
-function resetForm() {
-    $('#dictionary-form')[0].reset();
-    clearJsonFileLabel();
-    hideOtherHEDVersionFileUpload()
+function prepareForm() {
+    clearForm();
+    getHEDVersions()
+    hideOtherHEDVersionFileUpload();
 }
 
 /**
@@ -50,7 +51,7 @@ function submitForm() {
 
     let dictionaryFile = getJsonFileLabel();
     let display_name = convertToResultsName(dictionaryFile, 'issues')
-    resetFormFlashMessages();
+    clearFormFlashMessages();
     flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-validation-submit-flash')
     $.ajax({
             type: 'POST',

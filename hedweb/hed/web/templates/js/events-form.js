@@ -1,144 +1,72 @@
+const TEXT_FILE_EXTENSIONS = ['tsv', 'txt'];
 
 $(function () {
     prepareForm();
 });
 
+
 /**
- * Submits the form if there is a spreadsheet file and an available hed schema
+ * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
  */
-$('#events-validation-submit').on('click', function () {
-    if (spreadsheetIsSpecified()  && hedSpecifiedWhenOtherIsSelected()) {
-        submitForm();
+$('#events-file').on('change', function () {
+    let events = $('#events-file');
+    let eventsPath = events.val();
+    clearFormFlashMessages();
+    if (cancelWasPressedInChromeFileUpload(eventsPath)) {
+        clearForm();
+    }
+    else if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
+        updateFileLabel(eventsPath, '#events-display-name');
+        let columnsInfo = getColumnsInfo('events-form', 'events-file');
+        let s = '';
+    } else {
+        clearForm();
+        flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events-flash');
     }
 });
 
 /**
- * Gets the spreadsheet columns.
- * @param {Object} spreadsheetFile - A spreadsheet file.
- * @param {String} worksheetName - An Excel worksheet name.
+ * Submits the form if there is an events file and an available hed schema
  */
-function getColumnsInfo(spreadsheetFile, worksheetName) {
-    let formData = new FormData();
-    formData.append('spreadsheet-file', spreadsheetFile);
-    if (typeof worksheetName !== 'undefined') {
-        formData.append('worksheet-name', worksheetName);
+$('#events-validation-submit').on('click', function () {
+    if (fileIsSpecified('#events-file', 'events-flash', 'Events file is not specified.')
+        && hedSpecifiedWhenOtherIsSelected()) {
+        submitForm();
     }
-    $.ajax({
-        type: 'POST',
-        url: "{{url_for('route_blueprint.get_spreadsheet_columns_info')}}",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (columnsInfo) {
-            setComponentsRelatedToColumns(columnsInfo);
-        },
-        error: function (jqXHR) {
-            flashMessageOnScreen('Spreadsheet columns could not be determined.', 'error', 'spreadsheet-flash');
-        }
-    });
+});
+
+
+/**
+ * Clears the fields in the form.
+ */
+function clearForm() {
+    $('#events-form')[0].reset();
+    $('#events-display-name').text('');
+    clearFormFlashMessages()
+    hideColumnNames();
+    hideOtherHEDVersionFileUpload();
 }
 
 /**
- * Gets information associated with the Excel workbook worksheets. This information contains the names of the
- * worksheets, the names of the columns in the first worksheet, and column indices that contain HED tags in the
- * first worksheet.
- * @param {Object} workbookFile - An Excel workbook file.
+ * Clear the flash messages that aren't related to the form submission.
  */
-function getWorksheetsInfo(workbookFile) {
-    let formData = new FormData();
-    formData.append('spreadsheet-file', workbookFile);
-    $.ajax({
-        type: 'POST',
-        url: "{{url_for('route_blueprint.get_worksheets_info')}}",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (worksheetsInfo) {
-            populateWorksheetSelectbox(worksheetsInfo['worksheet-names']);
-            setComponentsRelatedToColumns(worksheetsInfo);
-            flashWorksheetNumberMessage(worksheetsInfo['worksheet-names']);
-        },
-        error: function (jqXHR) {
-            flashMessageOnScreen('Worksheet names could not be determined.', 'error',
-                'events-validation-submit-flash');
-        }
-    });
+function clearFormFlashMessages() {
+    flashMessageOnScreen('', 'success', 'events-flash');
+    clearJsonFlashMessage()
+    flashMessageOnScreen('', 'success', 'hed-select-flash');
+    flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
 }
-
 
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
  * components will be hidden and populated.
  */
 function prepareForm() {
-    resetForm();
+    clearForm();
     getHEDVersions()
     hideColumnNames();
     hideOtherHEDVersionFileUpload();
 }
-
-/**
- * Resets the flash messages that aren't related to the form submission.
- */
-function resetFormFlashMessages() {
-    flashMessageOnScreen('', 'success', 'spreadsheet-flash');
-    flashMessageOnScreen('', 'success', 'worksheet-flash');
-    flashMessageOnScreen('', 'success', 'hed-select-flash');
-    flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
-}
-
-/**
- * Resets the fields in the form.
- */
-function resetForm() {
-    $('#events-form')[0].reset();
-    clearSpreadsheetFileLabel();
-    clearWorksheetSelectbox();
-    hideColumnNames();
-    hideOtherHEDVersionFileUpload()
-}
-
-/**
- * Sets the components related to Excel worksheet columns when they are all empty.
- */
-function setComponentsRelatedToEmptyColumnNames() {
-    setHasColumnNamesCheckbox(false);
-    hideColumnNames();
-}
-
-/**
- * Sets the components related to the spreadsheet columns when they are not empty.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- */
-function setComponentsRelatedToNonEmptyColumnNames(columnNames) {
-    showColumnNames(columnNames)
-    setHasColumnNamesCheckbox(true);
-}
-
-/**
- * Sets the components related to the Excel worksheet columns.
- * @param {JSON} columnsInfo - A JSON object containing information related to the spreadsheet
- * columns.
- * This information contains the names of the columns and column indices that contain HED tags.
- */
-function setComponentsRelatedToColumns(columnsInfo) {
-    if (columnNamesAreEmpty(columnsInfo['column-names'])) {
-        setComponentsRelatedToEmptyColumnNames();
-    } else {
-        setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
-    }
-}
-
-/**
- * Checks or unchecks the spreadsheet column names checkbox to false.
- * @param {boolean} value  sets the checkbox to checked if true
- */
-function setHasColumnNamesCheckbox(value) {
-    $('#has-column-names').prop('checked', value);
-}
-
 
 /**
  * Submit the form and return the validation results. If there are issues then they are returned in an attachment
@@ -147,14 +75,10 @@ function setHasColumnNamesCheckbox(value) {
 function submitForm() {
     let eventsForm = document.getElementById("events-form");
     let formData = new FormData(eventsForm);
-    let worksheetName = $('#worksheet-name option:selected').text();
     let prefix = 'issues';
-    if(worksheetName) {
-        prefix = prefix + '_worksheet_' + worksheetName;
-    }
-    let spreadsheetFile = $('#spreadsheet-file')[0].files[0].name;
-    let display_name = convertToResultsName(spreadsheetFile, prefix)
-    resetFormFlashMessages();
+    let eventsFile = $('#events-file')[0].files[0].name;
+    let display_name = convertToResultsName(eventsFile, prefix)
+    clearFormFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'events-validation-submit-flash')
     $.ajax({
