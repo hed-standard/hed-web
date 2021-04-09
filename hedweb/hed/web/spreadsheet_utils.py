@@ -14,7 +14,7 @@ def generate_columns_info_input(request):
     columns_path = save_file_to_upload_folder(columns_file)
     input_arguments = {
         common.COLUMNS_PATH: columns_path,
-        common.COLUMNS_DISPLAY_NAME: columns_file.filename,
+        common.COLUMNS_DISPLAY_NAME: columns_file.get('filename', None),
         common.WORKSHEET_NAME: request.form.get(common.WORKSHEET_SELECTED, None)
     }
     return input_arguments
