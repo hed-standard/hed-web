@@ -72,8 +72,8 @@ function clearForm() {
  */
 function clearFlashMessages() {
     clearColumnInfoFlashMessages();
+    clearHedSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
-    flashMessageOnScreen('', 'success', 'hed-select-flash');
     flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
 }
 

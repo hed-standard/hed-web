@@ -17,7 +17,7 @@ $('#dictionary-validation-submit').on('click', function () {
  */
 function clearForm() {
     $('#dictionary-form')[0].reset();
-    clearFormFlashMessages()
+    clearFlashMessages()
     clearJsonFileLabel();
     hideOtherHEDVersionFileUpload()
 }
@@ -25,7 +25,7 @@ function clearForm() {
 /**
  * Clear the flash messages that aren't related to the form submission.
  */
-function clearFormFlashMessages() {
+function clearFlashMessages() {
     clearJsonInputFlashMessages();
     clearHedSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
@@ -51,7 +51,7 @@ function submitForm() {
 
     let dictionaryFile = getJsonFileLabel();
     let display_name = convertToResultsName(dictionaryFile, 'issues')
-    clearFormFlashMessages();
+    clearFlashMessages();
     flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-validation-submit-flash')
     $.ajax({
             type: 'POST',

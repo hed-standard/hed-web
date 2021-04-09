@@ -8,7 +8,7 @@ from hed.web.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
 from hed.web import dictionary, events, schema, spreadsheet, services
 from hed.web.hedstring import generate_arguments_from_hedstring_form, hedstring_process
-from hed.web.spreadsheet_utils import generate_columns_info_input, get_columns_info, get_worksheet_info
+from hed.web.spreadsheet_utils import generate_columns_info_input, get_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -245,41 +245,6 @@ def get_spreadsheet_validation_results():
         return handle_http_error(ex)
     finally:
         delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
-
-
-# @route_blueprint.route(route_constants.WORKSHEET_COLUMN_INFO_ROUTE, methods=['POST'])
-# def get_worksheets_info():
-#     """Gets information related to the Excel worksheets.
-#
-#     This information contains the names of the worksheets in a workbook, the names of the columns in the first
-#     worksheet, and column indices that contain HED tags in the first worksheet.
-#
-#     Parameters
-#     ----------
-#
-#     Returns
-#     -------
-#     string
-#         A serialized JSON string containing information related to the Excel worksheets.
-#
-#     """
-#
-#     file_path = ''
-#     try:
-#         x = request
-#         y = request.form
-#         z = request.files
-#         workbook_file = request.files.get(common.SPREADSHEET_FILE, None)
-#         file_path = save_file_to_upload_folder(workbook_file)
-#         worksheet_names = get_excel_worksheet_names(file_path)
-#         column_info = {common.WORKSHEET_NAMES: get_excel_worksheet_names(file_path)}
-#         column_info = get_column_info_dictionary(column_info, file_path, column_info[common.WORKSHEET_NAMES][0])
-#         return json.dumps(column_info)
-#
-#     except Exception as ex:
-#         return handle_error(ex)
-#     finally:
-#         delete_file_no_exceptions(file_path)
 
 
 @route_blueprint.route(route_constants.ADDITIONAL_EXAMPLES_ROUTE, strict_slashes=False, methods=['GET'])

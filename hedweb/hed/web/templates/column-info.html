@@ -2,7 +2,6 @@
 
     <div class="form-group" id="column-names">
         <h3>Column names:</h3>
-        <label class="secondary-label" for="column-names-table">Spreadsheet columns:</label>
         <table id="column-names-table"></table>
     </div>
     {% if show_indices in ['true'] %}
@@ -24,7 +23,7 @@
         <div class="form-group">
             <label class="secondary-label" for="tag-columns">List columns (comma-separated) with HED strings:</label>
             <input class="text" type="text" name="tag-columns" id="tag-columns">
-            <p class="flash" id="tag-columns-flash"></p>
         </div>
     {% endif %}
+    <p class="flash" id="tag-columns-flash"></p>
 {% endmacro %}

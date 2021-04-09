@@ -392,8 +392,7 @@ def handle_http_error(ex):
     if hasattr(ex, 'message'):
         message = ex.message
     else:
-        message = "Error of unknown cause"
-
+        message = str(ex)
     error_message = f"{error_code}: [{message}]"
     current_app.logger.error(error_message)
     return generate_text_response('', category='error', msg=error_message)

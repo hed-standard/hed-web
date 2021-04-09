@@ -12,12 +12,14 @@ $('#events-file').on('change', function () {
     let events = $('#events-file');
     let eventsPath = events.val();
     let eventsFile = events[0].files[0];
-    clearFormFlashMessages();
+    clearFlashMessages();
+    removeColumnTable();
     if (cancelWasPressedInChromeFileUpload(eventsPath)) {
         clearForm();
+        return;
     }
-    else if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
-        updateFileLabel(eventsPath, '#events-display-name');
+    updateFileLabel(eventsPath, '#events-display-name');
+    if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
         setColumnsInfo(eventsFile, undefined, false, 'events-flash');
     } else {
         clearForm();
@@ -42,7 +44,7 @@ $('#events-validation-submit').on('click', function () {
 function clearForm() {
     $('#events-form')[0].reset();
     $('#events-display-name').text('');
-    clearFormFlashMessages()
+    clearFlashMessages();
     hideColumnNames();
     hideOtherHEDVersionFileUpload();
 }
@@ -50,7 +52,8 @@ function clearForm() {
 /**
  * Clear the flash messages that aren't related to the form submission.
  */
-function clearFormFlashMessages() {
+function clearFlashMessages() {
+    clearColumnInfoFlashMessages();
     clearHedSelectFlashMessages();
     clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events-flash');
@@ -79,7 +82,7 @@ function submitForm() {
     let prefix = 'issues';
     let eventsFile = $('#events-file')[0].files[0].name;
     let display_name = convertToResultsName(eventsFile, prefix)
-    clearFormFlashMessages();
+    clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'events-validation-submit-flash')
     $.ajax({
