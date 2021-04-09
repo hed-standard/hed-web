@@ -32,6 +32,7 @@ function fileHasValidExtension(filePath, acceptedFileExtensions) {
     return $.inArray(fileExtension.toLowerCase(), acceptedFileExtensions) != -1
 }
 
+
 /**
  * Checks to see if a file has been specified.
  * @param {string} nameID - #id of the element holding the name
@@ -159,6 +160,17 @@ function setFlashMessageCategory(flashMessage, category) {
     } else {
         flashMessage.style.backgroundColor = '#f0f0f5';
     }
+}
+
+/**
+ * Returns the extension of a file.
+ * @param {string} filename - The filename of the file whose extension should be split off.
+ * @returns string - The file extension or an empty string if there is no extension.
+ *
+ */
+function splitExt(filename) {
+    const index = filename.lastIndexOf('.');
+    return (-1 !== index) ? [filename.substring(0, index), filename.substring(index + 1)] : [filename, ''];
 }
 
 /**

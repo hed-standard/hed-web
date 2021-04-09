@@ -11,14 +11,14 @@ $(function () {
 $('#events-file').on('change', function () {
     let events = $('#events-file');
     let eventsPath = events.val();
+    let eventsFile = events[0].files[0];
     clearFormFlashMessages();
     if (cancelWasPressedInChromeFileUpload(eventsPath)) {
         clearForm();
     }
     else if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
         updateFileLabel(eventsPath, '#events-display-name');
-        let columnsInfo = getColumnsInfo('events-form', 'events-file');
-        let s = '';
+        setColumnsInfo(eventsFile, undefined, false, 'events-flash');
     } else {
         clearForm();
         flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events-flash');
@@ -51,11 +51,12 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFormFlashMessages() {
+    clearHedSelectFlashMessages();
+    clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events-flash');
-    clearJsonFlashMessage()
-    flashMessageOnScreen('', 'success', 'hed-select-flash');
     flashMessageOnScreen('', 'success', 'events-validation-submit-flash');
 }
+
 
 /**
  * Prepare the validation form after the page is ready. The form will be reset to handle page refresh and
@@ -63,7 +64,7 @@ function clearFormFlashMessages() {
  */
 function prepareForm() {
     clearForm();
-    getHEDVersions()
+    getHedVersions()
     hideColumnNames();
     hideOtherHEDVersionFileUpload();
 }

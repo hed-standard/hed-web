@@ -28,7 +28,7 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFormFlashMessages() {
-    clearHEDFlashMessage();
+    clearHedSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'hedstring-flash');
     flashMessageOnScreen('', 'success', 'hedstring-submit-flash');
 }
@@ -51,7 +51,7 @@ function hedStringIsSpecified() {
  */
 function prepareForm() {
     clearForm();
-    getHEDVersions()
+    getHedVersions()
     hideOtherHEDVersionFileUpload()
 }
 

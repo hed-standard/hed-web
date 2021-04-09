@@ -12,8 +12,8 @@ $('#spreadsheet-file').on('change', function () {
     let spreadsheet = $('#spreadsheet-file');
     let spreadsheetPath = spreadsheet.val();
     let spreadsheetFile = spreadsheet[0].files[0];
-    clearSpreadsheetFlashMessages();
-
+    clearFlashMessages();
+    removeColumnTable()
     if (!fileHasValidExtension(spreadsheetPath, VALID_FILE_EXTENSIONS)) {
         clearForm();
         flashMessageOnScreen('Upload a valid spreadsheet (.xlsx, .xls, .tsv, .txt)', 'error', 'spreadsheet-flash');
@@ -22,12 +22,12 @@ $('#spreadsheet-file').on('change', function () {
     clearTagColumnTextboxes();
     updateFileLabel(spreadsheetPath, '#spreadsheet-display-name');
     if (fileHasValidExtension(spreadsheetPath, EXCEL_FILE_EXTENSIONS)) {
-        getWorksheetsInfo(spreadsheetFile);
+        setColumnsInfo(spreadsheetFile, undefined, true, 'spreadsheet-flash');
         showWorksheetSelect();
     }
     else if (fileHasValidExtension(spreadsheetPath, TEXT_FILE_EXTENSIONS)) {
         $('#worksheet-name').empty();
-        getWorksheetsInfo(spreadsheetFile);
+        setColumnsInfo(spreadsheetFile, undefined, true, 'spreadsheet-flash');
         hideWorksheetSelect();
     }
 });
@@ -50,8 +50,8 @@ $('#worksheet-name').on('change', function () {
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0];
     let worksheetName = $('#worksheet-name option:selected').text();
     // $('#worksheet-name').val(worksheetName)
-    clearSpreadsheetFlashMessages();
-    getWorksheetsInfo(spreadsheetFile, worksheetName, false);
+    clearFlashMessages();
+    setColumnsInfo(spreadsheetFile, worksheetName, false, 'spreadsheet-flash');
 });
 
 /**
@@ -70,47 +70,12 @@ function clearForm() {
 /**
  * Clear the flash messages that aren't related to the form submission.
  */
-function clearSpreadsheetFlashMessages() {
+function clearFlashMessages() {
+    clearColumnInfoFlashMessages();
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
-    flashMessageOnScreen('', 'success', 'tag-columns-flash');
     flashMessageOnScreen('', 'success', 'hed-select-flash');
     flashMessageOnScreen('', 'success', 'spreadsheet-validation-submit-flash');
 }
-
-/**
- * Gets information associated with the Excel workbook worksheets. This information contains the names of the
- * worksheets, the names of the columns in the first worksheet, and column indices that contain HED tags in the
- * first worksheet.
- * @param {Object} workbookFile - An Excel workbook file.
- * @param {string} worksheetName - name of worksheet or undefined.
- * @param {boolean} repopulate - if true repopulate the select pull down with worksheet names
- */
-function getWorksheetsInfo(workbookFile, worksheetName=undefined, repopulate=true) {
-    let formData = new FormData();
-    formData.append('columns-file', workbookFile);
-    if (worksheetName !== undefined) {
-        formData.append('worksheet-selected', worksheetName)
-    }
-    $.ajax({
-        type: 'POST',
-        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (worksheetsInfo) {
-            if (repopulate) {
-                populateWorksheetDropdown(worksheetsInfo['worksheet-names']);
-            }
-            setComponentsRelatedToColumns(worksheetsInfo, true);
-        },
-        error: function (jqXHR) {
-            flashMessageOnScreen('Spreadsheet could not be processed.', 'error',
-                'spreadsheet-flash');
-        }
-    });
-}
-
 
 /**
  * Hides  worksheet select section in the form.
@@ -140,7 +105,7 @@ function populateWorksheetDropdown(worksheetNames) {
  */
 function prepareForm() {
     clearForm();
-    getHEDVersions()
+    getHedVersions()
     hideColumnNames();
     hideWorksheetSelect();
     hideOtherHEDVersionFileUpload();
@@ -170,7 +135,7 @@ function submitForm() {
     }
     let spreadsheetFile = $('#spreadsheet-file')[0].files[0].name;
     let display_name = convertToResultsName(spreadsheetFile, prefix)
-    clearSpreadsheetFlashMessages();
+    clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
         'spreadsheet-validation-submit-flash')
     $.ajax({

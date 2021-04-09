@@ -27,7 +27,7 @@ function clearJsonFileLabel() {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function clearJsonFlashMessage() {
+function clearJsonInputFlashMessages() {
     flashMessageOnScreen('', 'success', 'json-flash');
 }
 

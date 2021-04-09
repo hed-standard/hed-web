@@ -33,15 +33,14 @@ $('#hed-xml-file').on('change', function () {
 /**
  * Resets the flash messages that aren't related to the form submission.
  */
-function clearHEDFlashMessage() {
+function clearHedSelectFlashMessages() {
     flashMessageOnScreen('', 'success', 'hed-select-flash');
 }
-
 
 /**
  * Gets the HED versions that are in the HED version drop-down menu.
  */
-function getHEDVersions() {
+function getHedVersions() {
     $.ajax({
             type: 'GET',
             url: "{{url_for('route_blueprint.get_major_hed_versions')}}",

@@ -4,12 +4,12 @@ import pathlib
 import tempfile
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
-from flask import current_app, jsonify, Response
+from flask import current_app, Response
 
 from hed.util import hed_cache
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
-from hed.web.constants import common, error_constants
+from hed.web.constants import common
 
 app_config = current_app.config
 
@@ -194,6 +194,7 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                     headers={'Content-Disposition': f"attachment filename={display_name}",
                              'Category': category, 'Message': msg})
 
+
 def generate_filename(basename, prefix=None, suffix=None, extension=None):
     """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
 
@@ -352,16 +353,22 @@ def handle_error(ex, hed_info=None, title=None):
 
     """
 
+    if not hed_info:
+        hed_info = {}
     if hasattr(ex, 'error_type'):
         error_code = ex.error_type
     else:
         error_code = type(ex).__name__
-    if not hed_info:
-        hed_info = {}
+
     if not title:
         title = ''
-    hed_info['message'] = f"{title}[{error_code}: {ex.message}]"
-    return json.dumps(hed_info)
+    if hasattr(ex, 'message'):
+        message = ex.message
+    else:
+        message = str(ex)
+
+        hed_info['message'] = f"{title}[{error_code}: {message}]"
+        return json.dumps(hed_info)
 
 
 def handle_http_error(ex):

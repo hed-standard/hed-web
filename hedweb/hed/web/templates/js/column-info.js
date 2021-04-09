@@ -1,10 +1,12 @@
 
-
+function clearColumnInfoFlashMessages() {
+    flashMessageOnScreen('', 'success', 'tag-columns-flash');
+}
 /**
  * Clears tag column text boxes.
  */
 function clearTagColumnTextboxes() {
-    $('.textbox-group input[field_type="text"]').val('');
+    $('.indices').val('');
 }
 
 /**
@@ -30,27 +32,45 @@ function columnNamesAreEmpty(names) {
  * @param {string} pathID - Form ID of the path of a spreadsheet-like file with column names.
  * @returns string or array
  */
-function getColumnsInfo(formID, pathID) {
-    let returnInfo = 'Oops'
-    let form = document.getElementById(formID);
-    let formData = new FormData(form);
-    // formData.append('column-file-path', pathID)
+
+/**
+ * Gets information a file with columns. This information the names of the columns in the specified
+ * worksheet and indices that contain HED tags.
+ * @param {Object} columnsFile - A file with columns.
+ * @param {string} worksheetName - Name of worksheet or undefined.
+ * @param {boolean} repopulateWorksheet - If true repopulate the select pull down with worksheet names.
+ * @param {string} flashMessage - ID name of the flash message element in which to display errors.
+ */
+function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorksheet=true, flashMessage) {
+    let formData = new FormData();
+    formData.append('columns-file', columnsFile);
+    if (worksheetName !== undefined) {
+        formData.append('worksheet-selected', worksheetName)
+    }
     $.ajax({
         type: 'POST',
         url: "{{url_for('route_blueprint.get_columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
-        dataType: 'text',
-        success: function (columnsInfo) {
-            returnInfo = columnsInfo;
+        dataType: 'json',
+        success: function (info) {
+               if (info['message'])
+                    flashMessageOnScreen(info['message'], 'error', flashMessage)
+               else {
+                   if (repopulateWorksheet) {
+                       populateWorksheetDropdown(info['worksheet-names']);
+                   }
+                   let hasColumns = $('#has-column-names').prop('checked')
+                   setComponentsRelatedToColumns(info, hasColumns, true);
+               }
         },
-        error: function (jqXHR) {
-            returnInfo = 'File column information processing failed.';
+        error: function () {
+            flashMessageOnScreen('File could not be processed.', 'error', 'flashMessage');
         }
     });
-    return returnInfo;
 }
+
 /**
  * Hides  columns section in the form.
  */
@@ -71,22 +91,6 @@ function populateRequiredTagColumnTextboxes(requiredTagColumnIndices) {
 }
 
 /**
- * Populates a table containing one row.
- * @param {Array} columnNames - An array containing the spreadsheet column names.
- * @param {String} tableID - String containing the ID of the table
- */
-function populateTableHeaders(columnNames, tableID) {
-    let columnTable = $('#column-names-table');
-    let columnNamesRow = $('<tr/>');
-    let numberOfColumnNames = columnNames.length;
-    columnTable.empty();
-    for (let i = 0; i < numberOfColumnNames; i++) {
-        columnNamesRow.append('<td>' + columnNames[i] + '</td>');
-    }
-    columnTable.append(columnNamesRow);
-}
-
-/**
  * Populate the tag column textbox from the tag column indices found in the spreadsheet columns.
  * @param {Array} tagColumnIndices - An integer array of tag column indices found in the spreadsheet
  * columns.
@@ -95,38 +99,29 @@ function populateTagColumnsTextbox(tagColumnIndices) {
     $('#tag-columns').val(tagColumnIndices.sort().map(String));
 }
 
-/*
-/!**
- * Sets the components related to the Excel worksheet columns.
- * @param {JSON} columnsInfo - A JSON object containing information related to the spreadsheet
- * columns.
- * This information contains the names of the columns and column indices that contain HED tags.
- *!/
-function setComponentsRelatedToColumns(columnsInfo) {
-    if (columnNamesAreEmpty(columnsInfo['column-names'])) {
-        setComponentsRelatedToEmptyColumnNames();
-    } else {
-        setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
-    }
-}*/
+/**
+ * Clears tag column text boxes.
+ */
+function removeColumnTable() {
+    $('#column-names-table').children().remove();
+}
 
 /**
  * Sets the components related to the Excel worksheet columns.
- * @param {JSON} columnsInfo - A JSON object containing information related to the spreadsheet
- * columns.
+ * @param {JSON} columnsInfo - A JSON object containing information related to columns.
+ * @param {boolean} hasColumns - if false then don't show the columns even if column names not empty
+ * @param {boolean} showIndices -
  * This information contains the names of the columns and column indices that contain HED tags.
  */
-function setComponentsRelatedToColumns(columnsInfo, showIndices = false) {
+function setComponentsRelatedToColumns(columnsInfo, hasColumns = true, showIndices = false) {
     clearTagColumnTextboxes();
-    if (columnNamesAreEmpty(columnsInfo['column-names'])) {
+    if (!hasColumns || columnNamesAreEmpty(columnsInfo['column-names']) ) {
         setComponentsRelatedToEmptyColumnNames();
     } else {
         setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column-names']);
     }
     if (showIndices) {
         if (!tagColumnsIndicesAreEmpty(columnsInfo['tag-column-indices'])) {
-            setComponentsRelatedToEmptyTagColumnIndices();
-        } else {
             populateTagColumnsTextbox(columnsInfo['tag-column-indices']);
         }
         if (Object.keys(columnsInfo['required-tag-column-indices']).length !== 0) {
@@ -142,13 +137,6 @@ function setComponentsRelatedToEmptyColumnNames() {
     clearTagColumnTextboxes();
     setHasColumnNamesCheckbox(false);
     hideColumnNames();
-}
-
-/**
- * Sets the components related to the spreadsheet tag column indices when they are empty.
- */
-function setComponentsRelatedToEmptyTagColumnIndices() {
-    $('#tag-columns').val('2');
 }
 
 /**
@@ -173,8 +161,15 @@ function setHasColumnNamesCheckbox(value) {
  * @param {Array} columnNames - An array containing the spreadsheet column names.
  */
 function showColumnNames(columnNames) {
-    populateTableHeaders(columnNames);
     $('#column-names').show();
+    let columnTable = $('#column-names-table');
+    let columnNamesRow = $('<tr/>');
+    let numberOfColumnNames = columnNames.length;
+    columnTable.empty();
+    for (let i = 0; i < numberOfColumnNames; i++) {
+        columnNamesRow.append('<td>' + columnNames[i] + '</td>');
+    }
+    columnTable.append(columnNamesRow);
 }
 
 /**

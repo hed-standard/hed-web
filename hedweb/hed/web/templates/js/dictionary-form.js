@@ -26,8 +26,8 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFormFlashMessages() {
-    clearJsonFlashMessage();
-    clearHEDFlashMessage();
+    clearJsonInputFlashMessages();
+    clearHedSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'dictionary-validation-submit-flash');
 }
 
@@ -37,7 +37,7 @@ function clearFormFlashMessages() {
  */
 function prepareForm() {
     clearForm();
-    getHEDVersions()
+    getHedVersions()
     hideOtherHEDVersionFileUpload();
 }
 
