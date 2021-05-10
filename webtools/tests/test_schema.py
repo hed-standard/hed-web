@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 from flask import Response
-from hedweb.app_factory import AppFactory, schema
+from hedweb.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -24,7 +24,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_schema_form(self):
-        self.assertRaises(TypeError, schema.generate_input_from_schema_form, {},
+        from hedweb.schema import generate_input_from_schema_form
+        self.assertRaises(TypeError, generate_input_from_schema_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_schema")
 
     def test_schema_process(self):
