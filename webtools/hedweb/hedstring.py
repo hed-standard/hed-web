@@ -1,5 +1,5 @@
 from flask import current_app
-
+from werkzeug import Response
 from hed.schema.hed_schema_file import load_schema
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.hed_string import HedString
@@ -85,6 +85,9 @@ def hedstring_convert(arguments, short_to_long=True, hed_schema=None):
     if not hed_schema:
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     hed_string_obj = HedString(arguments.get(common.HEDSTRING))
+    results = hedstring_validate(arguments, hed_schema)
+    if results['category'] == 'warning':
+        return results
     if short_to_long:
         issues = hed_string_obj.convert_to_long(hed_schema)
     else:
@@ -99,13 +102,15 @@ def hedstring_convert(arguments, short_to_long=True, hed_schema=None):
     return {'hedstring-result': return_str, 'category': category}
 
 
-def hedstring_validate(arguments):
+def hedstring_validate(arguments, hed_schema=None):
     """Validates a hedstring and returns a dictionary containing the issues or a no errors message
 
     Parameters
     ----------
     arguments: dict
         Dictionary containing standard input form arguments
+    hed_schema: str or HedSchema
+        Version number or path or HedSchema object to be used
 
     Returns
     -------
@@ -113,8 +118,9 @@ def hedstring_validate(arguments):
         A dictionary with hedstring-results as the key
     """
 
-    hed_file_path = arguments.get(common.HED_XML_FILE)
-    hed_validator = HedValidator(hed_xml_file=hed_file_path)
+    if not hed_schema:
+        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+    hed_validator = HedValidator(hed_schema=hed_schema)
     issues = hed_validator.validate_input(arguments.get(common.HEDSTRING))
     if issues:
         return_str = get_printable_issue_string(issues, "HED validation errors:")
