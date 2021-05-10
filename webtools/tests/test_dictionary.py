@@ -1,8 +1,7 @@
 import os
 import shutil
 import unittest
-from flask import Response
-from hedweb.app_factory import AppFactory, dictionary
+from hedweb.app_factory import AppFactory
 
 
 def test_dictionaries():
@@ -34,7 +33,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_dictionary_form(self):
-        self.assertRaises(TypeError, dictionary.generate_input_from_dictionary_form, {},
+        from hedweb.dictionary import generate_input_from_dictionary_form
+        self.assertRaises(TypeError, generate_input_from_dictionary_form, {},
                           "An exception should be raised if an empty request is passed")
 
     def test_dictionary_process(self):
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         from hed.util.exceptions import HedFileError
         arguments = {'json-path': ''}
         try:
-            a = dictionary_process(arguments)
+            dictionary_process(arguments)
         except HedFileError:
             pass
         except Exception:
@@ -59,8 +59,7 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             response = dictionary_convert(arguments)
             headers = dict(response.headers)
-            print(headers['Category'])
-            self.assertEqual('warning', headers['Category'], "dictionary_convert issue warning if unsuccessful")
+            self.assertEqual('warning', headers['Category'], "dictionary_convert cannot convert JSOn with errors")
             self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
@@ -144,7 +143,6 @@ class Test(unittest.TestCase):
         #     print(r.response)
         # else:
         #     print("Second response is empty")
-
 
     # def test_generate_input_arguments_from_validation_form(self):
     #     from hed.hedweb import dictionary

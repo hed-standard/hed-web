@@ -1,5 +1,6 @@
 import os
 from flask import current_app
+from werkzeug import Response
 
 from hed.schema.hed_schema_file import load_schema
 from hedweb.constants import common, file_constants
@@ -96,6 +97,9 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
 
     if not hed_schema:
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+    results = dictionary_validate(arguments, hed_schema)
+    if isinstance(results, Response):
+        return results
     issues = []
     for column_def in json_dictionary:
         for hed_string, position in column_def.hed_string_iter(include_position=True):

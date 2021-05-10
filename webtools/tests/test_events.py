@@ -77,30 +77,31 @@ class Test(unittest.TestCase):
 
     def test_spreadsheet_validate(self):
         from hedweb.events import events_validate
-        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bids_events.tsv')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
 
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv',
-                     'json-path': json_path, 'json-file': 'bids_events.json'}
+                     'json-path': json_path, 'json-file': 'bids_events.json', 'hed-option-validate': True}
 
-        with self.app.app_context():
-            response = events_validate(arguments)
-            headers = dict(response.headers)
-            self.assertEqual('success', headers['Category'],
-                             "events_validate should return success if converted")
-            self.assertFalse(response.data, "bids_events should validate using HED 7.1.2.xml")
-
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments['hed-xml-file'] = schema_path
-        arguments['hed-display-name'] = 'HED8.0.0-alpha.1.xml'
         with self.app.app_context():
             response = events_validate(arguments)
             headers = dict(response.headers)
             self.assertEqual('warning', headers['Category'],
-                             "events_validate has warning if validation errors")
-            self.assertTrue(response.data, "bids_events should not validate with HED8.0.0-alpha.1.xml")
+                             "events_validate should return validation errors for bids_events.json with 7.1.2")
+            self.assertTrue(response.data, "bids_events should return response data when there are validation errors")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
+                     'json-file': 'bids_events.json', 'hed-option-validate': True}
+        with self.app.app_context():
+            response = events_validate(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'],
+                             "events_validate should validate bids_events.json with 8.0.0-alpha.1")
+            self.assertFalse(response.data, "bids_events should have no response data when validation is successful")
 
 
 if __name__ == '__main__':
