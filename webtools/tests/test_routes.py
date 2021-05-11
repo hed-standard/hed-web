@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
 
     def test_get_events_results(self):
         response = self.app.test.post('/events-submit')
-        self.assertEqual(400, response.status_code, 'Event processing requires data')
+        self.assertEqual(404, response.status_code, 'Event processing requires data')
 
     def test_get_hed_services_results(self):
         response = self.app.test.get('/hed-services-submit')

@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from hedweb.app_factory import AppFactory, hedstring
+from hedweb.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -24,7 +24,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_hedstring_form(self):
-        self.assertRaises(TypeError, hedstring.generate_input_from_hedstring_form, {},
+        from hedweb.hedstring import generate_input_from_hedstring_form
+        self.assertRaises(TypeError, generate_input_from_hedstring_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_hedstring")
 
     def test_hedstring_process(self):

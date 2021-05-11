@@ -3,7 +3,7 @@ import shutil
 import unittest
 from unittest import mock
 from flask import Flask, current_app
-from hedweb.app_factory import AppFactory, spreadsheet
+from hedweb.app_factory import AppFactory
 
 
 class Test(unittest.TestCase):
@@ -25,7 +25,8 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.upload_directory)
 
     def test_generate_input_from_spreadsheet_form(self):
-        self.assertRaises(TypeError, spreadsheet.generate_input_from_spreadsheet_form, {},
+        from hedweb.spreadsheet import generate_input_from_spreadsheet_form
+        self.assertRaises(TypeError, generate_input_from_spreadsheet_form, {},
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_spreadsheet_process(self):
@@ -65,7 +66,7 @@ class Test(unittest.TestCase):
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4:"Event/Description/"}
+        prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
                      'spreadsheet-path': spreadsheet_path, 'spreadsheet-file': 'ExcelMultipleSheets.xlsx',
                      'worksheet-selected': 'LKT Events', 'has-column-names': True,
