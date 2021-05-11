@@ -27,7 +27,7 @@ if __name__ == '__main__':
     for row_number, row_dict in event_file.parse_dataframe(return_row_dict=True):
         assembled_row_hed_string = row_dict.get("HED", "")
         onset = row_dict.get("onset", "n/a")
-        hed_tags.append(row_dict.get("HED", "").hed_string)
+        hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)

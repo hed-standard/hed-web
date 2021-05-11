@@ -45,37 +45,51 @@ class Test(unittest.TestCase):
     def test_events_process(self):
         from hedweb.events import events_process
         from hed.util.exceptions import HedFileError
+        # Test for empty events-path
         arguments = {'events-path': ''}
         try:
-            a = events_process(arguments)
+            events_process(arguments)
         except HedFileError:
             pass
         except Exception:
             self.fail('events_process threw the wrong exception when events-path was empty')
         else:
             self.fail('events_process should have thrown a HedFileError exception when events-path was empty')
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        arguments = {'events-path': events_path, 'hed-option-validate': True,
+                     'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml'}
+        result = events_process(arguments)
+        self.assertTrue(isinstance(result, Response), "Validation should return a response object")
 
-            # def test_dictionary_convert(self):
-            #     from hed.hedweb.dictionary import dictionary_convert
-            #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
-            #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-            #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
-            #                  'json-path': json_path, 'json-file': 'good_events.json'}
-            #     with self.app.app_context():
-            #         response = dictionary_convert(arguments)
-            #         headers = dict(response.headers)
-            #         self.assertEqual('warning', headers['Category'], "dictionary_convert issue warning if unsuccessful")
-            #         self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
-            #
-            #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-            #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
-            #                  'json-path': json_path, 'json-file': 'good_events.json'}
-            #     with self.app.app_context():
-            #         response = dictionary_convert(arguments)
-            #         headers = dict(response.headers)
-            #         self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
+    def test_events_assemble(self):
+        from hedweb.events import events_assemble
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
 
-    def test_spreadsheet_validate(self):
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv',
+                     'json-path': json_path, 'json-file': 'bids_events.json', 'hed-option-assemble': True}
+        with self.app.app_context():
+            response = events_assemble(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'],
+                             "events_assemble should assemble with 8.0.0-alpha.1")
+            self.assertTrue(response.data, "events_assemble should have response data when assembly is successful")
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
+                     'json-file': 'bids_events.json', 'hed-option-assemble': True}
+        with self.app.app_context():
+            response = events_assemble(arguments)
+            headers = dict(response.headers)
+            self.assertEqual('warning', headers['Category'],
+                             "events_assemble should return validation errors for bids_events.json with 7.1.2")
+            self.assertTrue(response.data, "events_assemble should return response data for validation errors")
+
+    def test_events_validate(self):
         from hedweb.events import events_validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
@@ -90,7 +104,7 @@ class Test(unittest.TestCase):
             headers = dict(response.headers)
             self.assertEqual('warning', headers['Category'],
                              "events_validate should return validation errors for bids_events.json with 7.1.2")
-            self.assertTrue(response.data, "bids_events should return response data when there are validation errors")
+            self.assertTrue(response.data, "events_validate should return response data for validation errors")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
@@ -101,7 +115,7 @@ class Test(unittest.TestCase):
             headers = dict(response.headers)
             self.assertEqual('success', headers['Category'],
                              "events_validate should validate bids_events.json with 8.0.0-alpha.1")
-            self.assertFalse(response.data, "bids_events should have no response data when validation is successful")
+            self.assertFalse(response.data, "events_validation should have no response data for successful validation")
 
 
 if __name__ == '__main__':
