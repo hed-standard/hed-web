@@ -1,6 +1,7 @@
 CHECK_FOR_WARNINGS = 'check-for-warnings'
 
 COMMAND = 'command'
+COMMAND_ASSEMBLE = 'assemble'
 COMMAND_TO_LONG = 'short_to_long'
 COMMAND_TO_SHORT = 'long_to_short'
 COMMAND_VALIDATE = 'validate'

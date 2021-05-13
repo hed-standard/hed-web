@@ -1,6 +1,7 @@
 import os
 import shutil
 import unittest
+from flask import Response
 from hedweb.app_factory import AppFactory
 
 
@@ -59,6 +60,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary_process to short should return a response object when errors')
             headers = dict(response.headers)
             self.assertEqual('warning', headers['Category'],
                              'dictionary_process to short should give warning when JSON with errors')
@@ -70,11 +73,13 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary_process to short should return a response object when no errors')
             headers = dict(response.headers)
             self.assertEqual('success', headers['Category'],
                              'dictionary_process to short should return success if converted')
 
-    def test_dictionary_convert_to_short(self):
+    def test_dictionary_convert_to_long(self):
         from hedweb.dictionary import dictionary_convert
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
@@ -106,8 +111,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json', 'command': common.COMMAND}
         with self.app.app_context():
             results = dictionary_convert(arguments)
-            self.assertTrue(results["file_name"], "dictionary_convert results should have file_name key")
-            self.assertEqual('warning', results["category"],
+            self.assertTrue(results['file_name'], 'dictionary_convert results should have file_name key')
+            self.assertEqual('warning', results['category'],
                              'dictionary_convert category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
@@ -115,8 +120,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_convert(arguments)
-            self.assertTrue(results["file_name"], "dictionary_convert results should have file_name key")
-            self.assertEqual('success', results["category"],
+            self.assertTrue(results['file_name'], 'dictionary_convert results should have file_name key')
+            self.assertEqual('success', results['category'],
                              'dictionary_convert category should be success when no errors')
 
     def test_dictionary_validate(self):
@@ -127,9 +132,9 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_validate(arguments)
-            self.assertTrue(results["file_name"],
-                             'dictionary_validate results should have a file_name key when validation errors')
-            self.assertEqual('warning', results["category"],
+            self.assertTrue(results['file_name'],
+                            'dictionary_validate results should have a file_name key when validation errors')
+            self.assertEqual('warning', results['category'],
                              'dictionary_validate category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
@@ -137,7 +142,7 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_validate(arguments)
-            self.assertFalse("file_name" in results,
+            self.assertFalse('file_name' in results,
                              'dictionary_validate results should not have a file_name key when no validation errors')
             self.assertEqual('success', results["category"],
                              'dictionary_validate category should be success when no errors')

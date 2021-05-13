@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
     def test_generate_input_from_events_form(self):
         self.assertTrue(1, "Testing generate_input_from_events_form")
 
-    def test_events_process(self):
+    def test_events_process_empty_file(self):
         from hedweb.events import events_process
         from hed.util.exceptions import HedFileError
         # Test for empty events-path
@@ -55,12 +55,37 @@ class Test(unittest.TestCase):
             self.fail('events_process threw the wrong exception when events-path was empty')
         else:
             self.fail('events_process should have thrown a HedFileError exception when events-path was empty')
+
+    def test_events_process(self):
+        from hedweb.events import events_process
+        from hedweb.constants import common
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'events-path': events_path, 'hed-option-validate': True,
+        arguments = {'events-path': events_path, 'command': common.COMMAND_VALIDATE,
+                     'json-path': json_path, 'json-file': 'good_events.json',
                      'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml'}
-        result = events_process(arguments)
-        self.assertTrue(isinstance(result, Response), "Validation should return a response object")
+        with self.app.app_context():
+            response = events_process(arguments)
+            self.assertTrue(isinstance(response, Response),
+                            'events_process validation should return a response object when validation errors')
+            headers = dict(response.headers)
+            self.assertEqual('success', headers['Category'],
+                             'events_process validate should return success if no errors')
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        arguments = {'events-path': events_path, 'command': common.COMMAND_VALIDATE,
+                     'json-path': json_path, 'json-file': 'good_events.json',
+                     'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml'}
+        with self.app.app_context():
+            response = events_process(arguments)
+            self.assertTrue(isinstance(response, Response),
+                            'events_process validation should return a response object when no validation errors')
+            headers = dict(response.headers)
+            self.assertEqual('warning', headers['Category'],
+                             'events_process validate should give warning when errors')
+            self.assertTrue(response.data,
+                            'events_process validate should return data when errors')
 
     def test_events_assemble(self):
         from hedweb.events import events_assemble
@@ -70,24 +95,24 @@ class Test(unittest.TestCase):
 
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv',
-                     'json-path': json_path, 'json-file': 'bids_events.json', 'hed-option-assemble': True}
+                     'json-path': json_path, 'json-file': 'bids_events.json'}
         with self.app.app_context():
-            response = events_assemble(arguments)
-            headers = dict(response.headers)
-            self.assertEqual('success', headers['Category'],
-                             "events_assemble should assemble with 8.0.0-alpha.1")
-            self.assertTrue(response.data, "events_assemble should have response data when assembly is successful")
+            results = events_assemble(arguments)
+            self.assertTrue("file_name" in results,
+                             'events_assemble results should have a file_name key when no errors')
+            self.assertEqual('success', results["category"],
+                             'events_assemble category should be success when no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
-                     'json-file': 'bids_events.json', 'hed-option-assemble': True}
+                     'json-file': 'bids_events.json'}
         with self.app.app_context():
-            response = events_assemble(arguments)
-            headers = dict(response.headers)
-            self.assertEqual('warning', headers['Category'],
-                             "events_assemble should return validation errors for bids_events.json with 7.1.2")
-            self.assertTrue(response.data, "events_assemble should return response data for validation errors")
+            results = events_assemble(arguments)
+            self.assertTrue(results['file_name'],
+                            'events_assemble results should have a file_name key when errors')
+            self.assertEqual('warning', results['category'],
+                             'events_assemble category should be warning when errors')
 
     def test_events_validate(self):
         from hedweb.events import events_validate
@@ -97,25 +122,26 @@ class Test(unittest.TestCase):
 
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv',
-                     'json-path': json_path, 'json-file': 'bids_events.json', 'hed-option-validate': True}
+                     'json-path': json_path, 'json-file': 'bids_events.json'}
 
         with self.app.app_context():
-            response = events_validate(arguments)
-            headers = dict(response.headers)
-            self.assertEqual('warning', headers['Category'],
-                             "events_validate should return validation errors for bids_events.json with 7.1.2")
-            self.assertTrue(response.data, "events_validate should return response data for validation errors")
+            results = events_validate(arguments)
+            self.assertTrue(results["file_name"],
+                            'events_validate results should have a file_name key when validation errors')
+            self.assertEqual('warning', results["category"],
+                             'events_validate category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
-                     'json-file': 'bids_events.json', 'hed-option-validate': True}
+                     'json-file': 'bids_events.json'}
+
         with self.app.app_context():
-            response = events_validate(arguments)
-            headers = dict(response.headers)
-            self.assertEqual('success', headers['Category'],
-                             "events_validate should validate bids_events.json with 8.0.0-alpha.1")
-            self.assertFalse(response.data, "events_validation should have no response data for successful validation")
+            results = events_validate(arguments)
+            self.assertFalse('file_name' in results,
+                             'events_validate results should not have a file_name key when no validation errors')
+            self.assertEqual('success', results['category'],
+                             'events_validate category should be success when no errors')
 
 
 if __name__ == '__main__':

@@ -73,12 +73,12 @@ def dictionary_process(arguments):
         results = dictionary_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a dictionary processing method", "")
-    msg = results.get('msg', "")
+    msg = results.get('msg', '')
     category = results.get('category', 'success')
 
-    if "file_name" in results:
-        file_name = results.get('file_name', "")
-        display_name = results.get('display_name', "")
+    if 'file_name' in results:
+        file_name = results.get('file_name', '')
+        display_name = results.get('display_name', '')
         return generate_download_file_response(file_name, display_name=display_name, category=category, msg=msg)
     else:
         return generate_text_response("", msg=msg, category=category)

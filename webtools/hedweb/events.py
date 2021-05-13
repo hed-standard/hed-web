@@ -65,22 +65,22 @@ def events_process(arguments):
     """
 
     if not arguments[common.EVENTS_PATH]:
-        raise HedFileError('EmptyEventsFile', "Please upload an events file to process", "")
-    if arguments.get(common.HED_OPTION_VALIDATE, None):
+        raise HedFileError('EmptyEventsFile', 'Please upload an events file to process', '')
+    if arguments['command'] == common.COMMAND_VALIDATE:
         results = events_validate(arguments)
-    elif arguments.get(common.HED_OPTION_ASSEMBLE, None):
+    elif arguments['command'] == common.COMMAND_ASSEMBLE:
         results = events_assemble(arguments)
     else:
-        raise HedFileError('UnknownProcessingMethod', "Select an events file processing method", "")
-    msg = results.get("msg", "")
-    category = results.get("category", "success")
+        raise HedFileError('UnknownProcessingMethod', 'Select an events file processing method', '')
+    msg = results.get('msg', '')
+    category = results.get('category', 'success')
 
-    if "file_name" in results:
-        file_name = results.get("file_name")
-        display_name = results.get("display_name", file_name),
+    if 'file_name' in results:
+        file_name = results.get('file_name', '')
+        display_name = results.get('display_name', file_name)
         return generate_download_file_response(file_name, display_name=display_name, category=category, msg=msg)
     else:
-        return generate_text_response("", msg=msg)
+        return generate_text_response('', msg=msg, category=category)
 
 
 def events_assemble(arguments, hed_schema=None):
@@ -103,7 +103,7 @@ def events_assemble(arguments, hed_schema=None):
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
 
     results = events_validate(arguments, hed_schema)
-    if "file_name" in results:
+    if 'file_name' in results:
         return results
 
     if arguments.get(common.JSON_PATH, ''):  # If dictionary is provided and it has errors return those errors
@@ -122,10 +122,9 @@ def events_assemble(arguments, hed_schema=None):
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
     file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
-    # issue_file = save_text_to_upload_folder(issue_str, file_name)
     df.to_csv(file_name, '\t', index=False, header=True)
-    return {"file_name": file_name, "display_name": file_name, "category": "success",
-            "msg": "Events file successfully expanded"}
+    return {'file_name': file_name, 'display_name': file_name, 'category': 'success',
+            'msg': 'Events file successfully expanded'}
 
 
 def events_validate(arguments, hed_schema=None):
@@ -154,8 +153,8 @@ def events_validate(arguments, hed_schema=None):
             issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED dictionary errors")
             file_name = generate_filename(common.JSON_FILE, suffix='_dictionary_errors', extension='.txt')
             issue_file = save_text_to_upload_folder(issue_str, file_name)
-            return {"file_name": issue_file, "display_name": file_name, "category": "warning",
-                    "msg": "JSON sidecar definitions had dictionary errors"}
+            return {'file_name': issue_file, 'display_name': file_name, 'category': 'warning',
+                    'msg': "JSON sidecar definitions had dictionary errors"}
 
         issues = json_sidecar.validate_entries(hed_schema)
         if issues:
@@ -175,7 +174,7 @@ def events_validate(arguments, hed_schema=None):
 
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
         issue_file = save_text_to_upload_folder(issue_str, file_name)
-        return {"file_name": issue_file, "display_name": file_name, "category": "warning",
-                "msg": "Events file had validation errors"}
+        return {'file_name': issue_file, "display_name": file_name, "category": "warning",
+                'msg': "Events file had validation errors"}
     else:
-        return {"msg": "Events file had no validation errors"}
+        return {'msg': 'Events file had no validation errors', 'category': 'success'}
