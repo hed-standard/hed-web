@@ -81,7 +81,7 @@ def dictionary_process(arguments):
         display_name = results.get('display_name', "")
         return generate_download_file_response(file_name, display_name=display_name, category=category, msg=msg)
     else:
-        return generate_text_response("", msg=msg)
+        return generate_text_response("", msg=msg, category=category)
 
 
 def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
@@ -168,4 +168,4 @@ def dictionary_validate(input_arguments, hed_schema=None):
         return {'file_name': issue_path, 'display_name': file_name, 'category': 'warning',
                 'msg': 'JSON file had validation errors'}
     else:
-        return {'msg': 'JSON file had no validation errors'}
+        return {'msg': 'JSON file had no validation errors', 'category': 'success'}
