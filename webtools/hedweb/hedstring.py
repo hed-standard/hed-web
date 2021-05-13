@@ -6,7 +6,8 @@ from hed.util.hed_string import HedString
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common
-from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down
+from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down, \
+    generate_response_download_file_from_text, generate_text_response
 app_config = current_app.config
 
 
@@ -31,11 +32,11 @@ def generate_input_from_hedstring_form(request):
                  common.HED_OPTION_TO_SHORT: False,
                  common.HED_OPTION_TO_LONG: False}
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
-        arguments[common.HED_OPTION_VALIDATE] = True
+        arguments[common.COMMAND] = common.COMMAND_VALIDATE
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
-        arguments[common.HED_OPTION_TO_SHORT] = True
+        arguments[common.COMMAND] = common.COMMAND_TO_SHORT
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
-        arguments[common.HED_OPTION_TO_LONG] = True
+        arguments[common.COMMAND] = common.COMMAND_TO_LONG
     return arguments
 
 
@@ -55,11 +56,11 @@ def hedstring_process(arguments):
 
     if not arguments.get(common.HEDSTRING, None):
         raise HedFileError('EmptyHEDString', "Please enter a nonempty HED string to process", "")
-    if arguments.get(common.HED_OPTION_VALIDATE, None):
+    if arguments['command'] == common.COMMAND_VALIDATE:
         return hedstring_validate(arguments)
-    elif arguments.get(common.HED_OPTION_TO_SHORT, None):
+    elif arguments['command'] == common.COMMAND_TO_SHORT:
         return hedstring_convert(arguments, short_to_long=False)
-    elif arguments.get(common.HED_OPTION_TO_LONG, None):
+    elif arguments['command'] == common.COMMAND_TO_LONG:
         return hedstring_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a hedstring processing method", "")
@@ -94,12 +95,10 @@ def hedstring_convert(arguments, short_to_long=True, hed_schema=None):
         issues = hed_string_obj.convert_to_short(hed_schema)
 
     if issues:
-        return_str = get_printable_issue_string(issues, "Unable to convert HED string:")
-        category = 'warning'
+        issues_str = get_printable_issue_string(issues, 'HED validation errors:')
+        return {'data': issues_str, 'category': 'warning', 'msg': 'String had validation errors, unable to convert'}
     else:
-        return_str = str(hed_string_obj)
-        category = 'success'
-    return {'hedstring-result': return_str, 'category': category}
+        return {'data': str(hed_string_obj), 'category': 'success', 'msg': 'String conversion successful'}
 
 
 def hedstring_validate(arguments, hed_schema=None):
@@ -122,10 +121,9 @@ def hedstring_validate(arguments, hed_schema=None):
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     hed_validator = HedValidator(hed_schema=hed_schema)
     issues = hed_validator.validate_input(arguments.get(common.HEDSTRING))
+
     if issues:
-        return_str = get_printable_issue_string(issues, "HED validation errors:")
-        category = 'warning'
+        issues_str = get_printable_issue_string(issues, 'HED validation errors:')
+        return {'data': issues_str, 'category': 'warning', 'msg': 'String had validation errors'}
     else:
-        return_str = "No validation errors found..."
-        category = 'success'
-    return {'hedstring-result': return_str, 'category': category}
+        return {'category': 'success', 'msg': 'No validation errors found...'}

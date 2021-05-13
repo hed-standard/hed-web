@@ -10,6 +10,7 @@ from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
 from hedweb.web_utils import form_has_option, generate_filename, generate_download_file_response, \
+    generate_response_download_file_from_text, \
     generate_text_response, get_hed_path_from_pull_down, \
     get_uploaded_file_path_from_form, save_text_to_upload_folder
 
@@ -45,7 +46,6 @@ def generate_input_from_dictionary_form(request):
         arguments[common.COMMAND] = common.COMMAND_TO_SHORT
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
-
     return arguments
 
 
@@ -76,10 +76,10 @@ def dictionary_process(arguments):
     msg = results.get('msg', '')
     category = results.get('category', 'success')
 
-    if 'file_name' in results:
-        file_name = results.get('file_name', '')
+    if 'data' in results:
         display_name = results.get('display_name', '')
-        return generate_download_file_response(file_name, display_name=display_name, category=category, msg=msg)
+        return generate_response_download_file_from_text(results['data'], display_name=display_name,
+                                                         category=category, msg=msg)
     else:
         return generate_text_response("", msg=msg, category=category)
 
@@ -129,9 +129,8 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
-        issue_file = save_text_to_upload_folder(issue_str, file_name)
-        return {"file_name": issue_file, "display_name": file_name, "category": 'warning',
-                "msg": "JSON file had validation errors"}
+        return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
+                'msg': 'JSON file had validation errors'}
     else:
         file_name = generate_filename(display_name, suffix=suffix, extension='.json')
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_name)
@@ -164,8 +163,7 @@ def dictionary_validate(input_arguments, hed_schema=None):
         display_name = input_arguments.get(common.JSON_FILE, '')
         issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
-        issue_path = save_text_to_upload_folder(issue_str, file_name)
-        return {'file_name': issue_path, 'display_name': file_name, 'category': 'warning',
+        return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
                 'msg': 'JSON file had validation errors'}
     else:
         return {'msg': 'JSON file had no validation errors', 'category': 'success'}

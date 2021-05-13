@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         from hed.util.exceptions import HedFileError
         arguments = {'hedstring': ''}
         try:
-            a = hedstring_process(arguments)
+            hedstring_process(arguments)
         except HedFileError:
             pass
         except Exception:

@@ -151,6 +151,46 @@ def form_has_url(request, url_field, valid_extensions):
     return file_extension_is_valid(parsed_url.path, valid_extensions)
 
 
+def generate_response_download_file_from_text(download_text, display_name=None,
+                                              header=None, category='success', msg=''):
+    """Generates a download other response.
+
+    Parameters
+    ----------
+    download_text: str
+        Text with newlines for iterating.
+    display_name: str
+        Name to be assigned to the file in the response
+    header: str
+        Optional header -- header for download file blob
+    category: str
+        Category of the message to be displayed ('Success', 'Error', 'Warning')
+    msg: str
+        Optional message to be displayed in the submit-flash-field
+
+    Returns
+    -------
+    response object
+        A response object containing the downloaded file.
+
+    """
+    if not display_name:
+        display_name = 'download.txt'
+
+    if not download_text:
+        raise HedFileError('EmptyDownloadText', f"No download text given", "")
+
+    def generate():
+        if header:
+            yield header
+        for issue in download_text.splitlines(True):
+            yield issue
+
+    return Response(generate(), mimetype='text/plain charset=utf-8',
+                    headers={'Content-Disposition': f"attachment filename={display_name}",
+                             'Category': category, 'Message': msg})
+
+
 def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
     """Generates a download other response.
 

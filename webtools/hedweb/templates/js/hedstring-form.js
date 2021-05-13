@@ -73,11 +73,11 @@ function submitHedStringForm() {
             dataType: 'json',
             success: function (hedInfo) {
                 clearFormFlashMessages();
-                if (hedInfo['hedstring-result']) {
-                    $('#hedstring-result').val(hedInfo['hedstring-result'])
+                if (hedInfo['data']) {
+                    $('#hedstring-result').val(hedInfo['data'])
                     flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')
-                } else if (hedInfo['message'])
-                    flashMessageOnScreen(hedInfo['message'], 'error', 'hedstring-submit-flash')
+                } else if (hedInfo['msg'])
+                    flashMessageOnScreen(hedInfo['msg'], hedInfo['category'], 'hedstring-submit-flash')
                 else {
                     flashMessageOnScreen('Server could not respond to this request', 'error', 'hedstring-submit-flash')
                 }

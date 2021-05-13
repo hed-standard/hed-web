@@ -7,7 +7,7 @@ from hed.util import hed_cache
 from hed.util.error_reporter import get_printable_issue_string
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
-
+from hedweb.constants import common
 
 app_config = current_app.config
 
@@ -28,8 +28,8 @@ def services_process(arguments):
         A serialized JSON string containing information related to the hed strings validation result.
         If the validation fails then a 500 error message is returned.
     """
-    response = {"result": "", "error_type": "", "message": ""}
-    service = arguments.get("service", "")
+    response = {'result': '', 'error_type': '', 'message': ''}
+    service = arguments.get('service', '')
     supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
@@ -37,9 +37,10 @@ def services_process(arguments):
     elif service not in supported_services.keys():
         response["error_type"] = 'HEDServiceNotSupported'
         response["message"] = f"{service} not supported"
-    elif service == "get_services":
-        response["result"] = {"supported_services": supported_services}
+    elif service == 'get_services':
+        response["result"] = {'supported_services': supported_services}
     elif service == "validate_json":
+        arguments['command'] = common.COMMAND_VALIDATE
         response["result"] = get_validate_dictionary(arguments)
     elif service == "validate_strings":
         response["result"] = get_validate_strings(arguments)
@@ -75,7 +76,7 @@ def get_validate_dictionary(arguments):
     """
     hed_file_path = arguments.get('hed_file_path', None)
     if not hed_file_path:
-        hed = arguments.get("hed_version", "")
+        hed = arguments.get('hed_version', '')
         hed_file_path = hed_cache.get_path_from_hed_version(hed)
     hed_schema = hed_schema_file.load_schema(hed_file_path)
     json_text = arguments.get("json_dictionary", "")
