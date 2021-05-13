@@ -87,8 +87,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_convert(arguments, short_to_long=False)
-            self.assertTrue(results['file_name'],
-                            'dictionary_convert to long results should have file_name key')
+            self.assertTrue(results['data'],
+                            'dictionary_convert to long results should have data key')
             self.assertEqual('warning', results["category"],
                              'dictionary_convert to long category should be warning for errors')
 
@@ -97,8 +97,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_convert(arguments, short_to_long=False)
-            self.assertTrue(results['file_name'],
-                            'dictionary_convert to long results should have file_name key')
+            self.assertTrue(results['data'],
+                            'dictionary_convert to long results should have data key')
             self.assertEqual('success', results["category"],
                              'dictionary_convert to long category should be success when no errors')
 
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json', 'command': common.COMMAND}
         with self.app.app_context():
             results = dictionary_convert(arguments)
-            self.assertTrue(results['file_name'], 'dictionary_convert results should have file_name key')
+            self.assertTrue(results['data'], 'dictionary_convert results should have data key')
             self.assertEqual('warning', results['category'],
                              'dictionary_convert category should be warning for errors')
 
@@ -120,7 +120,7 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_convert(arguments)
-            self.assertTrue(results['file_name'], 'dictionary_convert results should have file_name key')
+            self.assertTrue(results['data'], 'dictionary_convert results should have data key')
             self.assertEqual('success', results['category'],
                              'dictionary_convert category should be success when no errors')
 
@@ -132,8 +132,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_validate(arguments)
-            self.assertTrue(results['file_name'],
-                            'dictionary_validate results should have a file_name key when validation errors')
+            self.assertTrue(results['data'],
+                            'dictionary_validate results should have a data key when validation errors')
             self.assertEqual('warning', results['category'],
                              'dictionary_validate category should be warning when errors')
 
@@ -142,8 +142,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'good_events.json'}
         with self.app.app_context():
             results = dictionary_validate(arguments)
-            self.assertFalse('file_name' in results,
-                             'dictionary_validate results should not have a file_name key when no validation errors')
+            self.assertFalse('data' in results,
+                             'dictionary_validate results should not have a data key when no validation errors')
             self.assertEqual('success', results["category"],
                              'dictionary_validate category should be success when no errors')
 

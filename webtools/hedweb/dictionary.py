@@ -107,7 +107,7 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
     if not hed_schema:
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     results = dictionary_validate(arguments, hed_schema)
-    if "file_name" in results:
+    if 'data' in results:
         return results
     issues = []
     for column_def in json_dictionary:
@@ -133,9 +133,8 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
                 'msg': 'JSON file had validation errors'}
     else:
         file_name = generate_filename(display_name, suffix=suffix, extension='.json')
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_name)
-        json_dictionary.save_as_json(file_path)
-        return {'file_name': file_path, 'display_name': file_name, 'category': 'success',
+        data = json_dictionary.get_as_json_string()
+        return {'data': data, 'display_name': file_name, 'category': 'success',
                 'msg': 'JSON dictionary was successfully converted'}
 
 
