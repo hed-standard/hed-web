@@ -7,15 +7,22 @@
       {"Name": "supported_services",
        "Description": "A list of available services with description, parameters and return values."}]
   },
-  "validate_strings": {
-     "Name": "validate_strings",
-     "Description": "Validate a list of HED strings and return errors",
+  "process_events": {
+     "Name": "process_events",
+     "Description": "Process a BIDS events file with JSON sidecars (passed as string)",
      "Parameters": [
+         {"Name": "command",
+          "Description": "Operation to perform. Must be validate",
+          "Default": "validate"
+         },
+         {"Name": "events_file",
+           "Description": "A BIDS events  as strings"
+         },
          {"Name": "hed_version",
-          "Description": "Version of HED to be used to validate",
+          "Description": "Version of HED to be used in processing",
           "Default": "Latest"},
-         {"Name": "hed_strings",
-          "Description": "List of hed strings to be validated",
+         {"Name": "json_dictionaries",
+          "Description": "A list of BIDS JSON sidecars as strings",
           "Default": []}
        ],
      "Returns": [
@@ -25,16 +32,54 @@
           "Description": "List of validation error dictionaries"}
      ]
   },
-    "validate_json": {
+  "validate_json": {
      "Name": "validate_json",
-     "Description": "Validate a JSON string in form of BIDS sidecar and return errors",
+     "Description": "Validate a BIDS JSON sidecar (in string form) and return errors",
      "Parameters": [
+         {"Name": "json_dictionary",
+          "Description": "JSON sidecar as a string"},
+         {"Name": "hed_version",
+          "Description": "Version of HED to be used to validate",
+          "Default": "Latest"}
+       ],
+     "Returns": [
+         {"Name": "hed_version",
+          "Description": "Version of HED used to validate"},
+         {"Name": "validation_errors",
+          "Description": "List of validation error dictionaries"}
+     ]
+  },
+  "validate_spreadsheet": {
+     "Name": "validate_spreadsheet",
+     "Description": "Validate a spreadsheet (tsv string) with HED tags in specified columns",
+     "Parameters": [
+         {"Name": "spreadsheet_file",
+           "Description": "A spreadsheet as "
+         },
          {"Name": "hed_version",
           "Description": "Version of HED to be used to validate",
           "Default": "Latest"},
-         {"Name": "json_dictionary",
-          "Description": "JSON sidecar as a string",
+         {"Name": "hed_columns",
+          "Description": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are validated.",
           "Default": []}
+       ],
+     "Returns": [
+         {"Name": "hed_version",
+          "Description": "Version of HED used to validate"},
+         {"Name": "validation_errors",
+          "Description": "List of validation error dictionaries"}
+     ]
+  },
+  "validate_strings": {
+     "Name": "validate_strings",
+     "Description": "Validate a list of HED strings and return errors",
+     "Parameters": [
+         {"Name": "hed_strings",
+          "Description": "List of hed strings to be validated",
+          "Default": []},
+         {"Name": "hed_version",
+          "Description": "Version of HED to be used to validate",
+          "Default": "Latest"}
        ],
      "Returns": [
          {"Name": "hed_version",

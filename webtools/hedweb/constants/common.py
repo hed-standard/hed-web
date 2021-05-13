@@ -1,12 +1,18 @@
 CHECK_FOR_WARNINGS = 'check-for-warnings'
+
+COMMAND = 'command'
+COMMAND_TO_LONG = 'short_to_long'
+COMMAND_TO_SHORT = 'long_to_short'
+COMMAND_VALIDATE = 'validate'
+
 COLUMN_NAMES = 'column-names'
 COLUMN_NAMES_TABLE = 'column-names-table'
-HAS_COLUMN_NAMES = 'has-column-names'
 COLUMN_POSTFIX = '-column'
 COLUMN_PREFIX_DICTIONARY = 'column-prefix-dictionary'
 COLUMNS_FILE = 'columns-file'
 COLUMNS_PATH = 'columns-path'
 COLUMNS_DISPLAY_NAME = 'columns-display-name'
+HAS_COLUMN_NAMES = 'has-column-names'
 TAG_COLUMNS = 'tag-columns'
 TAG_COLUMN_INDICES = 'tag-column-indices'
 
@@ -53,8 +59,6 @@ WORKSHEET_SELECTED = 'worksheet-selected'
 
 # Schema-specific constants
 SCHEMA_FORM = 'schema-form'
-SCHEMA_CONVERSION_SUBMIT = 'schema-conversion-submit'
-SCHEMA_DUPLICATE_TAG_SUBMIT = 'schema-duplicate-tag-submit'
 SCHEMA_DISPLAY_NAME = 'schema-display-name'
 SCHEMA_FILE = 'schema-file'
 SCHEMA_FILE_FLASH = 'schema-file-flash'

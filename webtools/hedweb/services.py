@@ -43,6 +43,8 @@ def services_process(arguments):
         response["result"] = get_validate_dictionary(arguments)
     elif service == "validate_strings":
         response["result"] = get_validate_strings(arguments)
+    elif service == "process_events":
+        response["result"] = process_events(arguments)
     else:
         response["errors"] = f"{service} not implemented"
     return response
@@ -58,7 +60,7 @@ def get_services():
 
 def get_validate_dictionary(arguments):
     """
-    Reports validation status of hed strings
+    Reports validation status of a JSON dictionary
 
     Parameters
     ----------
@@ -85,7 +87,44 @@ def get_validate_dictionary(arguments):
     else:
         issue_str = ''
         category = 'success'
-    # TODO: hed_schema needs to know its version
+
+    version = hed_schema.schema_attributes.get('version', 'Unknown version')
+    result = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
+    return result
+
+
+def process_events(arguments):
+    """
+    Performs requested operation on an events file in string form and returns the result
+
+    Parameters
+    ----------
+    arguments: dict
+         A dictionary of user data submitted by HEDTools.
+         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
+
+    Returns
+    -------
+    dict
+         A serialized JSON string containing information related to the hed strings validation result.
+    """
+    command = arguments.get('command', 'validate')
+    events_file = arguments.get('events_file', "")
+    hed_file_path = arguments.get('hed_file_path', None)
+    if not hed_file_path:
+        hed = arguments.get("hed_version", "")
+        hed_file_path = hed_cache.get_path_from_hed_version(hed)
+    hed_schema = hed_schema_file.load_schema(hed_file_path)
+    json_text = arguments.get("json_dictionaries", [])
+    json_dictionary = ColumnDefGroup(json_string=json_text)
+    issues = json_dictionary.validate_entries(hed_schema)
+    if issues:
+        issue_str = get_printable_issue_string(issues, f"HED validation errors")
+        category = 'warning'
+    else:
+        issue_str = ''
+        category = 'success'
+
     version = hed_schema.schema_attributes.get('version', 'Unknown version')
     result = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
     return result
