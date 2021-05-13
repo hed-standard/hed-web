@@ -98,8 +98,8 @@ class Test(unittest.TestCase):
                      'json-path': json_path, 'json-file': 'bids_events.json'}
         with self.app.app_context():
             results = events_assemble(arguments)
-            self.assertTrue("file_name" in results,
-                             'events_assemble results should have a file_name key when no errors')
+            self.assertTrue('data' in results,
+                            'events_assemble results should have a data key when no errors')
             self.assertEqual('success', results["category"],
                              'events_assemble category should be success when no errors')
 
@@ -109,8 +109,8 @@ class Test(unittest.TestCase):
                      'json-file': 'bids_events.json'}
         with self.app.app_context():
             results = events_assemble(arguments)
-            self.assertTrue(results['file_name'],
-                            'events_assemble results should have a file_name key when errors')
+            self.assertTrue(results['data'],
+                            'events_assemble results should have a data key when errors')
             self.assertEqual('warning', results['category'],
                              'events_assemble category should be warning when errors')
 
@@ -126,8 +126,8 @@ class Test(unittest.TestCase):
 
         with self.app.app_context():
             results = events_validate(arguments)
-            self.assertTrue(results["file_name"],
-                            'events_validate results should have a file_name key when validation errors')
+            self.assertTrue(results['data'],
+                            'events_validate results should have a data key when validation errors')
             self.assertEqual('warning', results["category"],
                              'events_validate category should be warning when errors')
 
@@ -138,8 +138,8 @@ class Test(unittest.TestCase):
 
         with self.app.app_context():
             results = events_validate(arguments)
-            self.assertFalse('file_name' in results,
-                             'events_validate results should not have a file_name key when no validation errors')
+            self.assertFalse('data' in results,
+                             'events_validate results should not have a data key when no validation errors')
             self.assertEqual('success', results['category'],
                              'events_validate category should be success when no errors')
 

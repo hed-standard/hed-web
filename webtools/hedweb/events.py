@@ -10,9 +10,9 @@ from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 
-from hedweb.web_utils import form_has_option, generate_download_file_response,\
+from hedweb.web_utils import form_has_option, generate_response_download_file_from_text,\
     generate_filename, generate_text_response, \
-    get_hed_path_from_pull_down, get_uploaded_file_path_from_form, save_text_to_upload_folder
+    get_hed_path_from_pull_down, get_uploaded_file_path_from_form
 app_config = current_app.config
 
 
@@ -44,9 +44,9 @@ def generate_input_from_events_form(request):
         common.JSON_FILE: original_json_name,
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
-        arguments[common.HED_OPTION_VALIDATE] = True
+        arguments[common.COMMAND] = common.COMMAND_VALIDATE
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_ASSEMBLE):
-        arguments[common.HED_OPTION_ASSEMBLE] = True
+        arguments[common.COMMAND] = common.COMMAND_ASSEMBLE
     return arguments
 
 
@@ -75,10 +75,10 @@ def events_process(arguments):
     msg = results.get('msg', '')
     category = results.get('category', 'success')
 
-    if 'file_name' in results:
-        file_name = results.get('file_name', '')
-        display_name = results.get('display_name', file_name)
-        return generate_download_file_response(file_name, display_name=display_name, category=category, msg=msg)
+    if 'data' in results:
+        display_name = results.get('display_name', '')
+        return generate_response_download_file_from_text(results['data'], display_name=display_name,
+                                                         category=category, msg=msg)
     else:
         return generate_text_response('', msg=msg, category=category)
 
@@ -96,14 +96,14 @@ def events_assemble(arguments, hed_schema=None):
     Returns
     -------
     dict
-        A dictionary pointing to downloadable file containing either assembled file or errors
+        A dictionary pointing to assembled string or errors
     """
 
     if not hed_schema:
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
 
     results = events_validate(arguments, hed_schema)
-    if 'file_name' in results:
+    if 'data' in results:
         return results
 
     if arguments.get(common.JSON_PATH, ''):  # If dictionary is provided and it has errors return those errors
@@ -121,9 +121,10 @@ def events_assemble(arguments, hed_schema=None):
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
+    csv_string = df.to_csv(None, '\t', index=False, header=True)
     file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
-    df.to_csv(file_name, '\t', index=False, header=True)
-    return {'file_name': file_name, 'display_name': file_name, 'category': 'success',
+    #df.to_csv(file_name, '\t', index=False, header=True)
+    return {'data': csv_string, 'display_name': file_name, 'category': 'success',
             'msg': 'Events file successfully expanded'}
 
 
@@ -152,16 +153,14 @@ def events_validate(arguments, hed_schema=None):
         if issues:
             issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED dictionary errors")
             file_name = generate_filename(common.JSON_FILE, suffix='_dictionary_errors', extension='.txt')
-            issue_file = save_text_to_upload_folder(issue_str, file_name)
-            return {'file_name': issue_file, 'display_name': file_name, 'category': 'warning',
+            return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
                     'msg': "JSON sidecar definitions had dictionary errors"}
 
         issues = json_sidecar.validate_entries(hed_schema)
         if issues:
             issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED validation errors")
             file_name = generate_filename(common.JSON_FILE, suffix='_validation_errors', extension='.txt')
-            issue_file = save_text_to_upload_folder(issue_str, file_name)
-            return {"file_name": issue_file, "display_name": file_name, "category": 'warning',
+            return {'data': issue_str, 'display_name': file_name, "category": 'warning',
                     "msg": "JSON sidecar had validation errors"}
 
     input_file = EventFileInput(arguments.get(common.EVENTS_PATH),
@@ -173,8 +172,7 @@ def events_validate(arguments, hed_schema=None):
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
 
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        issue_file = save_text_to_upload_folder(issue_str, file_name)
-        return {'file_name': issue_file, "display_name": file_name, "category": "warning",
+        return {'data': issue_str, "display_name": file_name, "category": "warning",
                 'msg': "Events file had validation errors"}
     else:
         return {'msg': 'Events file had no validation errors', 'category': 'success'}
