@@ -33,19 +33,19 @@ def services_process(arguments):
     supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
-        response["message"] = "Must specify a valid service"
+        response["msg"] = "Must specify a valid service"
     elif service not in supported_services.keys():
         response["error_type"] = 'HEDServiceNotSupported'
-        response["message"] = f"{service} not supported"
+        response["msg"] = f"{service} not supported"
     elif service == 'get_services':
-        response["result"] = {'supported_services': supported_services}
+        response["results"] = {'supported_services': supported_services}
     elif service == "validate_json":
         arguments['command'] = common.COMMAND_VALIDATE
-        response["result"] = get_validate_dictionary(arguments)
+        response["results"] = get_validate_dictionary(arguments)
     elif service == "validate_strings":
-        response["result"] = get_validate_strings(arguments)
+        response["results"] = get_validate_strings(arguments)
     elif service == "process_events":
-        response["result"] = process_events(arguments)
+        response["results"] = process_events(arguments)
     else:
         response["errors"] = f"{service} not implemented"
     return response
@@ -90,8 +90,8 @@ def get_validate_dictionary(arguments):
         category = 'success'
 
     version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    result = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
-    return result
+    results = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
+    return results
 
 
 def process_events(arguments):
