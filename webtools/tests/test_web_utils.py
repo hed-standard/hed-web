@@ -158,13 +158,6 @@ class Test(unittest.TestCase):
         from hedweb.web_utils import get_hed_path_from_pull_down
         mock_form = mock.Mock()
         mock_form.values = {}
-        # hed_file_path, hed_display_name = get_hed_path_from_pull_down(mock_form)
-        # self.assertFalse(hed_file_path,
-        #                  'When hed-version is not in form get_hed_path_from_pull_down returns empty hed_file_path')
-        # mock_dict1 = {'form': {common_constants.HED_VERSION: '7.1.1'}}
-        # hed_file_path, hed_display_name = get_hed_path_from_pull_down(mock_form)
-        # self.assertTrue(hed_file_path,
-        #                 'When hed-version is in form get_hed_path_from_pull_down returns a hed_file_path')
 
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")

@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         self.assertEqual(400, response.status_code, 'Columns info requires data')
 
     def test_get_dictionary_results(self):
-        response = self.app.test.post('/dictionary-submit')
+        response = self.app.test.post('/dictionary_submit')
         self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
 
     def test_get_events_results(self):
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         self.assertEqual(405, response.status_code, 'HED services require data')
 
     def test_get_hed_version(self):
-        response = self.app.test.post('/get-hed-version')
+        response = self.app.test.post('/get_hed_version')
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
 
     def test_get_hedstring_results(self):

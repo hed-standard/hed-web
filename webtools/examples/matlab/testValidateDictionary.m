@@ -21,24 +21,19 @@ data.service = 'validate_json';
 data.hed_version = '7.1.2';
 %data.hed_version = '8.0.0-alpha.1';
 data.check_for_warnings = true;
-data.json_dictionary = string(json_text);
+data.json_string = string(json_text);
+data.json_display_name = 'json str';
 
 %% Send the request and get the response for version 7.1.2
 response = webwrite(services_url, data, options);
 response = jsondecode(response);
-validation_errors = response.result.validation_errors;
+fprintf('Error report: [%s] %s\n', response.error_type, response.error_msg);
 
-if isfield(response, 'error_type')
-    error_type = response.error_type;
-else
-    error_type = '';
+%% Print out the results if available
+if isfield(response, 'results')
+   results = response.results;
+   fprintf('[%s] %s: %s\n', response.service, results.category, results.msg);
+   fprintf('HED version: %s\n', results.hed_version);
+   fprintf('Validation errors for %s:\n', dictionary_file)
+   fprintf('%s\n', results.data);
 end
-if isfield(response, 'message')
-    message = response.message;
-else
-    message = '';
-end
-
-fprintf('Validation results for %s\n', dictionary_file)
-fprintf('%s\n', validation_errors)
-fprintf('Error report: [%s] %s\n', error_type, message)

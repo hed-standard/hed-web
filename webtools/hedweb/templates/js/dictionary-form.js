@@ -6,8 +6,9 @@ $(function () {
 /**
  * Submits the form if the tag columns textbox is valid.
  */
-$('#dictionary-submit').on('click', function () {
-    if (fileIsSpecified('#json-file', 'json-flash', 'JSON is not specified.' ) && hedSpecifiedWhenOtherIsSelected()) {
+$('#dictionary_submit').on('click', function () {
+    if (fileIsSpecified('#json_file', 'json_flash', 'JSON is not specified.' ) &&
+        hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
@@ -16,7 +17,7 @@ $('#dictionary-submit').on('click', function () {
  * Clear the fields in the form.
  */
 function clearForm() {
-    $('#dictionary-form')[0].reset();
+    $('#dictionary_form')[0].reset();
     clearFlashMessages()
     clearJsonFileLabel();
     hideOtherHEDVersionFileUpload()
@@ -28,7 +29,7 @@ function clearForm() {
 function clearFlashMessages() {
     clearJsonInputFlashMessages();
     clearHedSelectFlashMessages();
-    flashMessageOnScreen('', 'success', 'dictionary-submit-flash');
+    flashMessageOnScreen('', 'success', 'dictionary_submit_flash');
 }
 
 /**
@@ -46,13 +47,13 @@ function prepareForm() {
  * file.
  */
 function submitForm() {
-    let dictionaryForm = document.getElementById("dictionary-form");
+    let dictionaryForm = document.getElementById("dictionary_form");
     let formData = new FormData(dictionaryForm);
 
     let dictionaryFile = getJsonFileLabel();
     let display_name = convertToResultsName(dictionaryFile, 'issues')
     clearFlashMessages();
-    flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary-submit-flash')
+    flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary_submit_flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_dictionary_results')}}",
@@ -61,10 +62,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'dictionary-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'dictionary_submit_flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'dictionary-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'dictionary_submit_flash')
             }
         }
     )

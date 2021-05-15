@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
+from hed.schema.hed_schema_file import load_schema, from_string
 from hed.util import hed_cache
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
@@ -320,6 +321,19 @@ def get_hed_path_from_pull_down(request):
         hed_file_path = ''
         hed_display_name = ''
     return hed_file_path, hed_display_name
+
+
+def get_hed_schema(arguments):
+    if common.SCHEMA_STRING in arguments:
+        hed_schema = from_string(common.SCHEMA_STRING)
+    elif common.HED_XML_FILE in arguments:
+        hed_schema = load_schema(arguments[common.HED_XML_FILE])
+    elif common.HED_VERSION in arguments:
+        hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.HED_VERSION])
+        hed_schema = load_schema(hed_file_path)
+    else:
+        raise HedFileError('NoHEDSchema', 'No HED valid HED schema was provided')
+    return hed_schema
 
 
 def get_optional_form_field(request, form_field_name, field_type=''):

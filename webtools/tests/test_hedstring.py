@@ -39,19 +39,19 @@ class Test(unittest.TestCase):
         except Exception:
             self.fail('dictionary_process threw the wrong exception when dictionary-path was empty')
         else:
-            self.fail('dictionary_process should have thrown a HedFileError exception when json-path was empty')
+            self.fail('dictionary_process should have thrown a HedFileError exception when json_path was empty')
 
     def test_hedstring_convert(self):
         from hedweb.hedstring import hedstring_convert
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_convert(arguments)
             self.assertEqual('warning', response['category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_convert(arguments)
@@ -60,14 +60,14 @@ class Test(unittest.TestCase):
     def test_hedstring_validate(self):
         from hedweb.hedstring import hedstring_validate
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_validate(arguments)
             self.assertEqual('warning', response['category'], "hedstring_validate has warning if validation errors")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_validate(arguments)

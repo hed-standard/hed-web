@@ -46,8 +46,8 @@ class Test(unittest.TestCase):
     #     from hed.hedweb.dictionary import dictionary_convert
     #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
     #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-    #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
-    #                  'json-path': json_path, 'json-file': 'good_events.json'}
+    #     arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
+    #                  'json_path': json_path, 'json_file': 'good_events.json'}
     #     with self.app.app_context():
     #         response = dictionary_convert(arguments)
     #         headers = dict(response.headers)
@@ -55,8 +55,8 @@ class Test(unittest.TestCase):
     #         self.assertTrue(response.data, "good_events should not convert using HED 7.1.2.xml")
     #
     #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-    #     arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
-    #                  'json-path': json_path, 'json-file': 'good_events.json'}
+    #     arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+    #                  'json_path': json_path, 'json_file': 'good_events.json'}
     #     with self.app.app_context():
     #         response = dictionary_convert(arguments)
     #         headers = dict(response.headers)
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
                      'spreadsheet-path': spreadsheet_path, 'spreadsheet-file': 'ExcelMultipleSheets.xlsx',
                      'worksheet-selected': 'LKT Events', 'has-column-names': True,
                      'tag_columns': [5], 'column-prefix-dictionary': prefix_dict}
@@ -79,8 +79,8 @@ class Test(unittest.TestCase):
             self.assertFalse(response.data, "ExcelMultipleSheets should validate using HED 7.1.2.xml")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments['hed-xml-file'] = schema_path
-        arguments['hed-display-name'] = 'HED8.0.0-alpha.1.xml'
+        arguments['hed_xml_file'] = schema_path
+        arguments['hed_display_name'] = 'HED8.0.0-alpha.1.xml'
         with self.app.app_context():
             response = spreadsheet_validate(arguments)
             headers = dict(response.headers)

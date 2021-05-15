@@ -6,7 +6,7 @@ COLUMN_INFO_ROUTE = '/get-columns-info'
 
 COMMON_ERRORS_ROUTE = '/common-errors'
 DICTIONARY_ROUTE = '/dictionary'
-DICTIONARY_SUBMIT_ROUTE = '/dictionary-submit'
+DICTIONARY_SUBMIT_ROUTE = '/dictionary_submit'
 
 EVENTS_ROUTE = '/events'
 EVENTS_SUBMIT_ROUTE = '/events-submit'
@@ -17,7 +17,7 @@ HEDSTRING_ROUTE = '/hedstring'
 HEDSTRING_SUBMIT_ROUTE = '/hedstring-submit'
 HED_TOOLS_HELP_ROUTE = '/hed-tools-help'
 HED_TOOLS_HOME_ROUTE = '/'
-HED_VERSION_ROUTE = '/get-hed-version'
+HED_VERSION_ROUTE = '/get_hed_version'
 SCHEMA_ROUTE = '/schema'
 SCHEMA_SUBMIT_ROUTE = '/schema-submit'
 

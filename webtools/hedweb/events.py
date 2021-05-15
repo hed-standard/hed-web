@@ -33,7 +33,7 @@ def generate_input_from_events_form(request):
     uploaded_events_path, original_events_name = \
         get_uploaded_file_path_from_form(request, common.EVENTS_FILE, file_constants.TEXT_FILE_EXTENSIONS)
     uploaded_json_name, original_json_name = \
-        get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
+        get_uploaded_file_path_from_form(request, common.JSON_DISPLAY_NAME, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     arguments = {
         common.HED_XML_FILE: hed_file_path,
@@ -41,7 +41,7 @@ def generate_input_from_events_form(request):
         common.EVENTS_PATH: uploaded_events_path,
         common.EVENTS_FILE: original_events_name,
         common.JSON_PATH: uploaded_json_name,
-        common.JSON_FILE: original_json_name,
+        common.JSON_DISPLAY_NAME: original_json_name,
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
@@ -151,15 +151,15 @@ def events_validate(arguments, hed_schema=None):
         json_sidecar = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
         def_dict, issues = json_sidecar.extract_defs(hed_schema)
         if issues:
-            issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED dictionary errors")
-            file_name = generate_filename(common.JSON_FILE, suffix='_dictionary_errors', extension='.txt')
+            issue_str = get_printable_issue_string(issues, f"{common.JSON_DISPLAY_NAME} HED dictionary errors")
+            file_name = generate_filename(common.JSON_DISPLAY_NAME, suffix='_dictionary_errors', extension='.txt')
             return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
                     'msg': "JSON sidecar definitions had dictionary errors"}
 
         issues = json_sidecar.validate_entries(hed_schema)
         if issues:
-            issue_str = get_printable_issue_string(issues, f"{common.JSON_FILE} HED validation errors")
-            file_name = generate_filename(common.JSON_FILE, suffix='_validation_errors', extension='.txt')
+            issue_str = get_printable_issue_string(issues, f"{common.JSON_DISPLAY_NAME} HED validation errors")
+            file_name = generate_filename(common.JSON_DISPLAY_NAME, suffix='_validation_errors', extension='.txt')
             return {'data': issue_str, 'display_name': file_name, "category": 'warning',
                     "msg": "JSON sidecar had validation errors"}
 

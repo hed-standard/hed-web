@@ -37,9 +37,9 @@ function clearFormFlashMessages() {
  * Checks to see if a hedstring has been specified.
  */
 function hedStringIsSpecified() {
-/*    let jsonFile = $('#json-file');
+/*    let jsonFile = $('#json_file');
     if (jsonFile[0].files.length === 0) {
-        flashMessageOnScreen('JSON is not specified.', 'error', 'json-flash');
+        flashMessageOnScreen('JSON is not specified.', 'error', 'json_flash');
         return false;
     }*/
     return true;

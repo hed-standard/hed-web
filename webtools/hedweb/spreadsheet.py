@@ -114,9 +114,9 @@ def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
     # else:
     #     suffix = '_to_short'
     # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    # display_name = arguments.get(common.JSON_FILE, '')
+    # display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
     # if issues:
-    #     display_name = arguments.get(common.JSON_FILE, '')
+    #     display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
     #     issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
     #     file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
     #     issue_file = save_text_to_upload_folder(issue_str, file_name)

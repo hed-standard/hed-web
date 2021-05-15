@@ -11,7 +11,7 @@ def event_input():
     test_events = {common.HED_XML_FILE: os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml'),
                    common.HED_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml',
                    common.JSON_PATH: os.path.join(base_path, 'data/short_form_valid.json'),
-                   common.JSON_FILE: 'short_form_valid.json',
+                   common.JSON_DISPLAY_NAME: 'short_form_valid.json',
                    common.SPREADSHEET_PATH: os.path.join(base_path, 'data/ExcelMultipleSheets.xlsx'),
                    common.SPREADSHEET_FILE: 'ExcelMultipleSheets.xlsx',
                    common.WORKSHEET_NAME: 'LKT Events',
@@ -63,8 +63,8 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'events-path': events_path, 'command': common.COMMAND_VALIDATE,
-                     'json-path': json_path, 'json-file': 'good_events.json',
-                     'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml'}
+                     'json_path': json_path, 'json_file': 'good_events.json',
+                     'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml'}
         with self.app.app_context():
             response = events_process(arguments)
             self.assertTrue(isinstance(response, Response),
@@ -75,8 +75,8 @@ class Test(unittest.TestCase):
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'events-path': events_path, 'command': common.COMMAND_VALIDATE,
-                     'json-path': json_path, 'json-file': 'good_events.json',
-                     'hed-xml-file': schema_path, 'hed-display-name': 'HED 7.1.2.xml'}
+                     'json_path': json_path, 'json_file': 'good_events.json',
+                     'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml'}
         with self.app.app_context():
             response = events_process(arguments)
             self.assertTrue(isinstance(response, Response),
@@ -93,9 +93,9 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
 
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv',
-                     'json-path': json_path, 'json-file': 'bids_events.json'}
+                     'json_path': json_path, 'json_file': 'bids_events.json'}
         with self.app.app_context():
             results = events_assemble(arguments)
             self.assertTrue('data' in results,
@@ -104,9 +104,9 @@ class Test(unittest.TestCase):
                              'events_assemble category should be success when no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
-                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
-                     'json-file': 'bids_events.json'}
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED7.1.2.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json_path': json_path,
+                     'json_file': 'bids_events.json'}
         with self.app.app_context():
             results = events_assemble(arguments)
             self.assertTrue(results['data'],
@@ -120,9 +120,9 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
 
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED7.1.2.xml',
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED7.1.2.xml',
                      'events-path': events_path, 'events-file': 'bids_events.tsv',
-                     'json-path': json_path, 'json-file': 'bids_events.json'}
+                     'json_path': json_path, 'json_file': 'bids_events.json'}
 
         with self.app.app_context():
             results = events_validate(arguments)
@@ -132,9 +132,9 @@ class Test(unittest.TestCase):
                              'events_validate category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed-xml-file': schema_path, 'hed-display-name': 'HED8.0.0-alpha.1.xml',
-                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json-path': json_path,
-                     'json-file': 'bids_events.json'}
+        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+                     'events-path': events_path, 'events-file': 'bids_events.tsv', 'json_path': json_path,
+                     'json_file': 'bids_events.json'}
 
         with self.app.app_context():
             results = events_validate(arguments)

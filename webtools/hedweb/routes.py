@@ -189,8 +189,7 @@ def get_spreadsheet_results():
     input_arguments = {}
     try:
         input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
-        a = spreadsheet.spreadsheet_process(input_arguments)
-        return a
+        return spreadsheet.spreadsheet_process(input_arguments)
     except Exception as ex:
         return handle_http_error(ex)
     finally:

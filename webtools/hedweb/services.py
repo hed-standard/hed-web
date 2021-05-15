@@ -8,6 +8,7 @@ from hed.util.error_reporter import get_printable_issue_string
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hedweb.constants import common
+from hedweb.dictionary import dictionary_validate
 
 app_config = current_app.config
 
@@ -28,26 +29,30 @@ def services_process(arguments):
         A serialized JSON string containing information related to the hed strings validation result.
         If the validation fails then a 500 error message is returned.
     """
-    response = {'result': '', 'error_type': '', 'message': ''}
+
     service = arguments.get('service', '')
+    response = {'results': '', 'error_type': '', 'error_msg': '', 'service': service}
     supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
-        response["msg"] = "Must specify a valid service"
+        response["error_msg"] = "Must specify a valid service"
     elif service not in supported_services.keys():
         response["error_type"] = 'HEDServiceNotSupported'
-        response["msg"] = f"{service} not supported"
+        response["error_msg"] = f"{service} not supported"
     elif service == 'get_services':
         response["results"] = {'supported_services': supported_services}
     elif service == "validate_json":
         arguments['command'] = common.COMMAND_VALIDATE
-        response["results"] = get_validate_dictionary(arguments)
+        response["results"] = dictionary_validate(arguments)
+    elif service == "validate_events":
+        response["results"] = process_events(arguments)
+    elif service == "validate_spreadsheet":
+        response["results"] = process_events(arguments)
     elif service == "validate_strings":
         response["results"] = get_validate_strings(arguments)
-    elif service == "process_events":
-        response["results"] = process_events(arguments)
     else:
-        response["errors"] = f"{service} not implemented"
+        response["error_type"] = 'HEDServiceNotImplemented'
+        response["error_msg"] = f"{service} not implemented"
     return response
 
 
@@ -79,7 +84,7 @@ def get_validate_dictionary(arguments):
         hed = arguments.get('hed_version', '')
         hed_file_path = hed_cache.get_path_from_hed_version(hed)
     hed_schema = hed_schema_file.load_schema(hed_file_path)
-    json_text = arguments.get("json_dictionary", "")
+    json_text = arguments.get("json_string", "")
     json_dictionary = ColumnDefGroup(json_string=json_text)
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:

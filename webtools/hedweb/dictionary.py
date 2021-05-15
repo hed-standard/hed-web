@@ -1,18 +1,15 @@
-import os
 from flask import current_app
 from werkzeug import Response
 
-from hed.schema.hed_schema_file import load_schema
 from hedweb.constants import common, file_constants
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.hed_string import HedString
 from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
 from hed.util.error_types import ErrorSeverity
 from hed.util.exceptions import HedFileError
-from hedweb.web_utils import form_has_option, generate_filename, generate_download_file_response, \
-    generate_response_download_file_from_text, \
-    generate_text_response, get_hed_path_from_pull_down, \
-    get_uploaded_file_path_from_form, save_text_to_upload_folder
+from hedweb.web_utils import form_has_option, generate_filename, \
+    generate_response_download_file_from_text, get_hed_schema,\
+    generate_text_response, get_hed_path_from_pull_down, get_uploaded_file_path_from_form
 
 app_config = current_app.config
 
@@ -38,7 +35,7 @@ def generate_input_from_dictionary_form(request):
         common.HED_XML_FILE: hed_file_path,
         common.HED_DISPLAY_NAME: hed_display_name,
         common.JSON_PATH: uploaded_file_name,
-        common.JSON_FILE: original_file_name,
+        common.JSON_DISPLAY_NAME: original_file_name,
     }
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
@@ -76,7 +73,7 @@ def dictionary_process(arguments):
     msg = results.get('msg', '')
     category = results.get('category', 'success')
 
-    if 'data' in results:
+    if results['data']:
         display_name = results.get('display_name', '')
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          category=category, msg=msg)
@@ -102,12 +99,16 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
         A downloadable dictionary file or a file containing warnings
     """
 
-    json_dictionary = ColumnDefGroup(arguments.get(common.JSON_PATH, ''))
+    if common.JSON_DICTIONARY in arguments:
+        json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_DICTIONARY])
+    else:
+        json_dictionary = ColumnDefGroup(json_filename=arguments.get(common.JSON_PATH, ''))
 
     if not hed_schema:
-        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+        hed_schema = get_hed_schema(arguments)
+
     results = dictionary_validate(arguments, hed_schema)
-    if 'data' in results:
+    if results['data']:
         return results
     issues = []
     for column_def in json_dictionary:
@@ -125,25 +126,26 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
     else:
         suffix = '_to_short'
     issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    display_name = arguments.get(common.JSON_FILE, '')
+    display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
+    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if issues:
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
-        return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
+        return {'data': issue_str, 'display_name': file_name, 'category': 'warning', 'hed_version': hed_version,
                 'msg': 'JSON file had validation errors'}
     else:
         file_name = generate_filename(display_name, suffix=suffix, extension='.json')
         data = json_dictionary.get_as_json_string()
-        return {'data': data, 'display_name': file_name, 'category': 'success',
+        return {'data': data, 'display_name': file_name, 'category': 'success',  'hed_version': hed_version,
                 'msg': 'JSON dictionary was successfully converted'}
 
 
-def dictionary_validate(input_arguments, hed_schema=None):
-    """ Validates the dictionary and returns a response or a printable string depending on return_response value
+def dictionary_validate(arguments, hed_schema=None):
+    """ Validates the dictionary and returns the errors and/or a message in a dictionary
 
     Parameters
     ----------
-    input_arguments: dict
+    arguments: dict
         Dictionary containing standard input form arguments
     hed_schema: str or HedSchema
         Version number or path or HedSchema object to be used
@@ -154,15 +156,19 @@ def dictionary_validate(input_arguments, hed_schema=None):
         dictionary of response values.
     """
 
-    json_dictionary = ColumnDefGroup(input_arguments.get(common.JSON_PATH, ''))
+    if common.JSON_STRING in arguments:
+        json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_STRING])
+    else:
+        json_dictionary = ColumnDefGroup(json_filename=arguments.get(common.JSON_PATH, ''))
     if not hed_schema:
-        hed_schema = load_schema(input_arguments.get(common.HED_XML_FILE, ''))
+        hed_schema = get_hed_schema(arguments)
+    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
     issues = json_dictionary.validate_entries(hed_schema)
     if issues:
-        display_name = input_arguments.get(common.JSON_FILE, '')
+        display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
         issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
         return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
-                'msg': 'JSON file had validation errors'}
+                'msg': 'JSON file had validation errors', 'hed_version': hed_version}
     else:
-        return {'msg': 'JSON file had no validation errors', 'category': 'success'}
+        return {'data': '', 'msg': 'JSON file had no validation errors', 'category': 'success', 'hed_version': hed_version}

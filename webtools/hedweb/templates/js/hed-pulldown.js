@@ -5,7 +5,7 @@ const HED_OTHER_VERSION_OPTION = 'Other';
  * Event handler function when the HED version drop-down menu changes. If Other is selected the file browser
  * underneath it will appear. If another option is selected then it will disappear.
  */
-$('#hed-version').on('change',function () {
+$('#hed_version').on('change',function () {
     if ($(this).val() === HED_OTHER_VERSION_OPTION) {
         $('#hed-other-version').show();
     } else {
@@ -17,13 +17,13 @@ $('#hed-version').on('change',function () {
 /**
  * Checks if the HED file uploaded has a valid extension.
  */
-$('#hed-xml-file').on('change', function () {
-    let hedSchema = $('#hed-xml-file');
+$('#hed_xml_file').on('change', function () {
+    let hedSchema = $('#hed_xml_file');
     let hedPath = hedSchema.val();
     let hedFile = hedSchema[0].files[0];
     if (fileHasValidExtension(hedPath, XML_FILE_EXTENSIONS)) {
         getVersionFromHEDFile(hedFile);
-        updateFileLabel(hedPath, '#hed-display-name');
+        updateFileLabel(hedPath, '#hed_display_name');
     } else {
         flashMessageOnScreen('Please upload a valid HED file (.xml)', 'error',
             'hed-select-flash')
@@ -71,7 +71,7 @@ function getHedVersions() {
  */
 function getVersionFromHEDFile(hedXMLFile) {
     let formData = new FormData();
-    formData.append('hed-xml-file', hedXMLFile);
+    formData.append('hed_xml_file', hedXMLFile);
     $.ajax({
         type: 'POST',
         url: "{{ url_for('route_blueprint.get_hed_version')}}",
@@ -80,8 +80,8 @@ function getVersionFromHEDFile(hedXMLFile) {
         processData: false,
         dataType: 'json',
         success: function (hedInfo) {
-            if (hedInfo['hed-version']) {
-                flashMessageOnScreen('Using HED version ' + hedInfo['hed-version'], 'success', 'hed-select-flash');
+            if (hedInfo['hed_version']) {
+                flashMessageOnScreen('Using HED version ' + hedInfo['hed_version'], 'success', 'hed-select-flash');
             } else if (hedInfo['message'])
                 flashMessageOnScreen(hedInfo['message'], 'error', 'hed-select-flash')
             else {
@@ -102,9 +102,9 @@ function getVersionFromHEDFile(hedXMLFile) {
  * Checks to see if a HED XML file is specified when the HED drop-down is set to "Other".
  */
 function hedSpecifiedWhenOtherIsSelected() {
-    let hedFile = $('#hed-xml-file');
+    let hedFile = $('#hed_xml_file');
     let hedFileIsEmpty = hedFile[0].files.length === 0;
-    if ($('#hed-version').val() === HED_OTHER_VERSION_OPTION && hedFileIsEmpty) {
+    if ($('#hed_version').val() === HED_OTHER_VERSION_OPTION && hedFileIsEmpty) {
         flashMessageOnScreen('HED version is not specified.', 'error', 'hed-select-flash');
         return false;
     }
@@ -115,7 +115,7 @@ function hedSpecifiedWhenOtherIsSelected() {
  * Hides the HED XML file upload.
  */
 function hideOtherHEDVersionFileUpload() {
-    $('#hed-display-name').text('');
+    $('#hed_display_name').text('');
     $('#hed-other-version').hide();
 }
 
@@ -125,8 +125,8 @@ function hideOtherHEDVersionFileUpload() {
  * @param {Array} hedVersions - An array containing the HED versions.
  */
 function populateHEDVersionsDropdown(hedVersions) {
-    let hedVersionDropdown = $('#hed-version');
-    $('#hed-version').empty()
+    let hedVersionDropdown = $('#hed_version');
+    $('#hed_version').empty()
     hedVersionDropdown.append('<option value=' + hedVersions[0] + '>' + hedVersions[0] + ' (Latest)</option>');
     for (let i = 1; i < hedVersions.length; i++) {
         hedVersionDropdown.append('<option value=' + hedVersions[i] + '>' + hedVersions[i] + '</option>');

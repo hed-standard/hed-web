@@ -12,7 +12,7 @@
     </p>
 
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
-    <form id="dictionary-form" method="POST" enctype="multipart/form-data">
+    <form id="dictionary_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <div class="form-group">
@@ -22,8 +22,8 @@
             {{ create_hed_process_options() }}
 
             <div class="form-group">
-                <button id="dictionary-submit" type="button">Process</button>
-                <p class="flash" id="dictionary-submit-flash"></p>
+                <button id="dictionary_submit" type="button">Process</button>
+                <p class="flash" id="dictionary_submit_flash"></p>
             </div>
         </div>
     </form>
