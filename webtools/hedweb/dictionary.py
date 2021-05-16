@@ -132,7 +132,7 @@ def dictionary_convert(arguments, short_to_long=True, hed_schema=None):
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
         file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
         return {'data': issue_str, 'display_name': file_name, 'category': 'warning', 'hed_version': hed_version,
-                'msg': 'JSON file had validation errors'}
+                'command': arguments.get('command', ''), 'msg': 'JSON file had validation errors'}
     else:
         file_name = generate_filename(display_name, suffix=suffix, extension='.json')
         data = json_dictionary.get_as_json_string()

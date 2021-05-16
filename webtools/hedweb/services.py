@@ -8,7 +8,8 @@ from hed.util.error_reporter import get_printable_issue_string
 from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hedweb.constants import common
-from hedweb.dictionary import dictionary_validate
+from hedweb.dictionary import dictionary_convert, dictionary_validate
+from hedweb.events import events_convert, events_validate
 
 app_config = current_app.config
 
@@ -31,7 +32,7 @@ def services_process(arguments):
     """
 
     service = arguments.get('service', '')
-    response = {'results': '', 'error_type': '', 'error_msg': '', 'service': service}
+    response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
     supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
@@ -41,11 +42,12 @@ def services_process(arguments):
         response["error_msg"] = f"{service} not supported"
     elif service == 'get_services':
         response["results"] = {'supported_services': supported_services}
-    elif service == "validate_json":
+    elif service == "events_validate":
+        response["results"] = events_validate(arguments)
+    elif service == "json_validate":
         arguments['command'] = common.COMMAND_VALIDATE
         response["results"] = dictionary_validate(arguments)
-    elif service == "validate_events":
-        response["results"] = process_events(arguments)
+
     elif service == "validate_spreadsheet":
         response["results"] = process_events(arguments)
     elif service == "validate_strings":
