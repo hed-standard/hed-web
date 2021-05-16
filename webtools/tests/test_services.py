@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         arguments = {'hed_file_path': hed_file_path, 'json_dictionary': json_text}
         with self.app.app_context():
             response = get_validate_dictionary(arguments)
-            self.assertEqual('success', response['category'], "get_dictionary_validation has success on good.json")
+            self.assertEqual('success', response['msg_category'], "get_dictionary_validation has success on good.json")
 
     def test_get_validate_strings(self):
         from hedweb.services import get_validate_strings
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         arguments = {'hed_file_path': hed_file_path, 'hed_strings': ['Red', 'Blue']}
         with self.app.app_context():
             response = get_validate_strings(arguments)
-            self.assertEqual('success', response['category'], "get_validate_strings has success with good strings")
+            self.assertEqual('success', response['msg_category'], "get_validate_strings has success with good strings")
             self.assertEqual('8.0.0-alpha.1', response['hed_version'],
                              "get_validate_strings is using version 8.0.0-alpha.1.xml")
 
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
         arguments['hed_file_path'] = hed_file_path
         with self.app.app_context():
             response = get_validate_strings(arguments)
-            self.assertEqual('warning', response['category'], "get_validate_strings has warning if validation errors")
+            self.assertEqual('warning', response['msg_category'], "get_validate_strings has warning if validation errors")
 
 if __name__ == '__main__':
     unittest.main()

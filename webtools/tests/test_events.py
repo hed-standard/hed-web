@@ -100,8 +100,8 @@ class Test(unittest.TestCase):
             results = events_assemble(arguments)
             self.assertTrue('data' in results,
                             'events_assemble results should have a data key when no errors')
-            self.assertEqual('success', results["category"],
-                             'events_assemble category should be success when no errors')
+            self.assertEqual('success', results["msg_category"],
+                             'events_assemble msg_category should be success when no errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED7.1.2.xml',
@@ -111,8 +111,8 @@ class Test(unittest.TestCase):
             results = events_assemble(arguments)
             self.assertTrue(results['data'],
                             'events_assemble results should have a data key when errors')
-            self.assertEqual('warning', results['category'],
-                             'events_assemble category should be warning when errors')
+            self.assertEqual('warning', results['msg_category'],
+                             'events_assemble msg_category should be warning when errors')
 
     def test_events_validate(self):
         from hedweb.events import events_validate
@@ -128,8 +128,8 @@ class Test(unittest.TestCase):
             results = events_validate(arguments)
             self.assertTrue(results['data'],
                             'events_validate results should have a data key when validation errors')
-            self.assertEqual('warning', results["category"],
-                             'events_validate category should be warning when errors')
+            self.assertEqual('warning', results["msg_category"],
+                             'events_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
@@ -140,8 +140,8 @@ class Test(unittest.TestCase):
             results = events_validate(arguments)
             self.assertFalse('data' in results,
                              'events_validate results should not have a data key when no validation errors')
-            self.assertEqual('success', results['category'],
-                             'events_validate category should be success when no errors')
+            self.assertEqual('success', results['msg_category'],
+                             'events_validate msg_category should be success when no errors')
 
 
 if __name__ == '__main__':

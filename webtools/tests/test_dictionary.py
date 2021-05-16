@@ -81,26 +81,27 @@ class Test(unittest.TestCase):
 
     def test_dictionary_convert_to_long(self):
         from hedweb.dictionary import dictionary_convert
+        from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json'}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
-            results = dictionary_convert(arguments, short_to_long=False)
+            results = dictionary_convert(arguments)
             self.assertTrue(results['data'],
                             'dictionary_convert to long results should have data key')
-            self.assertEqual('warning', results['category'],
-                             'dictionary_convert to long category should be warning for errors')
+            self.assertEqual('warning', results['msg_category'],
+                             'dictionary_convert to long msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json'}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
-            results = dictionary_convert(arguments, short_to_long=False)
+            results = dictionary_convert(arguments)
             self.assertTrue(results['data'],
                             'dictionary_convert to long results should have data key')
-            self.assertEqual('success', results["category"],
-                             'dictionary_convert to long category should be success when no errors')
+            self.assertEqual('success', results["msg_category"],
+                             'dictionary_convert to long msg_category should be success when no errors')
 
     def test_dictionary_convert_to_short(self):
         from hedweb.dictionary import dictionary_convert
@@ -108,44 +109,45 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', 'command': common.COMMAND}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'], 'dictionary_convert results should have data key')
-            self.assertEqual('warning', results['category'],
-                             'dictionary_convert category should be warning for errors')
+            self.assertEqual('warning', results['msg_category'],
+                             'dictionary_convert msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json'}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'], 'dictionary_convert results should have data key')
-            self.assertEqual('success', results['category'],
-                             'dictionary_convert category should be success when no errors')
+            self.assertEqual('success', results['msg_category'],
+                             'dictionary_convert msg_category should be success when no errors')
 
     def test_dictionary_validate(self):
         from hedweb.dictionary import dictionary_validate
+        from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json'}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)
             self.assertTrue(results['data'],
                             'dictionary_validate results should have a data key when validation errors')
-            self.assertEqual('warning', results['category'],
-                             'dictionary_validate category should be warning when errors')
+            self.assertEqual('warning', results['msg_category'],
+                             'dictionary_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json'}
+                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)
             self.assertFalse(results['data'],
                              'dictionary_validate results should not have a data key when no validation errors')
-            self.assertEqual('success', results["category"],
-                             'dictionary_validate category should be success when no errors')
+            self.assertEqual('success', results["msg_category"],
+                             'dictionary_validate msg_category should be success when no errors')
 
 
 if __name__ == '__main__':

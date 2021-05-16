@@ -3,9 +3,39 @@
         "get_services": {
             "Name": "get_services",
             "Description": "Return a list of hed services commands with descriptions",
-            "Parameters": [],
-            "Returns": [
-                "supported_services"
+            "Parameters": []
+        },
+        "json_to_long": {
+            "Description": "JSON sidecar as a string",
+            "Parameters": [
+                "events_file_string",
+                [
+                    "hed_version",
+                    "hed_schema_string"
+                ],
+                "json_dictionary_string"
+            ]
+        },
+        "dictionary_to_short": {
+            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors",
+            "Parameters": [
+                "service",
+                [
+                    "hed_version",
+                    "hed_schema_string"
+                ],
+                "dictionary_string"
+            ]
+        },
+        "dictionary_validate": {
+            "Description": "Validate a BIDS JSON sidecar (in string form) and return errors",
+            "Parameters": [
+                "service",
+                [
+                    "hed_version",
+                    "hed_schema_string"
+                ],
+                "dictionary_string"
             ]
         },
         "events_assemble": {
@@ -18,13 +48,6 @@
                     "hed_schema_string"
                 ],
                 "json_dictionary_strings"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
             ]
         },
         "events_validate": {
@@ -37,67 +60,6 @@
                     "hed_schema_string"
                 ],
                 "json_dictionary_strings"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
-            ]
-        },
-        "json_to_long": {
-            "Description": "JSON sidecar as a string",
-            "Parameters": [
-                "events_file_string",
-                [
-                    "hed_version",
-                    "hed_schema_string"
-                ],
-                "json_dictionary_string"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
-            ]
-        },
-        "json_to_short": {
-            "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors",
-            "Parameters": [
-                "service",
-                [
-                    "hed_version",
-                    "hed_schema_string"
-                ],
-                "json_dictionary_string"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
-            ]
-        },
-        "json_validate": {
-            "Description": "Validate a BIDS JSON sidecar (in string form) and return errors",
-            "Parameters": [
-                "service",
-                [
-                    "hed_version",
-                    "hed_schema_string"
-                ],
-                "json_dictionary_string"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
             ]
         },
         "spreadsheet_validate": {
@@ -109,13 +71,6 @@
                     "hed_schema_string"
                 ],
                 "spreadsheet_file_string"
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
             ]
         },
         "strings_validate": {
@@ -127,27 +82,33 @@
                     "hed_version",
                     "hed_schema_string"
                 ]
-            ],
-            "Returns": [
-                "command",
-                "data",
-                "hed_version",
-                "msg",
-                "status_category"
             ]
         }
     },
     "meanings": {
         "command": "Operation to perform.",
         "data": "Data returned by the service.",
+        "dictionary_string": "JSON sidecar as a string",
+        "dictionary_strings": "A list of BIDS JSON sidecars as strings",
         "events_file_string": "A BIDS events file as a string",
         "hed_columns": "A list of column numbers (starting with 1) of columns containing HED strings. If empty, all columns are used.",
         "hed_strings": "List of HED strings to be processed",
         "hed_version": "Version of HED to used in processing",
-        "json_dictionary_string": "JSON sidecar as a string",
-        "json_dictionary_strings": "A list of BIDS JSON sidecars as strings",
         "spreadsheet_file_string": "A spreadsheet tsv as a string",
         "supported_services": "A list of available services with description, parameters and return values.",
         "status_category": "Type of return value"
+    },
+    "return": {
+        "service": "Name of the requested service.",
+        "results": "Results of the operation",
+        "error_type": "Type of error if the service failed",
+        "error_msg": "Explanation of the message if the service failed"
+    },
+    "results": {
+        "command": "The command that was executed in response to the service request",
+        "data": "The data returned by the service. This could be a list of errors or the processed result depending on what happened.",
+        "hed_version": "The version of the HED schema used in the processing",
+        "msg_category": "One of success, warning, or failure depending on the result of processing the service.",
+        "msg": "Explanation of the result of service processing."
     }
 }

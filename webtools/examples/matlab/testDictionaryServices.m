@@ -17,23 +17,23 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', Inf, ...
                      'HeaderFields', header);
 data = struct();
-data.service = 'validate_json';
-data.hed_version = '7.1.2';
-%data.hed_version = '8.0.0-alpha.1';
-data.check_for_warnings = true;
+%data.service = 'dictionary_validate';
+%data.service = 'dictionary_to_long';
+data.service = 'dictionary_to_short';
+%data.hed_version = '7.1.2';
+data.hed_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);
-data.json_display_name = 'json str';
+data.display_name = 'my JSON dictionary';
 
 %% Send the request and get the response for version 7.1.2
 response = webwrite(services_url, data, options);
 response = jsondecode(response);
-fprintf('Error report: [%s] %s\n', response.error_type, response.error_msg);
+fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
 
 %% Print out the results if available
-if isfield(response, 'results')
+if isfield(response, 'results') && ~isempty(response.results)
    results = response.results;
-   fprintf('[%s] %s: %s\n', response.service, results.category, results.msg);
+   fprintf('[%s] status %s: %s\n', response.service, results.msg_category, results.msg);
    fprintf('HED version: %s\n', results.hed_version);
-   fprintf('Validation errors for %s:\n', dictionary_file)
-   fprintf('%s\n', results.data);
+   fprintf('Return data:\n%s\n', results.data);
 end

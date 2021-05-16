@@ -48,14 +48,14 @@ class Test(unittest.TestCase):
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_convert(arguments)
-            self.assertEqual('warning', response['category'], "hedstring_convert issue warning if unsuccessful")
+            self.assertEqual('warning', response['msg_category'], "hedstring_convert issue warning if unsuccessful")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_convert(arguments)
-            self.assertEqual('success', response['category'], "hedstring_convert should return success if converted")
+            self.assertEqual('success', response['msg_category'], "hedstring_convert should return success if converted")
 
     def test_hedstring_validate(self):
         from hedweb.hedstring import hedstring_validate
@@ -64,14 +64,14 @@ class Test(unittest.TestCase):
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_validate(arguments)
-            self.assertEqual('warning', response['category'], "hedstring_validate has warning if validation errors")
+            self.assertEqual('warning', response['msg_category'], "hedstring_validate has warning if validation errors")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
         arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
                      'hedstring': 'Red, Blue'}
         with self.app.app_context():
             response = hedstring_validate(arguments)
-            self.assertEqual('success', response['category'], "hedstring_validate should return success if converted")
+            self.assertEqual('success', response['msg_category'], "hedstring_validate should return success if converted")
 
 
 if __name__ == '__main__':

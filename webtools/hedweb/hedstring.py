@@ -25,18 +25,17 @@ def generate_input_from_hedstring_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
-    arguments = {common.HED_XML_FILE: hed_file_path,
+    arguments = {common.COMMAND: '',
+                 common.HED_XML_FILE: hed_file_path,
                  common.HED_DISPLAY_NAME: hed_display_name,
-                 common.HEDSTRING: request.form['hedstring-input'],
-                 common.HED_OPTION_VALIDATE: False,
-                 common.HED_OPTION_TO_SHORT: False,
-                 common.HED_OPTION_TO_LONG: False}
+                 common.HEDSTRING: request.form['hedstring-input']}
     if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
         arguments[common.COMMAND] = common.COMMAND_TO_SHORT
     elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
+
     return arguments
 
 
@@ -56,25 +55,23 @@ def hedstring_process(arguments):
 
     if not arguments.get(common.HEDSTRING, None):
         raise HedFileError('EmptyHEDString', "Please enter a nonempty HED string to process", "")
-    if arguments['command'] == common.COMMAND_VALIDATE:
+    if arguments[common.COMMAND] == common.COMMAND_VALIDATE:
         return hedstring_validate(arguments)
-    elif arguments['command'] == common.COMMAND_TO_SHORT:
-        return hedstring_convert(arguments, short_to_long=False)
-    elif arguments['command'] == common.COMMAND_TO_LONG:
+    elif arguments[common.COMMAND] == common.COMMAND_TO_SHORT:
+        return hedstring_convert(arguments)
+    elif arguments[common.COMMAND] == common.COMMAND_TO_LONG:
         return hedstring_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a hedstring processing method", "")
 
 
-def hedstring_convert(arguments, short_to_long=True, hed_schema=None):
+def hedstring_convert(arguments, hed_schema=None):
     """Converts a hedstring from short to long unless short_to_long is set to False, then long_to_short
 
     Parameters
     ----------
     arguments: dict
         Dictionary containing standard input form arguments
-    short_to_long: bool
-        If True convert the hedstring to long form, otherwise convert to short form
     hed_schema: HedSchema object
 
     Returns
@@ -87,18 +84,18 @@ def hedstring_convert(arguments, short_to_long=True, hed_schema=None):
         hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
     hed_string_obj = HedString(arguments.get(common.HEDSTRING))
     results = hedstring_validate(arguments, hed_schema)
-    if results['category'] == 'warning':
+    if results['msg_category'] == 'warning':
         return results
-    if short_to_long:
+    if arguments[common.COMMAND] == common.TO_LONG:
         issues = hed_string_obj.convert_to_long(hed_schema)
     else:
         issues = hed_string_obj.convert_to_short(hed_schema)
 
     if issues:
         issues_str = get_printable_issue_string(issues, 'HED validation errors:')
-        return {'data': issues_str, 'category': 'warning', 'msg': 'String had validation errors, unable to convert'}
+        return {'data': issues_str, 'msg_category': 'warning', 'msg': 'String had validation errors, unable to convert'}
     else:
-        return {'data': str(hed_string_obj), 'category': 'success', 'msg': 'String conversion successful'}
+        return {'data': str(hed_string_obj), 'msg_category': 'success', 'msg': 'String conversion successful'}
 
 
 def hedstring_validate(arguments, hed_schema=None):
@@ -124,6 +121,6 @@ def hedstring_validate(arguments, hed_schema=None):
 
     if issues:
         issues_str = get_printable_issue_string(issues, 'HED validation errors:')
-        return {'data': issues_str, 'category': 'warning', 'msg': 'String had validation errors'}
+        return {'data': issues_str, 'msg_category': 'warning', 'msg': 'String had validation errors'}
     else:
-        return {'category': 'success', 'msg': 'No validation errors found...'}
+        return {'msg_category': 'success', 'msg': 'No validation errors found...'}

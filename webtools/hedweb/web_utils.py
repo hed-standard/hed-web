@@ -153,7 +153,7 @@ def form_has_url(request, url_field, valid_extensions):
 
 
 def generate_response_download_file_from_text(download_text, display_name=None,
-                                              header=None, category='success', msg=''):
+                                              header=None, msg_category='success', msg=''):
     """Generates a download other response.
 
     Parameters
@@ -164,7 +164,7 @@ def generate_response_download_file_from_text(download_text, display_name=None,
         Name to be assigned to the file in the response
     header: str
         Optional header -- header for download file blob
-    category: str
+    msg_category: str
         Category of the message to be displayed ('Success', 'Error', 'Warning')
     msg: str
         Optional message to be displayed in the submit-flash-field
@@ -189,7 +189,7 @@ def generate_response_download_file_from_text(download_text, display_name=None,
 
     return Response(generate(), mimetype='text/plain charset=utf-8',
                     headers={'Content-Disposition': f"attachment filename={display_name}",
-                             'Category': category, 'Message': msg})
+                             'Category': msg_category, 'Message': msg})
 
 
 def generate_download_file_response(download_file, display_name=None, header=None, category='success', msg=''):
@@ -271,14 +271,14 @@ def generate_filename(basename, prefix=None, suffix=None, extension=None):
     return filename
 
 
-def generate_text_response(download_text, category='success', msg=''):
+def generate_text_response(download_text, msg_category='success', msg=''):
     """Generates a download other response.
 
     Parameters
     ----------
     download_text: str
         Text to be downloaded as part of the response.
-    category: str
+    msg_category: str
         Category of the message to be displayed ('Success', 'Error', 'Warning')
     msg: str
         Optional message to be displayed in the submit-flash-field
@@ -289,7 +289,7 @@ def generate_text_response(download_text, category='success', msg=''):
         A response object containing the downloaded file.
 
     """
-    headers = {'Category': category, 'Message': msg}
+    headers = {'Category': msg_category, 'Message': msg}
     if len(download_text) > 0:
         headers['Content-Length'] = len(download_text)
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
@@ -449,7 +449,7 @@ def handle_http_error(ex):
         message = str(ex)
     error_message = f"{error_code}: [{message}]"
     current_app.logger.error(error_message)
-    return generate_text_response('', category='error', msg=error_message)
+    return generate_text_response('', msg_category='error', msg=error_message)
 
 
 def save_file_to_upload_folder(file_object, delete_on_close=False):

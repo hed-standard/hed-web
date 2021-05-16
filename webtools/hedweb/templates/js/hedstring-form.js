@@ -77,7 +77,7 @@ function submitHedStringForm() {
                     $('#hedstring-result').val(hedInfo['data'])
                     flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')
                 } else if (hedInfo['msg'])
-                    flashMessageOnScreen(hedInfo['msg'], hedInfo['category'], 'hedstring-submit-flash')
+                    flashMessageOnScreen(hedInfo['msg'], hedInfo['msg_category'], 'hedstring-submit-flash')
                 else {
                     flashMessageOnScreen('Server could not respond to this request', 'error', 'hedstring-submit-flash')
                 }

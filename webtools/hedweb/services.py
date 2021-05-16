@@ -9,7 +9,7 @@ from hed.validator.hed_validator import HedValidator
 from hed.util.column_def_group import ColumnDefGroup
 from hedweb.constants import common
 from hedweb.dictionary import dictionary_convert, dictionary_validate
-from hedweb.events import events_convert, events_validate
+from hedweb.events import events_assemble, events_validate
 
 app_config = current_app.config
 
@@ -33,28 +33,35 @@ def services_process(arguments):
 
     service = arguments.get('service', '')
     response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
-    supported_services = get_services()
     if not service:
         response["error_type"] = 'HEDServiceMissing'
         response["error_msg"] = "Must specify a valid service"
-    elif service not in supported_services.keys():
-        response["error_type"] = 'HEDServiceNotSupported'
-        response["error_msg"] = f"{service} not supported"
     elif service == 'get_services':
-        response["results"] = {'supported_services': supported_services}
-    elif service == "events_validate":
-        response["results"] = events_validate(arguments)
-    elif service == "json_validate":
+        response["results"] = get_services()
+    elif service == "dictionary_to_long":
+        arguments['command'] = common.COMMAND_TO_LONG
+        response["results"] = dictionary_convert(arguments)
+    elif service == "dictionary_to_short":
+        arguments['command'] = common.COMMAND_TO_SHORT
+        response["results"] = dictionary_convert(arguments)
+    elif service == "dictionary_validate":
         arguments['command'] = common.COMMAND_VALIDATE
         response["results"] = dictionary_validate(arguments)
-
-    elif service == "validate_spreadsheet":
+    elif service == "events_assemble":
+        response["results"] = events_assemble(arguments)
+    elif service == "events_validate":
+        response["results"] = events_validate(arguments)
+    elif service == "spreadsheet_validate":
         response["results"] = process_events(arguments)
-    elif service == "validate_strings":
+    elif service == "strings_to_long":
+        response["results"] = get_validate_strings(arguments)
+    elif service == "strings_to_short":
+        response["results"] = get_validate_strings(arguments)
+    elif service == "strings_validate":
         response["results"] = get_validate_strings(arguments)
     else:
-        response["error_type"] = 'HEDServiceNotImplemented'
-        response["error_msg"] = f"{service} not implemented"
+        response["error_type"] = 'HEDServiceNotSupported'
+        response["error_msg"] = f"{service} not supported"
     return response
 
 
@@ -97,7 +104,7 @@ def get_validate_dictionary(arguments):
         category = 'success'
 
     version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    results = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
+    results = {'hed_version': version, 'validation_errors': issue_str, 'msg_category': category}
     return results
 
 
@@ -134,7 +141,7 @@ def process_events(arguments):
         category = 'success'
 
     version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    result = {'hed_version': version, 'validation_errors': issue_str, 'category': category}
+    result = {'hed_version': version, 'validation_errors': issue_str, 'msg_category': category}
     return result
 
 
@@ -171,4 +178,4 @@ def get_validate_strings(arguments):
     else:
         category = 'success'
     version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    return {'hed_version': version, 'validation_errors': validation_errors, 'category': category}
+    return {'hed_version': version, 'validation_errors': validation_errors, 'msg_category': category}

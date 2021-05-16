@@ -73,14 +73,14 @@ def events_process(arguments):
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select an events file processing method', '')
     msg = results.get('msg', '')
-    category = results.get('category', 'success')
+    category = results.get('msg_category', 'success')
 
     if 'data' in results:
         display_name = results.get('display_name', '')
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
-                                                         category=category, msg=msg)
+                                                         msg_category=category, msg=msg)
     else:
-        return generate_text_response('', msg=msg, category=category)
+        return generate_text_response('', msg=msg, msg_category=category)
 
 
 def events_assemble(arguments, hed_schema=None):
@@ -124,7 +124,7 @@ def events_assemble(arguments, hed_schema=None):
     csv_string = df.to_csv(None, '\t', index=False, header=True)
     file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
     #df.to_csv(file_name, '\t', index=False, header=True)
-    return {'data': csv_string, 'display_name': file_name, 'category': 'success',
+    return {'data': csv_string, 'display_name': file_name, 'msg_category': 'success',
             'msg': 'Events file successfully expanded'}
 
 
@@ -153,14 +153,14 @@ def events_validate(arguments, hed_schema=None):
         if issues:
             issue_str = get_printable_issue_string(issues, f"{common.JSON_DISPLAY_NAME} HED dictionary errors")
             file_name = generate_filename(common.JSON_DISPLAY_NAME, suffix='_dictionary_errors', extension='.txt')
-            return {'data': issue_str, 'display_name': file_name, 'category': 'warning',
+            return {'data': issue_str, 'display_name': file_name, 'msg_category': 'warning',
                     'msg': "JSON sidecar definitions had dictionary errors"}
 
         issues = json_sidecar.validate_entries(hed_schema)
         if issues:
             issue_str = get_printable_issue_string(issues, f"{common.JSON_DISPLAY_NAME} HED validation errors")
             file_name = generate_filename(common.JSON_DISPLAY_NAME, suffix='_validation_errors', extension='.txt')
-            return {'data': issue_str, 'display_name': file_name, "category": 'warning',
+            return {'data': issue_str, 'display_name': file_name, "msg_category": 'warning',
                     "msg": "JSON sidecar had validation errors"}
 
     input_file = EventFileInput(arguments.get(common.EVENTS_PATH),
@@ -172,7 +172,7 @@ def events_validate(arguments, hed_schema=None):
         issue_str = get_printable_issue_string(issues, f"{display_name} HED validation errors")
 
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
-        return {'data': issue_str, "display_name": file_name, "category": "warning",
+        return {'data': issue_str, "display_name": file_name, "msg_category": "warning",
                 'msg': "Events file had validation errors"}
     else:
-        return {'msg': 'Events file had no validation errors', 'category': 'success'}
+        return {'msg': 'Events file had no validation errors', 'msg_category': 'success'}
