@@ -8,8 +8,8 @@ $(function () {
 /**
  * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
  */
-$('#events-file').on('change', function () {
-    let events = $('#events-file');
+$('#events_file').on('change', function () {
+    let events = $('#events_file');
     let eventsPath = events.val();
     let eventsFile = events[0].files[0];
     clearFlashMessages();
@@ -18,20 +18,20 @@ $('#events-file').on('change', function () {
         clearForm();
         return;
     }
-    updateFileLabel(eventsPath, '#events-display-name');
+    updateFileLabel(eventsPath, '#events_display_name');
     if (fileHasValidExtension(eventsPath, TEXT_FILE_EXTENSIONS)) {
-        setColumnsInfo(eventsFile, undefined, false, 'events-flash');
+        setColumnsInfo(eventsFile, undefined, false, 'events_flash');
     } else {
         clearForm();
-        flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events-flash');
+        flashMessageOnScreen('Please upload a tsv file (.tsv, .txt)', 'error', 'events_flash');
     }
 });
 
 /**
  * Submits the form if there is an events file and an available hed schema
  */
-$('#events-submit').on('click', function () {
-    if (fileIsSpecified('#events-file', 'events-flash', 'Events file is not specified.')
+$('#events_submit').on('click', function () {
+    if (fileIsSpecified('#events_file', 'events_flash', 'Events file is not specified.')
         && hedSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
@@ -43,7 +43,7 @@ $('#events-submit').on('click', function () {
  */
 function clearForm() {
     $('#events-form')[0].reset();
-    $('#events-display-name').text('');
+    $('#events_display_name').text('');
     clearFlashMessages();
     hideColumnNames();
     hideOtherHEDVersionFileUpload();
@@ -56,8 +56,8 @@ function clearFlashMessages() {
     clearColumnInfoFlashMessages();
     clearHedSelectFlashMessages();
     clearJsonInputFlashMessages();
-    flashMessageOnScreen('', 'success', 'events-flash');
-    flashMessageOnScreen('', 'success', 'events-submit-flash');
+    flashMessageOnScreen('', 'success', 'events_flash');
+    flashMessageOnScreen('', 'success', 'events_submit_flash');
 }
 
 
@@ -80,11 +80,11 @@ function submitForm() {
     let eventsForm = document.getElementById("events-form");
     let formData = new FormData(eventsForm);
     let prefix = 'issues';
-    let eventsFile = $('#events-file')[0].files[0].name;
+    let eventsFile = $('#events_file')[0].files[0].name;
     let display_name = convertToResultsName(eventsFile, prefix)
     clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',
-        'events-submit-flash')
+        'events_submit_flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.get_events_results')}}",
@@ -93,10 +93,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'events-submit-flash')
+                getResponseSuccess(download, xhr, display_name, 'events_submit_flash')
             },
             error: function (download, status, xhr) {
-                getResponseFailure(download, xhr, display_name, 'events-submit-flash')
+                getResponseFailure(download, xhr, display_name, 'events_submit_flash')
             }
         }
     )

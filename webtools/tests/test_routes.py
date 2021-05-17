@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
         self.assertEqual(400, response.status_code, 'Dictionaryrequires data')
 
     def test_get_events_results(self):
-        response = self.app.test.post('/events-submit')
+        response = self.app.test.post('/events_submit')
         self.assertEqual(404, response.status_code, 'Event processing requires data')
 
     def test_get_hed_services_results(self):
@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
         self.assertEqual(400, response.status_code, 'Returning HED version requires data')
 
     def test_get_hedstring_results(self):
-        response = self.app.test.get('/hedstring-submit')
+        response = self.app.test.get('/string_submit')
         self.assertEqual(405, response.status_code, 'HED string processing require data')
 
     def test_get_major_hed_versions(self):

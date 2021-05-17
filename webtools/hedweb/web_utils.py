@@ -8,6 +8,8 @@ from flask import current_app, Response
 
 from hed.schema.hed_schema_file import load_schema, from_string
 from hed.util import hed_cache
+from hed.util.event_file_input import EventFileInput
+from hed.util.column_def_group import ColumnDefGroup
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
 from hedweb.constants import common
@@ -295,6 +297,18 @@ def generate_text_response(download_text, msg_category='success', msg=''):
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
 
+def get_events_file(arguments, events_optional=False):
+    if common.EVENTS_STRING in arguments:
+        events_file = EventFileInput(events_string=arguments.get(common.EVENTS_STRING))
+    elif common.EVENTS_PATH in arguments:
+        events_file = EventFileInput(events_filename=arguments.get(common.EVENTS_PATH))
+    elif events_optional:
+        events_file = None
+    else:
+        raise HedFileError('NoEventsFile', 'No events file was provided')
+    return events_file
+
+
 def get_hed_path_from_pull_down(request):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
     Parameters
@@ -323,7 +337,10 @@ def get_hed_path_from_pull_down(request):
     return hed_file_path, hed_display_name
 
 
-def get_hed_schema(arguments):
+
+
+
+def get_hed_schema(arguments, hed_optional=False):
     if common.SCHEMA_STRING in arguments:
         hed_schema = from_string(common.SCHEMA_STRING)
     elif common.HED_XML_FILE in arguments:
@@ -331,9 +348,23 @@ def get_hed_schema(arguments):
     elif common.HED_VERSION in arguments:
         hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.HED_VERSION])
         hed_schema = load_schema(hed_file_path)
+    elif hed_optional:
+        hed_schema = None
     else:
-        raise HedFileError('NoHEDSchema', 'No HED valid HED schema was provided')
+        raise HedFileError('NoHEDSchema', 'No valid HED schema was provided')
     return hed_schema
+
+
+def get_json_dictionary(arguments, json_optional=False):
+    if common.JSON_STRING in arguments:
+        json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_STRING])
+    elif common.JSON_PATH in arguments:
+        json_dictionary = ColumnDefGroup(json_filename=arguments.get(common.JSON_PATH, ''))
+    elif json_optional:
+        json_dictionary = None
+    else:
+        raise HedFileError('NoJSONDictionary', 'No JSON dictionary was provided')
+    return json_dictionary
 
 
 def get_optional_form_field(request, form_field_name, field_type=''):

@@ -54,11 +54,15 @@ def services_process(arguments):
     elif service == "spreadsheet_validate":
         response["results"] = process_events(arguments)
     elif service == "strings_to_long":
-        response["results"] = get_validate_strings(arguments)
+        arguments['command'] = common.COMMAND_TO_LONG
+        response["results"] = strings_convert(arguments)
+
     elif service == "strings_to_short":
-        response["results"] = get_validate_strings(arguments)
+        arguments['command'] = common.COMMAND_TO_SHORT
+        response["results"] = strings_convert(arguments)
     elif service == "strings_validate":
-        response["results"] = get_validate_strings(arguments)
+        arguments['command'] = common.COMMAND_VALIDATE
+        response["results"] = strings_validate(arguments)
     else:
         response["error_type"] = 'HEDServiceNotSupported'
         response["error_msg"] = f"{service} not supported"
@@ -71,41 +75,6 @@ def get_services():
     with open(the_path) as f:
         service_info = json.load(f)
     return service_info
-
-
-def get_validate_dictionary(arguments):
-    """
-    Reports validation status of a JSON dictionary
-
-    Parameters
-    ----------
-    arguments: dict
-         A dictionary of user data submitted by HEDTools.
-         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
-
-    Returns
-    -------
-    dict
-         A serialized JSON string containing information related to the hed strings validation result.
-    """
-    hed_file_path = arguments.get('hed_file_path', None)
-    if not hed_file_path:
-        hed = arguments.get('hed_version', '')
-        hed_file_path = hed_cache.get_path_from_hed_version(hed)
-    hed_schema = hed_schema_file.load_schema(hed_file_path)
-    json_text = arguments.get("json_string", "")
-    json_dictionary = ColumnDefGroup(json_string=json_text)
-    issues = json_dictionary.validate_entries(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"HED validation errors")
-        category = 'warning'
-    else:
-        issue_str = ''
-        category = 'success'
-
-    version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    results = {'hed_version': version, 'validation_errors': issue_str, 'msg_category': category}
-    return results
 
 
 def process_events(arguments):

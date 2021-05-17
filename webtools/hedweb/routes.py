@@ -8,7 +8,7 @@ from hedweb.constants import route_constants
 from hedweb.web_utils import delete_file_no_exceptions, \
    handle_http_error, handle_error, save_file_to_upload_folder
 from hedweb import dictionary, events, schema, spreadsheet, services
-from hedweb.hedstring import generate_input_from_hedstring_form, hedstring_process
+from hedweb.strings import generate_input_from_string_form, string_process
 from hedweb.spreadsheet_utils import generate_input_columns_info, get_columns_info
 
 app_config = current_app.config
@@ -77,8 +77,8 @@ def get_events_results():
         delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
-@route_blueprint.route(route_constants.HED_SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_hed_services_results():
+@route_blueprint.route(route_constants.SERVICES_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_services_results():
     """Perform the requested web service and return the results in JSON.
 
     Returns
@@ -122,8 +122,8 @@ def get_hed_version():
         delete_file_no_exceptions(request.files[common.HED_XML_FILE])
 
 
-@route_blueprint.route(route_constants.HEDSTRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def get_hedstring_results():
+@route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def get_string_results():
     """Process hed strings entered in a text box.
 
     Returns
@@ -133,8 +133,8 @@ def get_hedstring_results():
     """
 
     try:
-        input_arguments = generate_input_from_hedstring_form(request)
-        return json.dumps(hedstring_process(input_arguments))
+        input_arguments = generate_input_from_string_form(request)
+        return json.dumps(string_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)
 
@@ -258,12 +258,12 @@ def render_hed_services_form():
         A dummy rendered template so that the service can get a csrf token.
 
     """
-    return render_template(page_constants.HED_SERVICES_PAGE)
+    return render_template(page_constants.SERVICES_PAGE)
 
 
-@route_blueprint.route(route_constants.HEDSTRING_ROUTE, strict_slashes=False, methods=['GET'])
-def render_hedstring_form():
-    """Renders a form for different hedstring operations.
+@route_blueprint.route(route_constants.STRING_ROUTE, strict_slashes=False, methods=['GET'])
+def render_string_form():
+    """Renders a form for different hed string operations.
 
     Returns
     -------

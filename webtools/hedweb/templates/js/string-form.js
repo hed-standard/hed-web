@@ -6,10 +6,9 @@ $(function () {
 /**
  * Submits the form for tag comparison if we have a valid file.
  */
-$('#hedstring-submit').on('click', function () {
+$('#string_submit').on('click', function () {
    if (!hedStringIsSpecified()) {
-        flashMessageOnScreen('Must give a non-empty hedstring.  See above.', 'error',
-            'hedstring-submit-flash')
+        flashMessageOnScreen('Must give a non-empty hedstring.  See above.', 'error', 'string_submit_flash')
     } else {
         submitHedStringForm();
     }
@@ -19,7 +18,7 @@ $('#hedstring-submit').on('click', function () {
  * Resets the fields in the form.
  */
 function clearForm() {
-    $('#hedstring-form')[0].reset();
+    $('#string_form')[0].reset();
     clearFormFlashMessages();
     hideOtherHEDVersionFileUpload()
 }
@@ -29,8 +28,8 @@ function clearForm() {
  */
 function clearFormFlashMessages() {
     clearHedSelectFlashMessages();
-    flashMessageOnScreen('', 'success', 'hedstring-flash');
-    flashMessageOnScreen('', 'success', 'hedstring-submit-flash');
+    flashMessageOnScreen('', 'success', 'string_flash');
+    flashMessageOnScreen('', 'success', 'string_submit_flash');
 }
 
 /**
@@ -60,13 +59,13 @@ function prepareForm() {
  * file.
  */
 function submitHedStringForm() {
-    let stringForm = document.getElementById("hedstring-form");
+    let stringForm = document.getElementById("string_form");
     let formData = new FormData(stringForm);
     clearFormFlashMessages();
-    flashMessageOnScreen('HED string is being processed ...', 'success', 'hedstring-submit-flash')
+    flashMessageOnScreen('HED string is being processed ...', 'success', 'string_submit_flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_hedstring_results')}}",
+            url: "{{url_for('route_blueprint.get_string_results')}}",
             data: formData,
             contentType: false,
             processData: false,
@@ -74,16 +73,14 @@ function submitHedStringForm() {
             success: function (hedInfo) {
                 clearFormFlashMessages();
                 if (hedInfo['data']) {
-                    $('#hedstring-result').val(hedInfo['data'])
-                    flashMessageOnScreen('Processing completed', 'success', 'hedstring-submit-flash')
-                } else if (hedInfo['msg'])
-                    flashMessageOnScreen(hedInfo['msg'], hedInfo['msg_category'], 'hedstring-submit-flash')
-                else {
-                    flashMessageOnScreen('Server could not respond to this request', 'error', 'hedstring-submit-flash')
+                    $('#string_result').val(hedInfo['data'])
+                } else {
+                    $('#string_result').val('')
                 }
+                flashMessageOnScreen(hedInfo['msg'], hedInfo['msg_category'], 'string_submit_flash')
             },
             error: function (jqXHR) {
-                flashMessageOnScreen(jqXHR.responseJSON.message, 'error', 'hedstring-submit-flash')
+                flashMessageOnScreen(jqXHR.responseJSON.message, 'error', 'string_submit_flash')
             }
         }
     )
