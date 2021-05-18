@@ -33,7 +33,7 @@ def generate_input_from_events_form(request):
     uploaded_events_path, original_events_name = \
         get_uploaded_file_path_from_form(request, common.EVENTS_FILE, file_constants.TEXT_FILE_EXTENSIONS)
     uploaded_json_name, original_json_name = \
-        get_uploaded_file_path_from_form(request, common.JSON_DISPLAY_NAME, file_constants.DICTIONARY_FILE_EXTENSIONS)
+        get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     arguments = {
         common.HED_XML_FILE: hed_file_path,
@@ -66,9 +66,9 @@ def events_process(arguments):
       Response
         Downloadable response object.
     """
-
-
-    if arguments['command'] == common.COMMAND_VALIDATE:
+    if common.COMMAND not in arguments:
+        raise HedFileError('MissingCommand', 'Command is missing', '')
+    elif arguments['command'] == common.COMMAND_VALIDATE:
         results = events_validate(arguments)
     elif arguments['command'] == common.COMMAND_ASSEMBLE:
         results = events_assemble(arguments)
@@ -107,7 +107,7 @@ def events_assemble(arguments, hed_schema=None):
     hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
 
     events_file = get_events_file(arguments)
-    results = events_validate(arguments, hed_schema=hed_schema, column_group=json_dictionary, events_file=events_file)
+    results = events_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary, events_file=events_file)
     if results['data']:
         return results
     hed_tags = []
@@ -145,12 +145,12 @@ def events_validate(arguments, hed_schema=None, json_dictionary=None, events_fil
          A dictionary containing pointer to file with validation errors or a message
     """
     if not hed_schema:
-        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+        hed_schema = get_hed_schema(arguments)
     if not json_dictionary:
         json_dictionary = get_json_dictionary(arguments, json_optional=True)
 
     if json_dictionary:  # If dictionary is provided and it has errors return those errors
-        results = dictionary_validate(arguments, hed_schema, json_dictionary=json_dictionary)
+        results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
         if results['data']:
             return results
     if not events_file:

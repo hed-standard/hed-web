@@ -2,16 +2,46 @@ import os
 import json
 
 from flask import current_app
-from hed.schema import hed_schema_file
-from hed.util import hed_cache
-from hed.util.error_reporter import get_printable_issue_string
-from hed.validator.hed_validator import HedValidator
-from hed.util.column_def_group import ColumnDefGroup
 from hedweb.constants import common
 from hedweb.dictionary import dictionary_convert, dictionary_validate
 from hedweb.events import events_assemble, events_validate
+from hedweb.strings import string_convert, string_validate
 
 app_config = current_app.config
+
+
+def services_list():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    the_path = os.path.join(dir_path, './static/resources/services.json')
+    with open(the_path) as f:
+        service_info = json.load(f)
+    services = service_info['services']
+    meanings = service_info['meanings']
+    returns = service_info['returns']
+    results = service_info['results']
+    services_string = '\nServices:\n'
+    for service, info in services.items():
+        description = info['Description']
+        parm_string = json.dumps(info['Parameters'])
+        next_string = f'{service}: {description}\n\tParameters: {parm_string}\n'
+        services_string += next_string
+
+    meanings_string = '\nMeanings:\n'
+    for string, meaning in meanings.items():
+        meanings_string += f'\t{string}: {meaning}\n'
+
+    returns_string = '\nReturn values:\n'
+    for return_val, meaning in returns.items():
+        returns_string += f'\t{return_val}: {meaning}\n'
+
+    results_string = '\nresults field meanings:\n'
+    for result_val, meaning in results.items():
+        results_string += f'\t{result_val}: {meaning}\n'
+    data = services_string + meanings_string + returns_string + results_string
+    return {'command': '', 'data': data, 'output_display_name': '',
+            'hed_version': '', 'msg_category': 'success',
+            'msg': "List of available services and their meanings"}
+    return
 
 
 def services_process(arguments):
@@ -37,7 +67,7 @@ def services_process(arguments):
         response["error_type"] = 'HEDServiceMissing'
         response["error_msg"] = "Must specify a valid service"
     elif service == 'get_services':
-        response["results"] = get_services()
+        response["results"] = services_list()
     elif service == "dictionary_to_long":
         arguments['command'] = common.COMMAND_TO_LONG
         response["results"] = dictionary_convert(arguments)
@@ -48,103 +78,23 @@ def services_process(arguments):
         arguments['command'] = common.COMMAND_VALIDATE
         response["results"] = dictionary_validate(arguments)
     elif service == "events_assemble":
+        arguments['command'] = common.COMMAND_ASSEMBLE
         response["results"] = events_assemble(arguments)
     elif service == "events_validate":
         response["results"] = events_validate(arguments)
     elif service == "spreadsheet_validate":
-        response["results"] = process_events(arguments)
-    elif service == "strings_to_long":
+        response["error_type"] = 'HEDServiceNotYetImplemented'
+        response["error_msg"] = f"{service} not yet implemented"
+    elif service == "string_to_long":
         arguments['command'] = common.COMMAND_TO_LONG
-        response["results"] = strings_convert(arguments)
-
-    elif service == "strings_to_short":
+        response["results"] = string_convert(arguments)
+    elif service == "string_to_short":
         arguments['command'] = common.COMMAND_TO_SHORT
-        response["results"] = strings_convert(arguments)
-    elif service == "strings_validate":
+        response["results"] = string_convert(arguments)
+    elif service == "string_validate":
         arguments['command'] = common.COMMAND_VALIDATE
-        response["results"] = strings_validate(arguments)
+        response["results"] = string_validate(arguments)
     else:
         response["error_type"] = 'HEDServiceNotSupported'
         response["error_msg"] = f"{service} not supported"
     return response
-
-
-def get_services():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    the_path = os.path.join(dir_path, 'static/resources/services.json')
-    with open(the_path) as f:
-        service_info = json.load(f)
-    return service_info
-
-
-def process_events(arguments):
-    """
-    Performs requested operation on an events file in string form and returns the result
-
-    Parameters
-    ----------
-    arguments: dict
-         A dictionary of user data submitted by HEDTools.
-         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
-
-    Returns
-    -------
-    dict
-         A serialized JSON string containing information related to the hed strings validation result.
-    """
-    command = arguments.get('command', 'validate')
-    events_file = arguments.get('events_file', "")
-    hed_file_path = arguments.get('hed_file_path', None)
-    if not hed_file_path:
-        hed = arguments.get("hed_version", "")
-        hed_file_path = hed_cache.get_path_from_hed_version(hed)
-    hed_schema = hed_schema_file.load_schema(hed_file_path)
-    json_text = arguments.get("json_dictionaries", [])
-    json_dictionary = ColumnDefGroup(json_string=json_text)
-    issues = json_dictionary.validate_entries(hed_schema)
-    if issues:
-        issue_str = get_printable_issue_string(issues, f"HED validation errors")
-        category = 'warning'
-    else:
-        issue_str = ''
-        category = 'success'
-
-    version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    result = {'hed_version': version, 'validation_errors': issue_str, 'msg_category': category}
-    return result
-
-
-def get_validate_strings(arguments):
-    """
-    Reports validation status of hed strings
-
-    Parameters
-    ----------
-    arguments: dict
-         A dictionary of user data submitted data
-         Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
-
-    Returns
-    -------
-    list of dict
-         A serialized JSON string containing information related to the hed strings validation result.
-    """
-    hed_file_path = arguments.get('hed_file_path', None)
-    if not hed_file_path:
-        hed = arguments.get("hed_version", "")
-        hed_file_path = hed_cache.get_path_from_hed_version(hed)
-    hed_schema = hed_schema_file.load_schema(hed_file_path)
-    hed_strings = arguments.get("hed_strings", "")
-    hed_validator = HedValidator(hed_schema=hed_schema)
-    issues = hed_validator.validate_input(hed_strings)
-    validation_errors = []
-    for i in range(len(hed_strings)):
-        issue = issues[i]
-        if issue:
-            validation_errors.append(get_printable_issue_string(issue, f"Errors for HED string {i+1}:"))
-    if validation_errors:
-        category = 'warning'
-    else:
-        category = 'success'
-    version = hed_schema.schema_attributes.get('version', 'Unknown version')
-    return {'hed_version': version, 'validation_errors': validation_errors, 'msg_category': category}

@@ -86,7 +86,7 @@ def string_convert(arguments, hed_schema=None):
     """
 
     if not hed_schema:
-        hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+        hed_schema = get_hed_schema(arguments)
 
     results = string_validate(arguments, hed_schema)
     if results['data']:
@@ -137,18 +137,18 @@ def string_validate(arguments, hed_schema=None):
     """
 
     if not hed_schema:
-            hed_schema = get_hed_schema(arguments)
+        hed_schema = get_hed_schema(arguments)
     if common.STRING_LIST in arguments:
         hed_strings = arguments[common.STRING_LIST]
     else:
         raise HedFileError('NoStringList', 'No list of HED strings was entered')
     hed_validator = HedValidator(hed_schema=hed_schema)
-    issues = hed_validator.validate_input(hed_strings)
+
     validation_errors = []
-    for i in range(len(hed_strings)):
-        issue = issues[i]
-        if issue:
-            validation_errors.append(get_printable_issue_string(issue, f"Errors for HED string {i+1}:"))
+    for pos, string in enumerate(arguments.get(common.STRING_LIST), start=1):
+        issues = hed_validator.validate_input(string)
+        if issues:
+            validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
     hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if validation_errors:
         return {'command': arguments.get('command', ''), 'data': validation_errors,

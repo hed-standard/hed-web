@@ -17,25 +17,15 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 60, ...
                      'HeaderFields', header);
 data = struct();
 data.service = 'get_services';
-data.hed_version = '7.1.2';
-data.check_for_warnings = true;
 
-%% Send the request and get the response
+%% Send the request and get the response 
 response = webwrite(services_url, data, options);
 response = jsondecode(response);
-result = response.result;
-if isfield(response, 'error_type')
-    error_type = response.error_type;
-else
-    error_type = '';
+fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
+
+%% Print out the results if available
+if isfield(response, 'results') && ~isempty(response.results)
+   results = response.results;
+   fprintf('[%s] status %s: %s\n', response.service, results.msg_category, results.msg);
+   fprintf('Return data:\n%s\n', results.data);
 end
-if isfield(response, 'message')
-    message = response.message;
-else
-    message = '';
-end
-
-showServices(result)
-
-fprintf('Error report: [%s] %s\n', error_type, message)
-

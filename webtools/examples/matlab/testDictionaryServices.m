@@ -25,7 +25,7 @@ data.hed_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);
 data.display_name = 'my JSON dictionary';
 
-%% Send the request and get the response for version 7.1.2
+%% Send the request and get the response 
 response = webwrite(services_url, data, options);
 response = jsondecode(response);
 fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);

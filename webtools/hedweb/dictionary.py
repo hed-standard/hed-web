@@ -61,9 +61,8 @@ def dictionary_process(arguments):
       Response
         Downloadable response object.
     """
-
-    if not arguments[common.JSON_PATH]:
-        raise HedFileError('EmptyDictionaryFile', "Please upload a dictionary to process", "")
+    if common.COMMAND not in arguments:
+        raise HedFileError('MissingCommand', 'Command is missing', '')
     if arguments['command'] == common.COMMAND_VALIDATE:
         results = dictionary_validate(arguments)
     elif arguments['command'] == common.COMMAND_TO_SHORT:
@@ -163,7 +162,8 @@ def dictionary_validate(arguments, hed_schema=None, json_dictionary=None):
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
     hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    json_dictionary = get_json_dictionary(arguments)
+    if not json_dictionary:
+        json_dictionary = get_json_dictionary(arguments)
     if not json_dictionary:
         raise HedFileError('EmptyDictionaryFile', "Please upload a dictionary to process", "")
 

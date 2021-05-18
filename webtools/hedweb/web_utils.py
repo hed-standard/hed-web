@@ -299,9 +299,9 @@ def generate_text_response(download_text, msg_category='success', msg=''):
 
 def get_events_file(arguments, events_optional=False):
     if common.EVENTS_STRING in arguments:
-        events_file = EventFileInput(events_string=arguments.get(common.EVENTS_STRING))
+        events_file = EventFileInput(data_as_csv_string=arguments.get(common.EVENTS_STRING))
     elif common.EVENTS_PATH in arguments:
-        events_file = EventFileInput(events_filename=arguments.get(common.EVENTS_PATH))
+        events_file = EventFileInput(filename=arguments.get(common.EVENTS_PATH))
     elif events_optional:
         events_file = None
     else:
