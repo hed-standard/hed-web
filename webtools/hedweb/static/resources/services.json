@@ -7,7 +7,7 @@
         "dictionary_to_long": {
             "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors",
             "Parameters": [
-                "dictionary_string",
+                "json_string",
                 [
                     "hed_version",
                     "hed_schema_string"
@@ -17,7 +17,7 @@
         "dictionary_to_short": {
             "Description": "Convert a BIDS JSON sidecar (in string form) to short form if valid, otherwise return errors",
             "Parameters": [
-                "dictionary_string",
+                "json_string",
                 [
                     "hed_version",
                     "hed_schema_string"
@@ -27,7 +27,7 @@
         "dictionary_validate": {
             "Description": "Validate a BIDS JSON sidecar (in string form) and return errors",
             "Parameters": [
-                "dictionary_string",
+                "json_string",
                 [
                     "hed_version",
                     "hed_schema_string"

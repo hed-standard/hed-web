@@ -297,13 +297,13 @@ def generate_text_response(download_text, msg_category='success', msg=''):
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
 
-def get_events_file(arguments, events_optional=False):
+def get_events_file(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
-        events_file = EventFileInput(data_as_csv_string=arguments.get(common.EVENTS_STRING))
+        events_file = EventFileInput(data_as_csv_string=arguments.get(common.EVENTS_STRING),
+                                     json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
-        events_file = EventFileInput(filename=arguments.get(common.EVENTS_PATH))
-    elif events_optional:
-        events_file = None
+        events_file = EventFileInput(filename=arguments.get(common.EVENTS_PATH),
+                                     json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
         raise HedFileError('NoEventsFile', 'No events file was provided')
     return events_file

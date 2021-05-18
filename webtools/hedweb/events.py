@@ -2,7 +2,6 @@ from flask import current_app
 from werkzeug import Response
 import pandas as pd
 
-from hed.schema.hed_schema_file import load_schema
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.event_file_input import EventFileInput
@@ -104,20 +103,23 @@ def events_assemble(arguments, hed_schema=None):
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
     json_dictionary = get_json_dictionary(arguments, json_optional=True)
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
-
-    events_file = get_events_file(arguments)
-    results = events_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary, events_file=events_file)
+    def_dicts = json_dictionary.extract_defs()
+    events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
+    results = events_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary,
+                              events_file=events_file)
     if results['data']:
         return results
     hed_tags = []
     onsets = []
     for row_number, row_dict in events_file.parse_dataframe(return_row_dict=True):
+        hed1 = row_dict["HED"]
+        hed = str(row_dict.get("HED", ""))
+        print(hed)
         hed_tags.append(str(row_dict.get("HED", "")))
         onsets.append(row_dict.get("onset", "n/a"))
     data = {'onset': onsets, 'HED': hed_tags}
     df = pd.DataFrame(data)
-    csv_string = df.to_csv(None, '\t', index=False, header=True)
+    csv_string = df.to_csv(None, sep='\t', index=False, header=True)
     file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
     hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
     return {'command': arguments.get('command', ''), 'data': csv_string, 'output_display_name': file_name,
@@ -125,7 +127,7 @@ def events_assemble(arguments, hed_schema=None):
             'msg': 'Events file successfully expanded'}
 
 
-def events_validate(arguments, hed_schema=None, json_dictionary=None, events_file=None) :
+def events_validate(arguments, hed_schema=None, json_dictionary=None, events_file=None):
     """Reports the spreadsheet validation status.
 
     Parameters
@@ -153,8 +155,9 @@ def events_validate(arguments, hed_schema=None, json_dictionary=None, events_fil
         results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
         if results['data']:
             return results
+    def_dicts = json_dictionary.extract_defs()
     if not events_file:
-        events_file = get_events_file(arguments)
+        events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
 
     hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = HedValidator(hed_schema=hed_schema)

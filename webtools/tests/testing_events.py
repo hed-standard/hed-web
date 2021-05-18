@@ -15,7 +15,7 @@ if __name__ == '__main__':
     hed_schema = load_schema(schema_path)
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bids_events.json")
     column_group = ColumnDefGroup(json_path)
-    def_dict, def_issues = column_group.extract_defs(hed_schema)
+    def_dict, def_issues = column_group.extract_defs()
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))

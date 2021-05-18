@@ -138,7 +138,7 @@ class Test(unittest.TestCase):
 
         with self.app.app_context():
             results = events_validate(arguments)
-            self.assertFalse('data' in results,
+            self.assertFalse(results['data'],
                              'events_validate results should not have a data key when no validation errors')
             self.assertEqual('success', results['msg_category'],
                              'events_validate msg_category should be success when no errors')
