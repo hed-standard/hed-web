@@ -8,7 +8,7 @@ $(function () {
  */
 $('#dictionary_submit').on('click', function () {
     if (fileIsSpecified('#json_file', 'json_flash', 'JSON is not specified.' ) &&
-        hedSpecifiedWhenOtherIsSelected()) {
+        schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
@@ -20,7 +20,7 @@ function clearForm() {
     $('#dictionary_form')[0].reset();
     clearFlashMessages()
     clearJsonFileLabel();
-    hideOtherHEDVersionFileUpload()
+    hideOtherSchemaVersionFileUpload()
 }
 
 /**
@@ -28,7 +28,7 @@ function clearForm() {
  */
 function clearFlashMessages() {
     clearJsonInputFlashMessages();
-    clearHedSelectFlashMessages();
+    clearSchemaSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'dictionary_submit_flash');
 }
 
@@ -38,8 +38,8 @@ function clearFlashMessages() {
  */
 function prepareForm() {
     clearForm();
-    getHedVersions()
-    hideOtherHEDVersionFileUpload();
+    getSchemaVersions()
+    hideOtherSchemaVersionFileUpload();
 }
 
 /**

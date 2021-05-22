@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
             data = json.load(f)
 
         json_text = json.dumps(data)
-        arguments = {'service': 'dictionary_validate', 'hed_version': '8.0.0-alpha.1', 'json_string': json_text}
+        arguments = {'service': 'dictionary_validate', 'schema_version': '8.0.0-alpha.1', 'json_string': json_text}
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
     #     with self.app.app_context():
     #         response = get_validate_strings(arguments)
     #         self.assertEqual('success', response['msg_category'], "get_validate_strings has success with good strings")
-    #         self.assertEqual('8.0.0-alpha.1', response['hed_version'],
+    #         self.assertEqual('8.0.0-alpha.1', response['schema_version'],
     #                          "get_validate_strings is using version 8.0.0-alpha.1.xml")
     #
     #     hed_file_path = os.path.join(base_path, 'data/HED7.2.0.xml')

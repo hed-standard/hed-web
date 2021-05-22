@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% from "json-input.html" import create_json_input %}
-{% from "hed-pulldown.html" import create_hed_pulldown %}
-{% from "hed-process-options.html" import create_hed_process_options %}
+{% from "schema-pulldown.html" import create_schema_pulldown %}
+{% from "process-options.html" import create_process_options %}
 
 {% block content %}
     <h2>Process BIDS-style JSON dictionary</h2>
@@ -18,8 +18,8 @@
         <div class="form-group">
 
             {{ create_json_input() }}
-            {{ create_hed_pulldown() }}
-            {{ create_hed_process_options() }}
+            {{ create_schema_pulldown() }}
+            {{ create_process_options(to_long=True,to_short=True,validate=True) }}
 
             <div class="form-group">
                 <button id="dictionary_submit" type="button">Process</button>
@@ -30,7 +30,7 @@
     <script type="module">
         {%  include 'js/form-helpers.js' %}
         {%  include 'js/json-input.js' %}
-        {%  include 'js/hed-pulldown.js' %}
+        {%  include 'js/schema-pulldown.js' %}
         {%  include 'js/dictionary-form.js' %}
     </script>
 {% endblock %}

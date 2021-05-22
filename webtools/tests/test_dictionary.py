@@ -7,8 +7,8 @@ from hedweb.app_factory import AppFactory
 
 def test_dictionaries():
     base_path = os.path.dirname(os.path.abspath(__file__))
-    test_dict = {'hed_xml_file': os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml'),
-                 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+    test_dict = {'schema_xml_file': os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml'),
+                 'schema_display_name': 'HED8.0.0-alpha.1.xml',
                  'json_path': os.path.join(base_path, 'data/short_form_valid.json'),
                  'json_file': 'short_form_valid.json',
                  'check-for-warnings': True}
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
                             'dictionary_process to short should not convert using HED 7.1.2.xml')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
             results = dictionary_convert(arguments)
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
                              'dictionary_convert to long msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
             results = dictionary_convert(arguments)
@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = dictionary_convert(arguments)
@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
                              'dictionary_convert msg_category should be warning for errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_convert(arguments)
@@ -130,7 +130,7 @@ class Test(unittest.TestCase):
         from hedweb.constants import common
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED 7.1.2.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)
@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
                              'dictionary_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {'hed_xml_file': schema_path, 'hed_display_name': 'HED8.0.0-alpha.1.xml',
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
                      'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)

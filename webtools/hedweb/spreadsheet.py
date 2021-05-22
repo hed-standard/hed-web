@@ -27,13 +27,13 @@ def generate_input_from_spreadsheet_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
+    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.SPREADSHEET_FILE, file_constants.SPREADSHEET_FILE_EXTENSIONS)
 
     arguments = {
-        common.HED_XML_FILE: hed_file_path,
-        common.HED_DISPLAY_NAME: hed_display_name,
+        common.SCHEMA_PATH: hed_file_path,
+        common.SCHEMA_DISPLAY_NAME: schema_display_name,
         common.SPREADSHEET_PATH: uploaded_file_name,
         common.SPREADSHEET_FILE: original_file_name,
         common.TAG_COLUMNS: convert_number_str_to_list(request.form[common.TAG_COLUMNS]),
@@ -41,12 +41,12 @@ def generate_input_from_spreadsheet_form(request):
         common.WORKSHEET_SELECTED: get_optional_form_field(request, common.WORKSHEET_SELECTED, common.STRING),
         common.HAS_COLUMN_NAMES: get_optional_form_field(request, common.HAS_COLUMN_NAMES, common.BOOLEAN)
     }
-    if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
-        arguments[common.HED_OPTION_VALIDATE] = True
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
-        arguments[common.HED_OPTION_TO_SHORT] = True
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
-        arguments[common.HED_OPTION_TO_LONG] = True
+    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
+        arguments[common.COMMAND_VALIDATE] = True
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_SHORT):
+        arguments[common.COMMAND_TO_SHORT] = True
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
+        arguments[common.COMMAND_TO_LONG] = True
     return arguments
 
 
@@ -66,11 +66,11 @@ def spreadsheet_process(arguments):
 
     if not arguments[common.SPREADSHEET_PATH]:
         raise HedFileError('EmptySpreadsheetFile', "Please upload a spreadsheet to process", "")
-    if arguments.get(common.HED_OPTION_VALIDATE, None):
+    if arguments.get(common.COMMAND_VALIDATE, None):
         return spreadsheet_validate(arguments)
-    elif arguments.get(common.HED_OPTION_TO_SHORT, None):
+    elif arguments.get(common.COMMAND_TO_SHORT, None):
         return spreadsheet_convert(arguments, short_to_long=False)
-    elif arguments.get(common.HED_OPTION_TO_LONG, None):
+    elif arguments.get(common.COMMAND_TO_LONG, None):
         return spreadsheet_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a spreadsheet processing method", "")
@@ -97,7 +97,7 @@ def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
     return generate_text_response('Not available', msg_category='warning', msg='Spreadsheet conversion not implemented yet')
     #
     # if not hed_schema:
-    #     hed_schema = load_schema(arguments.get(common.HED_XML_FILE, ''))
+    #     hed_schema = load_schema(arguments.get(common.SCHEMA_PATH, ''))
     # error_handler = ErrorHandler()
     # tag_formatter = TagFormat(hed_schema=hed_schema, error_handler=error_handler)
     # issues = []
@@ -152,7 +152,7 @@ def spreadsheet_validate(arguments, hed_validator=None):
                               column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY,
                                                                      None))
     if not hed_validator:
-        hed_validator = HedValidator(hed_xml_file=arguments.get(common.HED_XML_FILE, ''),
+        hed_validator = HedValidator(schema_xml_file=arguments.get(common.SCHEMA_PATH, ''),
                                      check_for_warnings=arguments.get(common.CHECK_FOR_WARNINGS, False))
 
     issues = hed_validator.validate_input(file_input)

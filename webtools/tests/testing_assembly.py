@@ -18,8 +18,8 @@ if __name__ == '__main__':
     if def_issues:
         print(get_printable_issue_string(def_issues,
                                          title="There should be no errors in the definitions from the sidecars:"))
-    event_file = EventFileInput(events_path, json_def_files=column_group, def_dicts=def_dict)
-
+    #event_file = EventFileInput(events_path, json_def_files=column_group, def_dicts=def_dict)
+    event_file = EventFileInput(events_path, json_def_files=column_group)
     # for row_number, columns_to_row_dict in event_file:
     hed_tags = []
     onsets = []

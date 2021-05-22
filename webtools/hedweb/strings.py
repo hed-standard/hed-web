@@ -24,21 +24,21 @@ def generate_input_from_string_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
+    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
     hed_string = request.form['hedstring-input']
     if hed_string:
         string_list = [hed_string]
     else:
         raise HedFileError('EmptyHedString', 'Must enter a HED string')
     arguments = {common.COMMAND: '',
-                 common.HED_XML_FILE: hed_file_path,
-                 common.HED_DISPLAY_NAME: hed_display_name,
+                 common.SCHEMA_PATH: hed_file_path,
+                 common.SCHEMA_DISPLAY_NAME: schema_display_name,
                  common.STRING_LIST: string_list}
-    if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
+    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_SHORT):
         arguments[common.COMMAND] = common.COMMAND_TO_SHORT
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
 
     return arguments
@@ -109,14 +109,14 @@ def string_convert(arguments, hed_schema=None):
     else:
         category = 'success'
         msg = 'Strings converted successfully'
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if conversion_errors:
         return {'command': arguments.get('command', ''), 'data': conversion_errors, 'additional_info': string_list,
-                'hed_version': hed_version, 'msg_category': 'warning',
+                'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'Some strings had conversion errors, results of conversion in additional_info'}
     else:
         return {'command': arguments.get('command', ''), 'data': string_list,
-                'hed_version': hed_version, 'msg_category': 'success',
+                'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'Strings converted successfully'}
 
 
@@ -145,16 +145,16 @@ def string_validate(arguments, hed_schema=None):
     hed_validator = HedValidator(hed_schema=hed_schema)
 
     validation_errors = []
-    for pos, string in enumerate(arguments.get(common.STRING_LIST), start=1):
+    for pos, string in enumerate(hed_strings, start=1):
         issues = hed_validator.validate_input(string)
         if issues:
             validation_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if validation_errors:
         return {'command': arguments.get('command', ''), 'data': validation_errors,
-                'hed_version': hed_version, 'msg_category': 'warning',
+                'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'Strings had validation errors'}
     else:
         return {'command': arguments.get('command', ''), 'data': '',
-                'hed_version': hed_version, 'msg_category': 'success',
+                'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'Strings validated successfullly...'}

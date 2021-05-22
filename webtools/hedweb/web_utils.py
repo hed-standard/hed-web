@@ -1,13 +1,15 @@
 import os
+from os.path import basename, splitext
 import json
 import pathlib
+from pathlib import Path
 import tempfile
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from flask import current_app, Response
 
 from hed.schema.hed_schema_file import load_schema, from_string
-from hed.util import hed_cache
+from hed.util import hed_cache, file_util
 from hed.util.event_file_input import EventFileInput
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.exceptions import HedFileError
@@ -299,10 +301,10 @@ def generate_text_response(download_text, msg_category='success', msg=''):
 
 def get_events_file(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
-        events_file = EventFileInput(data_as_csv_string=arguments.get(common.EVENTS_STRING),
+        events_file = EventFileInput(None, data_as_csv_string=arguments[common.EVENTS_STRING],
                                      json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
-        events_file = EventFileInput(filename=arguments.get(common.EVENTS_PATH),
+        events_file = EventFileInput(arguments[common.EVENTS_PATH],
                                      json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
         raise HedFileError('NoEventsFile', 'No events file was provided')
@@ -321,35 +323,34 @@ def get_hed_path_from_pull_down(request):
     tuple: str, str
         The HED XML local path and the HED display file name
     """
-    if common.HED_VERSION not in request.form:
+    if common.SCHEMA_VERSION not in request.form:
         hed_file_path = ''
-        hed_display_name = ''
-    elif request.form[common.HED_VERSION] != common.HED_OTHER_VERSION_OPTION:
-        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common.HED_VERSION])
-        hed_display_name = os.path.basename(hed_file_path)
-    elif request.form[common.HED_VERSION] == common.HED_OTHER_VERSION_OPTION and \
-            common.HED_XML_FILE in request.files:
-        hed_file_path = save_file_to_upload_folder(request.files[common.HED_XML_FILE])
-        hed_display_name = request.files[common.HED_XML_FILE].filename
+        schema_display_name = ''
+    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
+        hed_file_path = hed_cache.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        schema_display_name = os.path.basename(hed_file_path)
+    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and \
+            common.SCHEMA_PATH in request.files:
+        hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
+        schema_display_name = request.files[common.SCHEMA_PATH].filename
     else:
         hed_file_path = ''
-        hed_display_name = ''
-    return hed_file_path, hed_display_name
+        schema_display_name = ''
+    return hed_file_path, schema_display_name
 
 
-
-
-
-def get_hed_schema(arguments, hed_optional=False):
+def get_hed_schema(arguments):
     if common.SCHEMA_STRING in arguments:
-        hed_schema = from_string(common.SCHEMA_STRING)
-    elif common.HED_XML_FILE in arguments:
-        hed_schema = load_schema(arguments[common.HED_XML_FILE])
-    elif common.HED_VERSION in arguments:
-        hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.HED_VERSION])
+        schema_format = arguments.get(common.SCHEMA_FORMAT, ".xml")
+        hed_schema = from_string(arguments[common.SCHEMA_STRING], file_type=schema_format)
+    elif common.SCHEMA_PATH in arguments:
+        hed_schema = load_schema(arguments[common.SCHEMA_PATH])
+    elif common.SCHEMA_URL in arguments:
+        hed_file_path = file_util.url_to_file(arguments[common.SCHEMA_URL])
         hed_schema = load_schema(hed_file_path)
-    elif hed_optional:
-        hed_schema = None
+    elif common.SCHEMA_VERSION in arguments:
+        hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
+        hed_schema = load_schema(hed_file_path)
     else:
         raise HedFileError('NoHEDSchema', 'No valid HED schema was provided')
     return hed_schema
@@ -359,7 +360,7 @@ def get_json_dictionary(arguments, json_optional=False):
     if common.JSON_STRING in arguments:
         json_dictionary = ColumnDefGroup(json_string=arguments[common.JSON_STRING])
     elif common.JSON_PATH in arguments:
-        json_dictionary = ColumnDefGroup(json_filename=arguments.get(common.JSON_PATH, ''))
+        json_dictionary = ColumnDefGroup(json_filename=arguments[common.JSON_PATH])
     elif json_optional:
         json_dictionary = None
     else:

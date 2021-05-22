@@ -27,21 +27,21 @@ def generate_input_from_dictionary_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
+    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
     uploaded_file_name, original_file_name = \
         get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     arguments = {
-        common.HED_XML_FILE: hed_file_path,
-        common.HED_DISPLAY_NAME: hed_display_name,
+        common.SCHEMA_PATH: hed_file_path,
+        common.SCHEMA_DISPLAY_NAME: schema_display_name,
         common.JSON_PATH: uploaded_file_name,
         common.JSON_FILE: original_file_name,
     }
-    if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
+    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_SHORT):
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_SHORT):
         arguments[common.COMMAND] = common.COMMAND_TO_SHORT
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_TO_LONG):
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_TO_LONG):
         arguments[common.COMMAND] = common.COMMAND_TO_LONG
     else:
         arguments[common.COMMAND] = ''
@@ -61,13 +61,15 @@ def dictionary_process(arguments):
       Response
         Downloadable response object.
     """
-    if common.COMMAND not in arguments:
+    if not arguments.get(common.JSON_PATH, 'None'):
+        raise HedFileError('EmptyJSONFile', "Please give a JSON file to process", "")
+    elif common.COMMAND not in arguments:
         raise HedFileError('MissingCommand', 'Command is missing', '')
-    if arguments['command'] == common.COMMAND_VALIDATE:
+    elif arguments[common.COMMAND] == common.COMMAND_VALIDATE:
         results = dictionary_validate(arguments)
-    elif arguments['command'] == common.COMMAND_TO_SHORT:
+    elif arguments[common.COMMAND] == common.COMMAND_TO_SHORT:
         results = dictionary_convert(arguments)
-    elif arguments['command'] == common.COMMAND_TO_LONG:
+    elif arguments[common.COMMAND] == common.COMMAND_TO_LONG:
         results = dictionary_convert(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', "Select a dictionary processing method", "")
@@ -75,7 +77,7 @@ def dictionary_process(arguments):
     msg_category = results.get('msg_category', 'success')
 
     if results['data']:
-        display_name = results.get('json_display_name', '')
+        display_name = results.get('output_display_name', '')
         return generate_response_download_file_from_text(results['data'], display_name=display_name,
                                                          msg_category=msg_category, msg=msg)
     else:
@@ -102,7 +104,7 @@ def dictionary_convert(arguments, hed_schema=None, json_dictionary=None):
 
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if not json_dictionary:
         json_dictionary = get_json_dictionary(arguments)
 
@@ -132,13 +134,13 @@ def dictionary_convert(arguments, hed_schema=None, json_dictionary=None):
         issue_str = get_printable_issue_string(issues, f"JSON conversion for {json_display_name} was unsuccessful")
         file_name = generate_filename(json_display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
         return {'command': arguments.get('command', ''), 'data': issue_str, 'output_display_name': file_name,
-                'hed_version': hed_version, 'msg_category': 'warning',
+                'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'JSON file had validation errors'}
     else:
         file_name = generate_filename(json_display_name, suffix=suffix, extension='.json')
         data = json_dictionary.get_as_json_string()
         return {'command': arguments.get('command', ''), 'data': data, 'output_display_name': file_name,
-                'hed_version': hed_version, 'msg_category': 'success',
+                'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'JSON dictionary was successfully converted'}
 
 
@@ -162,7 +164,7 @@ def dictionary_validate(arguments, hed_schema=None, json_dictionary=None):
 
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if not json_dictionary:
         json_dictionary = get_json_dictionary(arguments)
     if not json_dictionary:
@@ -174,7 +176,7 @@ def dictionary_validate(arguments, hed_schema=None, json_dictionary=None):
                                                f"{common.JSON_DISPLAY_NAME} JSON dictionary definition errors")
         file_name = generate_filename(common.JSON_DISPLAY_NAME, suffix='_dictionary_errors', extension='.txt')
         return {'command': arguments.get('command', ''), 'data': issue_str, 'output_display_name': file_name,
-                'hed_version': hed_version, 'msg_category': 'warning',
+                'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': "JSON dictionary had definition errors"}
 
     issues = json_dictionary.validate_entries(hed_schema)
@@ -183,9 +185,9 @@ def dictionary_validate(arguments, hed_schema=None, json_dictionary=None):
         issue_str = get_printable_issue_string(issues, f"HED validation errors for {display_name}")
         file_name = generate_filename(display_name, suffix='validation_errors', extension='.txt')
         return {'command': arguments.get('command', ''), 'data': issue_str, 'output_display_name': file_name,
-                'hed_version': hed_version, 'msg_category': 'warning',
+                'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': 'JSON dictionary had validation errors'}
     else:
         return {'command': arguments.get('command', ''), 'data': '',
-                'hed_version': hed_version, 'msg_category': 'success',
+                'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'JSON file had no validation errors'}

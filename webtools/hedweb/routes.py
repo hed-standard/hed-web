@@ -96,8 +96,8 @@ def get_services_results():
         return handle_error(ex)
 
 
-@route_blueprint.route(route_constants.HED_VERSION_ROUTE, methods=['POST'])
-def get_hed_version():
+@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['POST'])
+def get_schema_version():
     """Finds the information about the HED version of a file and returns as JSON.
 
     Parameters
@@ -112,14 +112,14 @@ def get_hed_version():
 
     try:
         hed_info = {}
-        if common.HED_XML_FILE in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[common.HED_XML_FILE])
-            hed_info[common.HED_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
+        if common.SCHEMA_PATH in request.files:
+            hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
+            hed_info[common.SCHEMA_VERSION] = hed_schema_file.get_hed_xml_version(hed_file_path)
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
     finally:
-        delete_file_no_exceptions(request.files[common.HED_XML_FILE])
+        delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
 
 
 @route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -139,9 +139,9 @@ def get_string_results():
         return handle_error(ex)
 
 
-@route_blueprint.route(route_constants.HED_MAJOR_VERSION_ROUTE, methods=['GET'])
-def get_major_hed_versions():
-    """Gets a list of major hed versions from the hed_cache and returns as a serialized JSON string
+@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET'])
+def get_schema_versions():
+    """Gets a list of hed versions from the hed_cache and returns as a serialized JSON string
 
     Returns
     -------
@@ -152,7 +152,7 @@ def get_major_hed_versions():
 
     try:
         hed_cache.cache_all_hed_xml_versions()
-        hed_info = {common.HED_MAJOR_VERSIONS: hed_cache.get_all_hed_versions()}
+        hed_info = {common.SCHEMA_VERSION_LIST: hed_cache.get_all_hed_versions()}
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)

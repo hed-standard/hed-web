@@ -26,8 +26,8 @@ options = weboptions('MediaType', 'application/json', 'Timeout', 120, ...
 data = struct();
 %data.service = 'string_validate';
 data.service = 'string_to_long';
-%data.hed_version = '7.1.2';
-data.hed_version = '8.0.0-alpha.1';
+%data.schema_version = '7.1.2';
+data.schema_version = '8.0.0-alpha.1';
 data.string_list = hedStrings;
 
 %% Send the request and get the response for version 7.1.2
@@ -39,7 +39,7 @@ fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
 if isfield(response, 'results') && ~isempty(response.results)
     results = response.results;
     fprintf('[%s] status %s: %s\n', response.service, results.msg_category, results.msg);
-    fprintf('HED version: %s\n', results.hed_version);
+    fprintf('HED version: %s\n', results.schema_version);
     fprintf('\nReturn data for service %s [%s]:\n', ...
         response.service, results.command);
     data = results.data;

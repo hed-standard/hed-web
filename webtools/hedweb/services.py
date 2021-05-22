@@ -39,7 +39,7 @@ def services_list():
         results_string += f'\t{result_val}: {meaning}\n'
     data = services_string + meanings_string + returns_string + results_string
     return {'command': '', 'data': data, 'output_display_name': '',
-            'hed_version': '', 'msg_category': 'success',
+            'schema_version': '', 'msg_category': 'success',
             'msg': "List of available services and their meanings"}
     return
 
@@ -52,7 +52,7 @@ def services_process(arguments):
     ----------
     arguments dict
         a dictionary of arguments
-        Keys include "hed_strings", "check_for_warnings", and "hed_xml_file"
+        Keys include "hed_strings", "check_for_warnings", and "schema_xml_file"
 
     Returns
     -------

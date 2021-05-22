@@ -20,8 +20,8 @@ data = struct();
 %data.service = 'dictionary_validate';
 %data.service = 'dictionary_to_long';
 data.service = 'dictionary_to_short';
-%data.hed_version = '7.1.2';
-data.hed_version = '8.0.0-alpha.1';
+%data.schema_version = '7.1.2';
+data.schema_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);
 data.display_name = 'my JSON dictionary';
 
@@ -34,6 +34,6 @@ fprintf('Error report:  [%s] %s\n', response.error_type, response.error_msg);
 if isfield(response, 'results') && ~isempty(response.results)
    results = response.results;
    fprintf('[%s] status %s: %s\n', response.service, results.msg_category, results.msg);
-   fprintf('HED version: %s\n', results.hed_version);
+   fprintf('HED version: %s\n', results.schema_version);
    fprintf('Return data:\n%s\n', results.data);
 end

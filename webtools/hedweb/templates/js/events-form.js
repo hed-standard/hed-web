@@ -32,7 +32,7 @@ $('#events_file').on('change', function () {
  */
 $('#events_submit').on('click', function () {
     if (fileIsSpecified('#events_file', 'events_flash', 'Events file is not specified.')
-        && hedSpecifiedWhenOtherIsSelected()) {
+        && schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
@@ -46,7 +46,7 @@ function clearForm() {
     $('#events_display_name').text('');
     clearFlashMessages();
     hideColumnNames();
-    hideOtherHEDVersionFileUpload();
+    hideOtherSchemaVersionFileUpload();
 }
 
 /**
@@ -54,7 +54,7 @@ function clearForm() {
  */
 function clearFlashMessages() {
     clearColumnInfoFlashMessages();
-    clearHedSelectFlashMessages();
+    clearSchemaSelectFlashMessages();
     clearJsonInputFlashMessages();
     flashMessageOnScreen('', 'success', 'events_flash');
     flashMessageOnScreen('', 'success', 'events_submit_flash');
@@ -67,9 +67,9 @@ function clearFlashMessages() {
  */
 function prepareForm() {
     clearForm();
-    getHedVersions()
+    getSchemaVersions()
     hideColumnNames();
-    hideOtherHEDVersionFileUpload();
+    hideOtherSchemaVersionFileUpload();
 }
 
 /**

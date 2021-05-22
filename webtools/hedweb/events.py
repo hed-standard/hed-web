@@ -2,13 +2,14 @@ from flask import current_app
 from werkzeug import Response
 import pandas as pd
 
-from hed.util.column_def_group import ColumnDefGroup
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.event_file_input import EventFileInput
 from hed.util.exceptions import HedFileError
+from hed.util.column_def_group import ColumnDefGroup
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
+from hed.schema.hed_schema_file import load_schema
 from hedweb.web_utils import form_has_option, generate_response_download_file_from_text,\
     generate_filename, generate_text_response, get_events_file, get_hed_schema, get_json_dictionary, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form
@@ -28,24 +29,24 @@ def generate_input_from_events_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, hed_display_name = get_hed_path_from_pull_down(request)
+    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
     uploaded_events_path, original_events_name = \
         get_uploaded_file_path_from_form(request, common.EVENTS_FILE, file_constants.TEXT_FILE_EXTENSIONS)
     uploaded_json_name, original_json_name = \
         get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
 
     arguments = {
-        common.HED_XML_FILE: hed_file_path,
-        common.HED_DISPLAY_NAME: hed_display_name,
+        common.SCHEMA_PATH: hed_file_path,
+        common.SCHEMA_DISPLAY_NAME: schema_display_name,
         common.EVENTS_PATH: uploaded_events_path,
         common.EVENTS_FILE: original_events_name,
         common.EVENTS_DISPLAY_NAME: original_events_name,
         common.JSON_PATH: uploaded_json_name,
         common.JSON_DISPLAY_NAME: original_json_name,
     }
-    if form_has_option(request, common.HED_OPTION, common.HED_OPTION_VALIDATE):
+    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
         arguments[common.COMMAND] = common.COMMAND_VALIDATE
-    elif form_has_option(request, common.HED_OPTION, common.HED_OPTION_ASSEMBLE):
+    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_ASSEMBLE):
         arguments[common.COMMAND] = common.COMMAND_ASSEMBLE
     else:
         arguments[common.COMMAND] = ''
@@ -105,8 +106,7 @@ def events_assemble(arguments, hed_schema=None):
     json_dictionary = get_json_dictionary(arguments, json_optional=True)
     def_dicts = json_dictionary.extract_defs()
     events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
-    results = events_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary,
-                              events_file=events_file)
+    results = events_validate(arguments, hed_schema=hed_schema, events_file=events_file)
     if results['data']:
         return results
     hed_tags = []
@@ -121,13 +121,13 @@ def events_assemble(arguments, hed_schema=None):
     df = pd.DataFrame(data)
     csv_string = df.to_csv(None, sep='\t', index=False, header=True)
     file_name = generate_filename(common.EVENTS_FILE, suffix='_expanded', extension='.tsv')
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     return {'command': arguments.get('command', ''), 'data': csv_string, 'output_display_name': file_name,
-            'hed_version': hed_version, 'msg_category': 'success',
+            'schema_version': schema_version, 'msg_category': 'success',
             'msg': 'Events file successfully expanded'}
 
 
-def events_validate(arguments, hed_schema=None, json_dictionary=None, events_file=None):
+def events_validate(arguments, hed_schema=None, events_file=None):
     """Reports the spreadsheet validation status.
 
     Parameters
@@ -136,8 +136,6 @@ def events_validate(arguments, hed_schema=None, json_dictionary=None, events_fil
         A dictionary of the values extracted from the form
     hed_schema: str or HedSchema
         Version number or path or HedSchema object to be used
-    json_dictionary: ColumnDefGroup
-        Dictionary containing meanings of the columns
     events_file: EventFileInput
         Event file object passed in from elsewhere
 
@@ -146,20 +144,20 @@ def events_validate(arguments, hed_schema=None, json_dictionary=None, events_fil
     dict
          A dictionary containing pointer to file with validation errors or a message
     """
+
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
-    if not json_dictionary:
-        json_dictionary = get_json_dictionary(arguments, json_optional=True)
-
-    if json_dictionary:  # If dictionary is provided and it has errors return those errors
-        results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
-        if results['data']:
-            return results
-    def_dicts = json_dictionary.extract_defs()
     if not events_file:
-        events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
+        json_dictionary = get_json_dictionary(arguments, json_optional=True)
+        def_dicts = None
+        if json_dictionary:
+            results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
+            if results['data']:
+                return results
+            def_dicts = json_dictionary.extract_defs()
 
-    hed_version = hed_schema.header_attributes.get('version', 'Unknown version')
+        events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(events_file)
     if issues:
@@ -168,9 +166,9 @@ def events_validate(arguments, hed_schema=None, json_dictionary=None, events_fil
 
         file_name = generate_filename(display_name, suffix='_validation_errors', extension='.txt')
         return {'command': arguments.get('command', ''), 'data': issue_str, "output_display_name": file_name,
-                'hed_version': hed_version, "msg_category": "warning",
+                'schema_version': schema_version, "msg_category": "warning",
                 'msg': "Events file had validation errors"}
     else:
         return {'command': arguments.get('command', ''), 'data': '',
-                'hed_version': hed_version, 'msg_category': 'success',
+                'schema_version': schema_version, 'msg_category': 'success',
                 'msg': 'Events file had no validation errors'}

@@ -13,7 +13,7 @@ from hedweb.app_factory import AppFactory
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/upload')
+        cls.upload_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/upload')
         app = AppFactory.create_app('config.TestConfig')
         with app.app_context():
             from hedweb.routes import route_blueprint
@@ -109,8 +109,8 @@ class Test(unittest.TestCase):
 
     def test_generate_download_file_response(self):
         from hedweb.web_utils import generate_download_file_response
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
-        temp_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/temp.txt')
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED.xml')
+        temp_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/temp.txt')
         copyfile(hed_file, temp_file)
         self.assertTrue(os.path.isfile(temp_file), "Dummy file exists")
         download_response = generate_download_file_response(temp_file)
@@ -165,7 +165,7 @@ class Test(unittest.TestCase):
         from hedweb.web_utils import get_hed_schema
 
         # Test
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.1.2.xml')
         arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
                      common.COMMAND: common.COMMAND_CONVERT}
         with self.app.app_context():
@@ -219,7 +219,7 @@ class Test(unittest.TestCase):
         filename = 'HED.xml'
         actual_path = os.path.join(self.upload_directory, filename)
         self.assertEqual(0, os.path.isfile(actual_path), f"{actual_path} should not exist before saving")
-        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED.xml')
+        hed_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED.xml')
         # with open(hed_file) as f:
         #     upload_file = FileStorage(f, filename='HED.xml', content_type='text/xml',  content_length=0, stream=stream)
         #     with self.app.app_context():

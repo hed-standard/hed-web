@@ -49,7 +49,7 @@ $('#spreadsheet-file').on('change', function () {
  */
 $('#spreadsheet-submit').on('click', function () {
     if (fileIsSpecified('#spreadsheet-file', 'spreadsheet-flash', 'Spreadsheet is not specified.') &&
-        tagColumnsTextboxIsValid() && hedSpecifiedWhenOtherIsSelected()) {
+        tagColumnsTextboxIsValid() && schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
 });
@@ -76,7 +76,7 @@ function clearForm() {
     clearTagColumnTextboxes();
     hideColumnNames();
     hideWorksheetSelect()
-    hideOtherHEDVersionFileUpload()
+    hideOtherSchemaVersionFileUpload()
 }
 
 /**
@@ -84,7 +84,7 @@ function clearForm() {
  */
 function clearFlashMessages() {
     clearColumnInfoFlashMessages();
-    clearHedSelectFlashMessages();
+    clearSchemaSelectFlashMessages();
     flashMessageOnScreen('', 'success', 'spreadsheet-flash');
     flashMessageOnScreen('', 'success', 'spreadsheet-submit-flash');
 }
@@ -117,10 +117,10 @@ function populateWorksheetDropdown(worksheetNames) {
  */
 function prepareForm() {
     clearForm();
-    getHedVersions()
+    getSchemaVersions()
     hideColumnNames();
     hideWorksheetSelect();
-    hideOtherHEDVersionFileUpload();
+    hideOtherSchemaVersionFileUpload();
 }
 
 
