@@ -12,7 +12,7 @@
         </i>
     </p>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
-    <form id="events-form" method="POST" enctype="multipart/form-data">
+    <form id="events_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <h3>Upload BIDS-style events file:</h3>

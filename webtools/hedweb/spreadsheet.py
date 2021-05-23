@@ -152,7 +152,7 @@ def spreadsheet_validate(arguments, hed_validator=None):
                               column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY,
                                                                      None))
     if not hed_validator:
-        hed_validator = HedValidator(schema_xml_file=arguments.get(common.SCHEMA_PATH, ''),
+        hed_validator = HedValidator(schema_file=arguments.get(common.SCHEMA_PATH, ''),
                                      check_for_warnings=arguments.get(common.CHECK_FOR_WARNINGS, False))
 
     issues = hed_validator.validate_input(file_input)

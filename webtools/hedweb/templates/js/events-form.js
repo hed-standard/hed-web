@@ -42,7 +42,7 @@ $('#events_submit').on('click', function () {
  * Clears the fields in the form.
  */
 function clearForm() {
-    $('#events-form')[0].reset();
+    $('#events_form')[0].reset();
     $('#events_display_name').text('');
     clearFlashMessages();
     hideColumnNames();
@@ -77,7 +77,7 @@ function prepareForm() {
  * file.
  */
 function submitForm() {
-    let eventsForm = document.getElementById("events-form");
+    let eventsForm = document.getElementById("events_form");
     let formData = new FormData(eventsForm);
     let prefix = 'issues';
     let eventsFile = $('#events_file')[0].files[0].name;
@@ -87,7 +87,7 @@ function submitForm() {
         'events_submit_flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_events_results')}}",
+            url: "{{url_for('route_blueprint.events_results')}}",
             data: formData,
             contentType: false,
             processData: false,

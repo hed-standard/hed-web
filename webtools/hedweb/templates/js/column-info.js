@@ -42,7 +42,7 @@ function setColumnsInfo(columnsFile, worksheetName=undefined, repopulateWorkshee
     }
     $.ajax({
         type: 'POST',
-        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
+        url: "{{url_for('route_blueprint.columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
@@ -79,7 +79,7 @@ function setColumnsNameTable(columnsFile, worksheetName=undefined,  flashMessage
     }
     $.ajax({
         type: 'POST',
-        url: "{{url_for('route_blueprint.get_columns_info_results')}}",
+        url: "{{url_for('route_blueprint.columns_info_results')}}",
         data: formData,
         contentType: false,
         processData: false,
@@ -146,8 +146,8 @@ function setComponentsRelatedToColumns(columnsInfo, hasColumns = true, showIndic
         setComponentsRelatedToNonEmptyColumnNames(columnsInfo['column_names']);
     }
     if (showIndices) {
-        if (!tagColumnsIndicesAreEmpty(columnsInfo['tag_column_indices'])) {
-            populateTagColumnsTextbox(columnsInfo['tag_column_indices']);
+        if (!tagColumnsIndicesAreEmpty(columnsInfo['COLUMN_INDICES'])) {
+            populateTagColumnsTextbox(columnsInfo['COLUMN_INDICES']);
         }
         if (Object.keys(columnsInfo['required_column_indices']).length !== 0) {
             populateRequiredTagColumnTextboxes(columnsInfo['required_column_indices']);

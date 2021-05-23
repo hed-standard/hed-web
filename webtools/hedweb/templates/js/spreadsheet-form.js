@@ -70,7 +70,7 @@ $('#worksheet_name').on('change', function () {
  * Clear the fields in the form.
  */
 function clearForm() {
-    $('#spreadsheet-form')[0].reset();
+    $('#spreadsheet_form')[0].reset();
     $('#spreadsheet_display_name').text('');
     $('#worksheet_name').empty();
     clearTagColumnTextboxes();
@@ -137,7 +137,7 @@ function showWorksheetSelect() {
  * file.
  */
 function submitForm() {
-    let spreadsheetForm = document.getElementById("spreadsheet-form");
+    let spreadsheetForm = document.getElementById("spreadsheet_form");
     let formData = new FormData(spreadsheetForm);
     let worksheetName = $('#worksheet_select option:selected').text();
     formData.append('worksheet_selected', worksheetName)
@@ -152,7 +152,7 @@ function submitForm() {
         'spreadsheet_submit_flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_spreadsheet_results')}}",
+            url: "{{url_for('route_blueprint.spreadsheet_results')}}",
             data: formData,
             contentType: false,
             processData: false,

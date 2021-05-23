@@ -52,7 +52,7 @@ def services_process(arguments):
     ----------
     arguments dict
         a dictionary of arguments
-        Keys include "hed_strings", "check_for_warnings", and "schema_xml_file"
+        Keys include "hed_strings", "check_for_warnings", and "schema_file"
 
     Returns
     -------

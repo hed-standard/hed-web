@@ -8,5 +8,5 @@ from hed.util.error_reporter import get_printable_issue_string
 
 if __name__ == '__main__':
     str = open('D:/temp.txt', 'r').read()
-    json_dictionary = ColumnDefGroup(str)
+    json_dictionary = ColumnDefGroup(json_string=str)
     print(str)

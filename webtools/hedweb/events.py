@@ -5,11 +5,9 @@ import pandas as pd
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.event_file_input import EventFileInput
 from hed.util.exceptions import HedFileError
-from hed.util.column_def_group import ColumnDefGroup
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
-from hed.schema.hed_schema_file import load_schema
 from hedweb.web_utils import form_has_option, generate_response_download_file_from_text,\
     generate_filename, generate_text_response, get_events_file, get_hed_schema, get_json_dictionary, \
     get_hed_path_from_pull_down, get_uploaded_file_path_from_form
@@ -104,14 +102,17 @@ def events_assemble(arguments, hed_schema=None):
     if not hed_schema:
         hed_schema = get_hed_schema(arguments)
     json_dictionary = get_json_dictionary(arguments, json_optional=True)
-    def_dicts = json_dictionary.extract_defs()
-    events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
+    if json_dictionary:
+        results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
+        if results['data']:
+            return results
+    events_file = get_events_file(arguments, json_dictionary=json_dictionary)
     results = events_validate(arguments, hed_schema=hed_schema, events_file=events_file)
     if results['data']:
         return results
     hed_tags = []
     onsets = []
-    for row_number, row_dict in events_file.parse_dataframe(return_row_dict=True):
+    for row_number, row_dict in events_file.iter_dataframe(return_row_dict=True):
         hed1 = row_dict["HED"]
         hed = str(row_dict.get("HED", ""))
         print(hed)
@@ -149,14 +150,12 @@ def events_validate(arguments, hed_schema=None, events_file=None):
         hed_schema = get_hed_schema(arguments)
     if not events_file:
         json_dictionary = get_json_dictionary(arguments, json_optional=True)
-        def_dicts = None
         if json_dictionary:
             results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
             if results['data']:
                 return results
-            def_dicts = json_dictionary.extract_defs()
 
-        events_file = get_events_file(arguments, json_dictionary=json_dictionary, def_dicts=def_dicts)
+        events_file = get_events_file(arguments, json_dictionary=json_dictionary)
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     validator = HedValidator(hed_schema=hed_schema)
     issues = validator.validate_input(events_file)

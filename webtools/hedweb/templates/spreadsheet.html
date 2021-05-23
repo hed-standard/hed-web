@@ -13,7 +13,7 @@
     </p>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms.css') }}">
-    <form id="spreadsheet-form" method="POST" enctype="multipart/form-data">
+    <form id="spreadsheet_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <h3>Upload spreadsheet file (tab-separated or Excel):</h3>

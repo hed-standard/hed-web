@@ -16,14 +16,14 @@ HED_TOOLS_HOME_ROUTE = '/'
 
 SCHEMA_ROUTE = '/schema'
 SCHEMA_SUBMIT_ROUTE = '/schema_submit'
-SCHEMA_VERSION_ROUTE = '/get_schema_version'
-SCHEMA_VERSIONS_ROUTE = '/get_schema_versions'
+SCHEMA_VERSION_ROUTE = '/schema_version'
+SCHEMA_VERSIONS_ROUTE = '/schema_versions'
 
 SERVICES_SUBMIT_ROUTE = '/services_submit'
-SERVICES_ROUTE = '/hed_services'
+SERVICES_ROUTE = '/services'
 SPREADSHEET_ROUTE = '/spreadsheet'
 SPREADSHEET_SUBMIT_ROUTE = '/spreadsheet_submit'
-WORKSHEET_COLUMN_INFO_ROUTE = '/get_worksheets_info'
+WORKSHEET_COLUMN_INFO_ROUTE = '/worksheets_info'
 
 STRING_ROUTE = '/string'
 STRING_SUBMIT_ROUTE = '/string_submit'

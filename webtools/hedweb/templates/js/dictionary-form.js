@@ -56,7 +56,7 @@ function submitForm() {
     flashMessageOnScreen('Dictionary is being validated ...', 'success', 'dictionary_submit_flash')
     $.ajax({
             type: 'POST',
-            url: "{{url_for('route_blueprint.get_dictionary_results')}}",
+            url: "{{url_for('route_blueprint.dictionary_results')}}",
             data: formData,
             contentType: false,
             processData: false,

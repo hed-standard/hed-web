@@ -103,7 +103,7 @@ def schema_version_results():
         delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
 
 
-@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['POST'])
+@route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])
 def schema_versions_results():
     """Gets a list of hed versions from the hed_cache and returns as a serialized JSON string
 

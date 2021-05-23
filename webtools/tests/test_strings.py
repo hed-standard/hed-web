@@ -56,7 +56,8 @@ class Test(unittest.TestCase):
                      common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml', 'string_list': ['Red, Blue']}
         with self.app.app_context():
             response = string_convert(arguments)
-            self.assertEqual('success', response['msg_category'], "hedstring_convert should return success if converted")
+            self.assertEqual('success', response['msg_category'],
+                             "hedstring_convert should return success if converted")
 
     def test_string_validate(self):
         from hedweb.strings import string_validate

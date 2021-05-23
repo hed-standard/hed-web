@@ -18,8 +18,7 @@ COLUMNS_DISPLAY_NAME = 'columns_display_name'
 
 HAS_COLUMN_NAMES = 'has_column_names'
 TAG_COLUMNS = 'tag_columns'
-TAG_COLUMN_INDICES = 'tag_column_indices'
-
+COLUMN_INDICES = 'column_indices'
 DOWNLOAD_FILE = 'download_file'
 
 EVENTS_DISPLAY_NAME = 'events_display_name'
