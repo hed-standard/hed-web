@@ -203,7 +203,7 @@ def get_text_file_info(file_path):
     column_delimiter = get_column_delimiter_based_on_file_extension(file_path)
     column_info[common.COLUMN_NAMES] = get_text_file_column_names(file_path, column_delimiter)
     column_info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(column_info[common.COLUMN_NAMES])
-    column_info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(column_info[common.COLUMN_NAMES])
+    column_info[common.REQUIRED_COLUMN_INDICES] = get_specific_tag_column_indices(column_info[common.COLUMN_NAMES])
     return column_info
 
 
@@ -220,7 +220,7 @@ def get_worksheet_info(file_path, worksheet_name=None):
     worksheet = opened_file.sheet_by_name(worksheet_name)
     info[common.COLUMN_NAMES] = [worksheet.cell(0, col_index).value for col_index in range(worksheet.ncols)]
     info[common.TAG_COLUMN_INDICES] = get_other_tag_column_indices(info[common.COLUMN_NAMES])
-    info[common.REQUIRED_TAG_COLUMN_INDICES] = get_specific_tag_column_indices(info[common.COLUMN_NAMES])
+    info[common.REQUIRED_COLUMN_INDICES] = get_specific_tag_column_indices(info[common.COLUMN_NAMES])
     info[common.WORKSHEET_SELECTED] = worksheet_name
     opened_file.release_resources()
     return info

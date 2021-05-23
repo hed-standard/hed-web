@@ -1,4 +1,4 @@
-CHECK_FOR_WARNINGS = 'check-for-warnings'
+CHECK_FOR_WARNINGS = 'check_for_warnings'
 
 COMMAND = 'command'
 COMMAND_ASSEMBLE = 'command_assemble'
@@ -8,19 +8,19 @@ COMMAND_TO_LONG = 'command_to_long'
 COMMAND_TO_SHORT = 'command_to_short'
 COMMAND_VALIDATE = 'command_validate'
 
-COLUMN_NAMES = 'column-names'
-COLUMN_NAMES_TABLE = 'column-names-table'
-COLUMN_POSTFIX = '-column'
-COLUMN_PREFIX_DICTIONARY = 'column-prefix-dictionary'
-COLUMNS_FILE = 'columns-file'
-COLUMNS_PATH = 'columns-path'
-COLUMNS_DISPLAY_NAME = 'columns-display-name'
+COLUMN_NAMES = 'column_names'
+COLUMN_NAMES_TABLE = 'column_names_table'
+COLUMN_POSTFIX = '_column'
+COLUMN_PREFIX_DICTIONARY = 'column_prefix_dictionary'
+COLUMNS_FILE = 'columns_file'
+COLUMNS_PATH = 'columns_path'
+COLUMNS_DISPLAY_NAME = 'columns_display_name'
 
-HAS_COLUMN_NAMES = 'has-column-names'
-TAG_COLUMNS = 'tag-columns'
-TAG_COLUMN_INDICES = 'tag-column-indices'
+HAS_COLUMN_NAMES = 'has_column_names'
+TAG_COLUMNS = 'tag_columns'
+TAG_COLUMN_INDICES = 'tag_column_indices'
 
-DOWNLOAD_FILE = 'download-file'
+DOWNLOAD_FILE = 'download_file'
 
 EVENTS_DISPLAY_NAME = 'events_display_name'
 EVENTS_FILE = 'events_file'
@@ -34,7 +34,7 @@ OTHER_VERSION_OPTION = 'Other'
 
 HEDSTRING = 'hedstring'
 
-SCHEMA_VERSION = 'schema_version'
+
 
 
 JSON_DICTIONARY = 'json_dictionary'
@@ -45,20 +45,9 @@ JSON_STRING = 'json_string'
 JSON_STRINGS = 'json_strings'
 
 OUTPUT_DISPLAY_NAME = 'output_display_name'
-REQUIRED_TAG_COLUMN_INDICES = 'required-tag-column-indices'
-SPREADSHEET_DISPLAY_NAME = 'spreadsheet-display-name'
-SPREADSHEET_FILE = 'spreadsheet-file'
-SPREADSHEET_PATH = 'spreadsheet-path'
-STRING_LIST = 'string_list'
-WARNING_COUNT = 'warning-count'
-
-WORKSHEET_NAME = 'worksheet-name'
-WORKSHEET_NAMES = 'worksheet-names'
-WORKSHEET_SELECT = 'worksheet-select'
-WORKSHEET_SELECTED = 'worksheet-selected'
 
 # Schema-specific constants
-SCHEMA_FORM = 'schema-form'
+SCHEMA_FORM = 'schema_form'
 SCHEMA_DISPLAY_NAME = 'schema_display_name'
 SCHEMA_FILE = 'schema_file'
 SCHEMA_FILE_FLASH = 'schema_file_flash'
@@ -74,7 +63,23 @@ SCHEMA_URL = 'schema_url'
 SCHEMA_URL_DISPLAY_NAME = 'schema_url_display_name'
 SCHEMA_URL_FLASH = 'schema_url_flash'
 SCHEMA_URL_OPTION = 'schema_url_option'
+SCHEMA_VERSION = 'schema_version'
 SCHEMA_VERSION_LIST = 'schema_version_list'
+
+REQUIRED_COLUMN_INDICES = 'required_column_indices'
+SPREADSHEET_DISPLAY_NAME = 'spreadsheet_display_name'
+SPREADSHEET_FILE = 'spreadsheet_file'
+SPREADSHEET_FLASH = 'spreadsheet_flash'
+SPREADSHEET_PATH = 'spreadsheet_path'
+SPREADSHEET_SUBMIT_FLASH = 'spreadsheet_submit_flash'
+
+STRING_LIST = 'string_list'
+
+WORKSHEET_NAME = 'worksheet_name'
+WORKSHEET_NAMES = 'worksheet_names'
+WORKSHEET_SELECT = 'worksheet_select'
+WORKSHEET_SELECTED = 'worksheet_selected'
+
 
 # Type constants
 BOOLEAN = 'boolean'

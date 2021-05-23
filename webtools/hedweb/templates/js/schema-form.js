@@ -48,7 +48,7 @@ $('#schema_url_option').on('change',function () {
  * Clear the fields in the form.
  */
 function clearForm() {
-    $('#schema-form')[0].reset();
+    $('#schema_form')[0].reset();
     $('#schema_url_option').prop('checked', false);
     $('#schema_file_option').prop('checked', false);
 }
@@ -127,7 +127,7 @@ function prepareForm() {
  * Submit the form and return the conversion results as an attachment
  */
 function submitSchemaForm() {
-    let schemaForm = document.getElementById("schema-form");
+    let schemaForm = document.getElementById("schema_form");
     let formData = new FormData(schemaForm);
     let display_name = convertToOutputName(getSchemaFilename())
     clearFormFlashMessages(false);

@@ -120,9 +120,9 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
 
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED7.1.2.xml',
-                     'events_path': events_path, 'events_file': 'bids_events.tsv',
-                     'json_path': json_path, 'json_file': 'bids_events.json'}
+        arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED7.1.2.xml',
+                     common.EVENTS_PATH: events_path, common.EVENTS_FILE: 'bids_events.tsv',
+                     common.JSON_PATH: json_path, common.JSON_FILE: 'bids_events.json'}
 
         with self.app.app_context():
             results = events_validate(arguments)
@@ -132,9 +132,9 @@ class Test(unittest.TestCase):
                              'events_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                     'events_path': events_path, 'events_file': 'bids_events.tsv', 'json_path': json_path,
-                     'json_file': 'bids_events.json'}
+        arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml',
+                     common.EVENTS_PATH: events_path, common.EVENTS_FILE: 'bids_events.tsv',
+                     common.JSON_PATH: json_path, common.JSON_FILE: 'bids_events.json'}
 
         with self.app.app_context():
             results = events_validate(arguments)

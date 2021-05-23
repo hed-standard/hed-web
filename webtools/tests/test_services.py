@@ -42,32 +42,30 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
         with open(json_path) as f:
             data = json.load(f)
-
         json_text = json.dumps(data)
-        arguments = {'service': 'dictionary_validate', 'schema_version': '8.0.0-alpha.1', 'json_string': json_text}
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
+                     + 'hedxml/HED8.0.0-alpha.1.xml'
+        arguments = {'service': 'dictionary_validate', 'schema_url': schema_url, 'json_string': json_text}
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],
                              'dictionary_validation services should not have a error when file is valid')
             results = response['results']
             self.assertEqual('success', results['msg_category'], "dictionary_validation services has success on good.json")
+            self.assertEqual('8.0.0-alpha.1', results['schema_version'], 'Version 8.0.0.-alpha.1 was used')
 
-    # def test_get_validate_strings(self):
-    #     from hedweb.services import get_validate_strings
-    #     base_path = os.path.dirname(os.path.abspath(__file__))
-    #     hed_file_path = os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml')
-    #     arguments = {'hed_file_path': hed_file_path, 'hed_strings': ['Red', 'Blue']}
-    #     with self.app.app_context():
-    #         response = get_validate_strings(arguments)
-    #         self.assertEqual('success', response['msg_category'], "get_validate_strings has success with good strings")
-    #         self.assertEqual('8.0.0-alpha.1', response['schema_version'],
-    #                          "get_validate_strings is using version 8.0.0-alpha.1.xml")
-    #
-    #     hed_file_path = os.path.join(base_path, 'data/HED7.2.0.xml')
-    #     arguments['hed_file_path'] = hed_file_path
-    #     with self.app.app_context():
-    #         response = get_validate_strings(arguments)
-    #         self.assertEqual('warning', response['msg_category'], "get_validate_strings has warning if validation errors")
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
+                     + 'hedxml/HED7.2.0.xml'
+        arguments = {'service': 'dictionary_validate', 'schema_url': schema_url, 'json_string': json_text}
+        with self.app.app_context():
+            response = services_process(arguments)
+            self.assertFalse(response['error_type'],
+                             'dictionary_validation services should not have a error when file is valid')
+            results = response['results']
+            self.assertTrue(results['data'], 'dictionary_validation produces errors when file not valid')
+            self.assertEqual('warning', results['msg_category'], "dictionary_validation did not valid with 7.2.0")
+            self.assertEqual('7.2.0', results['schema_version'], 'Version 7.2.0 was used')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -159,23 +159,6 @@ class Test(unittest.TestCase):
         mock_form = mock.Mock()
         mock_form.values = {}
 
-    def test_get_hed_schema(self):
-        from hed.schema.hed_schema import HedSchema
-        from hedweb.constants import common
-        from hedweb.web_utils import get_hed_schema
-
-        # Test
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED7.1.2.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     common.COMMAND: common.COMMAND_CONVERT}
-        with self.app.app_context():
-            hed_schema = get_hed_schema(arguments)
-            self.assertIsInstance(hed_schema, HedSchema, "get_hed_schema should return HedSchema object")
-            issues = hed_schema.issues
-            self.assertFalse(issues, "Issues should be empty")
-
-        with open("data.txt", "r") as myfile:
-            data = myfile.readlines()
 
     def test_get_optional_form_field(self):
         self.assertTrue(1, "Testing get_optional_form_field")

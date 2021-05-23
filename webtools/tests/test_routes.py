@@ -50,9 +50,14 @@ class Test(unittest.TestCase):
         response = self.app.test.get('/string_submit')
         self.assertEqual(405, response.status_code, 'HED string processing require data')
 
-    def test_get_major_schema_versions(self):
-        response = self.app.test.post('/get-schema_versions')
-        self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
+    def test_get_schema_versions(self):
+        with self.app.app_context():
+            response = self.app.test.post('/get_schema_versions')
+            self.assertEqual(400, response.status_code, 'Returning HED version list requires data')
+            resp = self.app.client.post('/get_schema_versions')
+            print(resp)
+        # response = self.app.test.post('/get_schema_versions')
+        # self.assertEqual(405, response.status_code, 'Returning HED version list requires data')
         # import hed.hedweb.constants.common_constants as constants
         # from hed.hedweb.web_utils import find_major_schema_versions
         # hed_info = find_major_schema_versions()
@@ -60,7 +65,7 @@ class Test(unittest.TestCase):
         # self.assertTrue('7.1.2' in hed_info[constants.HED_MAJOR_VERSIONS], "7.1.2 is a major versions")
 
     def test_get_schema_results(self):
-        response = self.app.test.post('/schema-submit')
+        response = self.app.test.post('/schema_submit')
         self.assertEqual(400, response.status_code, 'Schema processing requires data')
 
     def test_get_spreadsheet_results(self):
