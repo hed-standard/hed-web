@@ -8,9 +8,9 @@ $(function () {
  */
 $('#string_submit').on('click', function () {
    if (!stringIsSpecified()) {
-        flashMessageOnScreen('Must give a non-empty hedstring.  See above.', 'error', 'string_submit_flash')
+        flashMessageOnScreen('Must give a non-empty string.  See above.', 'error', 'string_submit_flash')
     } else {
-        submitHedStringForm();
+        submitStringForm();
     }
 });
 
@@ -58,7 +58,7 @@ function prepareForm() {
  * Submit the form and return the validation results. If there are issues then they are returned in an attachment
  * file.
  */
-function submitHedStringForm() {
+function submitStringForm() {
     let stringForm = document.getElementById("string_form");
     let formData = new FormData(stringForm);
     clearFormFlashMessages();

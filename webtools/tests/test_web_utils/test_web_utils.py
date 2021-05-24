@@ -133,22 +133,22 @@ class Test(unittest.TestCase):
         filename = generate_filename(None, prefix=None, suffix=None, extension=None)
         self.assertEqual('', filename, "Returns empty when all arguments are none")
         filename = generate_filename(None, prefix=None, suffix=None, extension='.txt')
-        self.assertEqual('', filename, "Returns empty when basename, prefix, and suffix are None, but extension is not")
+        self.assertEqual('', filename, "Returns empty when base_name, prefix, and suffix are None, but extension is not")
         filename = generate_filename('c:/temp.json', prefix=None, suffix=None, extension='.txt')
         self.assertEqual('c_temp.txt', filename,
-                         "Returns stripped basename + extension when prefix, and suffix are None")
+                         "Returns stripped base_name + extension when prefix, and suffix are None")
         filename = generate_filename('temp.json', prefix='prefix', suffix='suffix', extension='.txt')
         self.assertEqual('prefix_temp_suffix.txt', filename,
-                         "Returns stripped basename + extension when prefix, and suffix are None")
+                         "Returns stripped base_name + extension when prefix, and suffix are None")
         filename = generate_filename(None, prefix='prefix', suffix='suffix', extension='.txt')
         self.assertEqual('prefix_suffix.txt', filename,
-                         "Returns correct string when no basename")
+                         "Returns correct string when no base_name")
         filename = generate_filename('event-strategy-v3_task-matchingpennies_events.json',
                                      suffix='blech', extension='.txt')
         self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
-                         "Returns correct string when basename with hyphens")
+                         "Returns correct string when base_name with hyphens")
         filename = generate_filename('HED7.1.2.xml', suffix='blech', extension='.txt')
-        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when basename has periods")
+        self.assertEqual('HED7.1.2_blech.txt', filename, "Returns correct string when base_name has periods")
 
     def test_generate_text_response(self):
         print("Stuff")

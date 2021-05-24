@@ -25,7 +25,7 @@ def generate_input_from_string_form(request):
         A dictionary containing input arguments for calling the underlying validation function.
     """
     hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
-    hed_string = request.form['hedstring-input']
+    hed_string = request.form[common.STRING_INPUT]
     if hed_string:
         string_list = [hed_string]
     else:

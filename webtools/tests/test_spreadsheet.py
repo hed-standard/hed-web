@@ -30,9 +30,10 @@ class Test(unittest.TestCase):
                           "An exception is raised if an empty request is passed to generate_input_from_spreadsheet")
 
     def test_spreadsheet_process(self):
+        from hedweb.constants import common
         from hedweb.spreadsheet import spreadsheet_process
         from hed.util.exceptions import HedFileError
-        arguments = {'spreadsheet-path': ''}
+        arguments = {common.SPREADSHEET_PATH: ''}
         try:
             a = spreadsheet_process(arguments)
         except HedFileError:
@@ -63,14 +64,15 @@ class Test(unittest.TestCase):
     #         self.assertEqual('success', headers['Category'], "dictionary_convert should return success if converted")
 
     def test_spreadsheet_validate(self):
+        from hedweb.constants import common
         from hedweb.spreadsheet import spreadsheet_validate
         spreadsheet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/ExcelMultipleSheets.xlsx')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         prefix_dict = {3: "Event/Long name/", 2: "Event/Label/", 4: "Event/Description/"}
-        arguments = {'schema_xml_file': schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     'spreadsheet-path': spreadsheet_path, 'spreadsheet-file': 'ExcelMultipleSheets.xlsx',
-                     'worksheet-selected': 'LKT Events', 'has-column-names': True,
-                     'tag_columns': [5], 'column-prefix-dictionary': prefix_dict}
+        arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED 7.1.2.xml',
+                     common.SPREADSHEET_PATH: spreadsheet_path, common.SPREADSHEET_FILE: 'ExcelMultipleSheets.xlsx',
+                     common.WORKSHEET_SELECTED: 'LKT Events', common.HAS_COLUMN_NAMES: True,
+                     common.TAG_COLUMNS: [5], common.COLUMN_PREFIX_DICTIONARY: prefix_dict}
 
         with self.app.app_context():
             response = spreadsheet_validate(arguments)
@@ -79,8 +81,8 @@ class Test(unittest.TestCase):
             self.assertFalse(response.data, "ExcelMultipleSheets should validate using HED 7.1.2.xml")
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments['schema_xml_file'] = schema_path
-        arguments['schema_display_name'] = 'HED8.0.0-alpha.1.xml'
+        arguments[common.SCHEMA_PATH] = schema_path
+        arguments[common.SCHEMA_DISPLAY_NAME] = 'HED8.0.0-alpha.1.xml'
         with self.app.app_context():
             response = spreadsheet_validate(arguments)
             headers = dict(response.headers)

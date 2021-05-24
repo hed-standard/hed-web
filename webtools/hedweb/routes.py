@@ -179,7 +179,7 @@ def spreadsheet_results():
         delete_file_no_exceptions(input_arguments.get(common.SPREADSHEET_PATH, ''))
 
 
-@route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+@route_blueprint.route(route_constants.STRING_SUBMIT_ROUTE, strict_slashes=False, methods=['GET', 'POST'])
 def string_results():
     """Process hed strings entered in a text box.
 
@@ -191,7 +191,9 @@ def string_results():
 
     try:
         input_arguments = generate_input_from_string_form(request)
-        return json.dumps(string_process(input_arguments))
+        a = json.dumps(string_process(input_arguments))
+        return a
+        # return json.dumps(string_process(input_arguments))
     except Exception as ex:
         return handle_error(ex)
 

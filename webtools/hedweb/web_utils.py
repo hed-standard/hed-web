@@ -11,6 +11,7 @@ from flask import current_app, Response
 from hed.schema.hed_schema_file import load_schema, from_string
 from hed.util import hed_cache, file_util
 from hed.util.event_file_input import EventFileInput
+from hed.util.hed_file_input import HedFileInput
 from hed.util.column_def_group import ColumnDefGroup
 from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension, delete_file_if_it_exists
@@ -240,17 +241,17 @@ def generate_download_file_response(download_file, display_name=None, header=Non
                              'Category': category, 'Message': msg})
 
 
-def generate_filename(basename, prefix=None, suffix=None, extension=None):
+def generate_filename(base_name, prefix=None, suffix=None, extension=None):
     """Generates a filename for the attachment of the form prefix_basename_suffix + extension.
 
     Parameters
     ----------
-   basename: str
+   base_name: str
         The name of the base, usually the name of the file that the issues were generated from
     prefix: str
-        The prefix prepended to the front of the basename
+        The prefix prepended to the front of the base_name
     suffix: str
-        The suffix appended to the end of the basename
+        The suffix appended to the end of the base_name
     Returns
     -------
     string
@@ -260,8 +261,8 @@ def generate_filename(basename, prefix=None, suffix=None, extension=None):
     pieces = []
     if prefix:
         pieces = pieces + [secure_filename(prefix)]
-    if basename:
-        pieces.append(os.path.splitext(secure_filename(basename))[0])
+    if base_name:
+        pieces.append(os.path.splitext(secure_filename(base_name))[0])
     if suffix:
         pieces = pieces + [secure_filename(suffix)]
 
@@ -299,16 +300,16 @@ def generate_text_response(download_text, msg_category='success', msg=''):
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
 
-def get_events_file(arguments, json_dictionary=None, def_dicts=None):
+def get_events(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
-        events_file = EventFileInput(None, data_as_csv_string=arguments[common.EVENTS_STRING],
+        events = EventFileInput(None, data_as_csv_string=arguments[common.EVENTS_STRING],
                                      json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
-        events_file = EventFileInput(arguments[common.EVENTS_PATH],
+        events = EventFileInput(arguments[common.EVENTS_PATH],
                                      json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
         raise HedFileError('NoEventsFile', 'No events file was provided')
-    return events_file
+    return events
 
 
 def get_hed_path_from_pull_down(request):
@@ -396,6 +397,19 @@ def get_optional_form_field(request, form_field_name, field_type=''):
             form_field_value = request.form[form_field_name]
     return form_field_value
 
+
+def get_spreadsheet(arguments):
+    if common.SPREADSHEET_STRING in arguments:
+        spreadsheet = None
+    elif common.SPREADSHEET_PATH in arguments:
+        spreadsheet = HedFileInput(arguments.get(common.SPREADSHEET_PATH, None),
+                                   worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
+                                   tag_columns=arguments.get(common.TAG_COLUMNS, None),
+                                   has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
+                                   column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY,None))
+    else:
+        raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided')
+    return spreadsheet
 
 def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     """Gets the other paths of the uploaded files in the form.

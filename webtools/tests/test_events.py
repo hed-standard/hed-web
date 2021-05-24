@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
     #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
     #
     #     arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-    #                  'events_path': events_path, 'events_file': 'bids_events.tsv',
+    #                  'events_path': events_path, 'events': 'bids_events.tsv',
     #                  'json_path': json_path, 'json_file': 'bids_events.json'}
     #     with self.app.app_context():
     #         results = events_assemble(arguments)
@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
     #
     #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
     #     arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED7.1.2.xml',
-    #                  'events_path': events_path, 'events_file': 'bids_events.tsv', 'json_path': json_path,
+    #                  'events_path': events_path, 'events': 'bids_events.tsv', 'json_path': json_path,
     #                  'json_file': 'bids_events.json'}
     #     with self.app.app_context():
     #         results = events_assemble(arguments)
