@@ -4,7 +4,7 @@
 {% from "json-input.html" import create_json_input %}
 {% from "process-options.html" import create_process_options %}
 {% block content %}
-    <h2>Validate BIDS-style event file</h2>
+    <h2>Process a BIDS-style event file</h2>
     <p>
         <i>Upload a BIDS-style tsv events file and an optional JSON events file.<br>
             Select a HED schema, selected a processing option, and press Process.<br>
@@ -29,7 +29,7 @@
         {{ create_column_info('false') }}
         {{ create_json_input() }}
         {{ create_schema_pulldown() }}
-        {{ create_process_options(assemble=True,to_long=True,to_short=True,validate=True) }}
+        {{ create_process_options(assemble=True,to_long=False,to_short=False,validate=True) }}
 
         <div class="form-group">
             <button id="events_submit" type="button">Process</button>

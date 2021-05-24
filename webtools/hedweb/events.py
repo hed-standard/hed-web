@@ -125,6 +125,31 @@ def events_assemble(arguments, hed_schema=None):
             'msg': 'Events file successfully expanded'}
 
 
+def events_convert(arguments, short_to_long=True, hed_schema=None):
+    """Converts events data from short to long unless short_to_long is set to False, then long_to_short
+
+    Parameters
+    ----------
+    arguments: dict
+        Dictionary containing standard input form arguments
+    short_to_long: bool
+        If True convert the dictionary to long form, otherwise convert to short form
+    hed_schema:str or HedSchema
+        Version number or path or HedSchema object to be used
+
+    Returns
+    -------
+    Response
+        A downloadable events file or a file containing warnings or just a warning
+    """
+    if not hed_schema:
+        hed_schema = get_hed_schema(arguments)
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    return {'command': arguments.get('command', ''), 'data': '',
+            'schema_version': schema_version, 'msg_category': 'warning',
+            'msg': 'This convert command has not yet been implemented for spreadsheets'}
+
+
 def events_validate(arguments, hed_schema=None, events=None):
     """Reports the spreadsheet validation status.
 

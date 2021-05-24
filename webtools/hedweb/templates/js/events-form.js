@@ -8,8 +8,8 @@ $(function () {
 /**
  * Events file handler function. Checks if the file uploaded has a valid spreadsheet extension.
  */
-$('#events').on('change', function () {
-    let events = $('#events');
+$('#events_file').on('change', function () {
+    let events = $('#events_file');
     let eventsPath = events.val();
     let eventsFile = events[0].files[0];
     clearFlashMessages();
@@ -31,7 +31,7 @@ $('#events').on('change', function () {
  * Submits the form if there is an events file and an available hed schema
  */
 $('#events_submit').on('click', function () {
-    if (fileIsSpecified('#events', 'events_flash', 'Events file is not specified.')
+    if (fileIsSpecified('#events_file', 'events_flash', 'Events file is not specified.')
         && schemaSpecifiedWhenOtherIsSelected()) {
         submitForm();
     }
@@ -80,7 +80,7 @@ function submitForm() {
     let eventsForm = document.getElementById("events_form");
     let formData = new FormData(eventsForm);
     let prefix = 'issues';
-    let eventsFile = $('#events')[0].files[0].name;
+    let eventsFile = $('#events_file')[0].files[0].name;
     let display_name = convertToResultsName(eventsFile, prefix)
     clearFlashMessages();
     flashMessageOnScreen('Worksheet is being validated ...', 'success',

@@ -101,42 +101,12 @@ def spreadsheet_convert(arguments, short_to_long=True, hed_schema=None):
     Response
         A downloadable spreadsheet file or a file containing warnings
     """
-
-    return generate_text_response('Not available', msg_category='warning',
-                                  msg='Spreadsheet conversion not implemented yet')
-    #
-    # if not hed_schema:
-    #     hed_schema = load_schema(arguments.get(common.SCHEMA_PATH, ''))
-    # error_handler = ErrorHandler()
-    # tag_formatter = TagFormat(hed_schema=hed_schema, error_handler=error_handler)
-    # issues = []
-    # for column_def in json_dictionary:
-    #     for hed_string, position in column_def.hed_string_iter(include_position=True):
-    #         if short_to_long:
-    #             new_hed_string, errors = tag_formatter.convert_hed_string_to_long(hed_string)
-    #         else:
-    #             new_hed_string, errors = tag_formatter.convert_hed_string_to_short(hed_string)
-    #         issues = issues + errors
-    #         column_def.set_hed_string(new_hed_string, position)
-    # if short_to_long:
-    #     suffix = '_to_long'
-    # else:
-    #     suffix = '_to_short'
-    # issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-    # display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
-    # if issues:
-    #     display_name = arguments.get(common.JSON_DISPLAY_NAME, '')
-    #     issue_str = get_printable_issue_string(issues, f"JSON conversion for {display_name} was unsuccessful")
-    #     file_name = generate_filename(display_name, suffix=f"{suffix}_conversion_errors", extension='.txt')
-    #     issue_file = save_text_to_upload_folder(issue_str, file_name)
-    #     return generate_download_file_response(issue_file, display_name=file_name, msg_category='warning',
-    #                                            msg='JSON dictionary had conversion errors')
-    # else:
-    #     file_name = generate_filename(display_name, suffix=suffix, extension='.json')
-    #     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_name)
-    #     json_dictionary.save_as_json(file_path)
-    #     return generate_download_file_response(file_path, display_name=file_name, msg_category='success',
-    #                                            msg='JSON dictionary was successfully converted')
+    if not hed_schema:
+        hed_schema = get_hed_schema(arguments)
+    schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
+    return {'command': arguments.get('command', ''), 'data': '',
+            'schema_version': schema_version, 'msg_category': 'warning',
+            'msg': 'This convert command has not yet been implemented for spreadsheets'}
 
 
 def spreadsheet_validate(arguments, hed_schema=None, spreadsheet=None):

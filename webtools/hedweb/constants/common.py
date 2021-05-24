@@ -22,7 +22,7 @@ COLUMN_INDICES = 'column_indices'
 DOWNLOAD_FILE = 'download_file'
 
 EVENTS_DISPLAY_NAME = 'events_display_name'
-EVENTS_FILE = 'events'
+EVENTS_FILE = 'events_file'
 EVENTS_FLASH = 'events_flash'
 EVENTS_PATH = 'events_path'
 EVENTS_STRING = 'events_string'
