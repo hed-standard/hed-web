@@ -1,13 +1,12 @@
 from flask import current_app
 from werkzeug import Response
-from hed.schema.hed_schema_file import load_schema
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.hed_string import HedString
 from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common
-from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down, get_hed_schema,\
-    generate_response_download_file_from_text, generate_text_response
+from hedweb.web_utils import form_has_option, get_hed_path_from_pull_down, get_hed_schema
+
 app_config = current_app.config
 
 
@@ -29,7 +28,7 @@ def generate_input_from_string_form(request):
     if hed_string:
         string_list = [hed_string]
     else:
-        raise HedFileError('EmptyHedString', 'Must enter a HED string')
+        raise HedFileError('EmptyHedString', 'Must enter a HED string', '')
     arguments = {common.COMMAND: '',
                  common.SCHEMA_PATH: hed_file_path,
                  common.SCHEMA_DISPLAY_NAME: schema_display_name,
@@ -103,12 +102,6 @@ def string_convert(arguments, hed_schema=None):
             conversion_errors.append(get_printable_issue_string(issues, f"Errors for HED string {pos}:"))
         string_list.append(str(hed_string_obj))
 
-    if conversion_errors:
-        category = 'warning'
-        msg = 'Some strings had conversion errors'
-    else:
-        category = 'success'
-        msg = 'Strings converted successfully'
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if conversion_errors:
         return {'command': arguments.get('command', ''), 'data': conversion_errors, 'additional_info': string_list,
@@ -141,7 +134,7 @@ def string_validate(arguments, hed_schema=None):
     if common.STRING_LIST in arguments:
         hed_strings = arguments[common.STRING_LIST]
     else:
-        raise HedFileError('NoStringList', 'No list of HED strings was entered')
+        raise HedFileError('NoStringList', 'No list of HED strings was entered', '')
     hed_validator = HedValidator(hed_schema=hed_schema)
 
     validation_errors = []
@@ -157,4 +150,4 @@ def string_validate(arguments, hed_schema=None):
     else:
         return {'command': arguments.get('command', ''), 'data': '',
                 'schema_version': schema_version, 'msg_category': 'success',
-                'msg': 'Strings validated successfullly...'}
+                'msg': 'Strings validated successfully...'}

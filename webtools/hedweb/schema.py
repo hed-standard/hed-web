@@ -1,19 +1,15 @@
-from os.path import basename, splitext
+from os.path import basename
 from urllib.parse import urlparse
 from flask import current_app
 
 from hed.schema import schema_compliance
-from hed.schema.hed_schema_file import load_schema, convert_schema_to_format
-from hed.util.file_util import url_to_file, get_file_extension
+from hed.util.file_util import get_file_extension
 from hed.util.error_reporter import get_printable_issue_string
 from hed.util.exceptions import HedFileError
 
-
 from hedweb.web_utils import form_has_file, form_has_option, form_has_url, \
-    generate_response_download_file_from_text, \
-    generate_download_file_response, generate_filename, generate_text_response, get_hed_schema, \
-    save_file_to_upload_folder, save_text_to_upload_folder
-
+    generate_response_download_file_from_text, get_hed_schema, \
+    generate_filename, generate_text_response, save_file_to_upload_folder
 from hedweb.constants import common, file_constants
 
 app_config = current_app.config
@@ -80,7 +76,8 @@ def schema_process(arguments):
     msg_category = results.get('msg_category', 'success')
 
     if results['data']:
-        return generate_response_download_file_from_text(results['data'], display_name=results.get('output_display_name', ''),
+        return generate_response_download_file_from_text(results['data'],
+                                                         display_name=results.get('output_display_name', ''),
                                                          msg_category=msg_category, msg=msg)
     else:
         return generate_text_response("", msg=msg, msg_category=msg_category)
@@ -128,10 +125,10 @@ def schema_convert(arguments):
                 'schema_version': schema_version, 'msg_category': 'warning',
                 'msg': "Schema had syntax errors"}
     if common.SCHEMA_FORMAT in arguments:
-        format = common.SCHEMA_FORMAT
+        schema_format = common.SCHEMA_FORMAT
     else:
-        format = get_file_extension(display_name)
-    if format == file_constants.SCHEMA_XML_EXTENSION:
+        schema_format = get_file_extension(display_name)
+    if schema_format == file_constants.SCHEMA_XML_EXTENSION:
         data = hed_schema.get_as_mediawiki_string()
         extension = '.mediawiki'
     else:

@@ -1,7 +1,7 @@
 %% Shows how to call hed-services to obtain a list of services
 host = 'http://127.0.0.1:5000';
-csrf_url = [host '/hed-services']; 
-services_url = [host '/hed-services-submit'];
+csrf_url = [host '/services']; 
+services_url = [host '/services_submit'];
 dictionary_file = '../data/good_dictionary.json';
 json_text = fileread(dictionary_file);
 
@@ -17,9 +17,9 @@ header = ["Content-Type" "application/json"; ...
 options = weboptions('MediaType', 'application/json', 'Timeout', Inf, ...
                      'HeaderFields', header);
 data = struct();
-%data.service = 'dictionary_validate';
+data.service = 'dictionary_validate';
 %data.service = 'dictionary_to_long';
-data.service = 'dictionary_to_short';
+%data.service = 'dictionary_to_short';
 %data.schema_version = '7.1.2';
 data.schema_version = '8.0.0-alpha.1';
 data.json_string = string(json_text);

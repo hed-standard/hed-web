@@ -114,13 +114,14 @@ class Test(unittest.TestCase):
     #         self.assertEqual('warning', results['msg_category'],
     #                          'events_assemble msg_category should be warning when errors')
 
-    def test_events_validate(self):
+    def test_events_validate_file(self):
         from hedweb.events import events_validate
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
         json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
 
-        arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED7.1.2.xml',
+        arguments = {'command': common.COMMAND_VALIDATE,
+                     common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED7.1.2.xml',
                      common.EVENTS_PATH: events_path, common.EVENTS_FILE: 'bids_events.tsv',
                      common.JSON_PATH: json_path, common.JSON_FILE: 'bids_events.json'}
 
@@ -132,9 +133,50 @@ class Test(unittest.TestCase):
                              'events_validate msg_category should be warning when errors')
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml',
+        arguments = {'command': common.COMMAND_VALIDATE,
+                     common.SCHEMA_PATH: schema_path, common.SCHEMA_DISPLAY_NAME: 'HED8.0.0-alpha.1.xml',
                      common.EVENTS_PATH: events_path, common.EVENTS_FILE: 'bids_events.tsv',
                      common.JSON_PATH: json_path, common.JSON_FILE: 'bids_events.json'}
+
+        with self.app.app_context():
+            results = events_validate(arguments)
+            self.assertFalse(results['data'],
+                             'events_validate results should not have a data key when no validation errors')
+            self.assertEqual('success', results['msg_category'],
+                             'events_validate msg_category should be success when no errors')
+
+
+    def test_events_validate_string(self):
+        from hedweb.events import events_validate
+        events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+        with open(events_path, "r") as myfile:
+            events_string = myfile.read()
+
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
+        with open(json_path, "r") as myfile:
+            json_string = myfile.read()
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
+        with open(schema_path, "r") as myfile:
+            schema_string = myfile.read()
+
+        arguments = {common.SCHEMA_STRING: schema_string, common.SCHEMA_DISPLAY_NAME: 'HED7.1.2.xml',
+                     common.EVENTS_STRING: events_string,
+                     common.JSON_STRING: json_string}
+
+        with self.app.app_context():
+            results = events_validate(arguments)
+            self.assertTrue(results['data'],
+                            'events_validate results should have a data key when validation errors')
+            self.assertEqual('warning', results["msg_category"],
+                             'events_validate msg_category should be warning when errors')
+
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
+        with open(schema_path, "r") as myfile:
+            schema_string = myfile.read()
+        arguments = {common.SCHEMA_STRING: schema_string, common.SCHEMA_DISPLAY_NAME: 'HED7.1.2.xml',
+                     common.EVENTS_STRING: events_string,
+                     common.JSON_STRING: json_string}
 
         with self.app.app_context():
             results = events_validate(arguments)

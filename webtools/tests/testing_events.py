@@ -29,3 +29,9 @@ if __name__ == '__main__':
     validator = HedValidator(hed_schema=hed_schema)
     validation_issues = validator.validate_input(input_file)
     print(get_printable_issue_string(validation_issues, "Normal hed string errors"))
+
+    events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.tsv')
+    with open(events_path, "r") as myfile:
+        events_string = myfile.read()
+    input_file = EventFileInput(None, data_as_csv_string=events_string)
+    # input_file = EventFileInput(data_as_csv_string=events_string)

@@ -1,8 +1,6 @@
 import os
-from os.path import basename, splitext
 import json
 import pathlib
-from pathlib import Path
 import tempfile
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
@@ -303,12 +301,12 @@ def generate_text_response(download_text, msg_category='success', msg=''):
 def get_events(arguments, json_dictionary=None, def_dicts=None):
     if common.EVENTS_STRING in arguments:
         events = EventFileInput(None, data_as_csv_string=arguments[common.EVENTS_STRING],
-                                     json_def_files=json_dictionary, def_dicts=def_dicts)
+                                json_def_files=json_dictionary, def_dicts=def_dicts)
     elif common.EVENTS_PATH in arguments:
         events = EventFileInput(arguments[common.EVENTS_PATH],
-                                     json_def_files=json_dictionary, def_dicts=def_dicts)
+                                json_def_files=json_dictionary, def_dicts=def_dicts)
     else:
-        raise HedFileError('NoEventsFile', 'No events file was provided')
+        raise HedFileError('NoEventsFile', 'No events file was provided', '')
     return events
 
 
@@ -353,7 +351,7 @@ def get_hed_schema(arguments):
         hed_file_path = hed_cache.get_path_from_hed_version(arguments[common.SCHEMA_VERSION])
         hed_schema = load_schema(hed_file_path)
     else:
-        raise HedFileError('NoHEDSchema', 'No valid HED schema was provided')
+        raise HedFileError('NoHEDSchema', 'No valid HED schema was provided', '')
     return hed_schema
 
 
@@ -365,7 +363,7 @@ def get_json_dictionary(arguments, json_optional=False):
     elif json_optional:
         json_dictionary = None
     else:
-        raise HedFileError('NoJSONDictionary', 'No JSON dictionary was provided')
+        raise HedFileError('NoJSONDictionary', 'No JSON dictionary was provided', '')
     return json_dictionary
 
 
@@ -406,10 +404,11 @@ def get_spreadsheet(arguments):
                                    worksheet_name=arguments.get(common.WORKSHEET_SELECTED, None),
                                    tag_columns=arguments.get(common.TAG_COLUMNS, None),
                                    has_column_names=arguments.get(common.HAS_COLUMN_NAMES, None),
-                                   column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY,None))
+                                   column_prefix_dictionary=arguments.get(common.COLUMN_PREFIX_DICTIONARY, None))
     else:
-        raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided')
+        raise HedFileError('NoSpreadsheet', 'No spreadsheet was provided', '')
     return spreadsheet
+
 
 def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     """Gets the other paths of the uploaded files in the form.
@@ -436,7 +435,7 @@ def get_uploaded_file_path_from_form(request, file_key, valid_extensions=None):
     return uploaded_file_name, original_file_name
 
 
-def handle_error(ex, hed_info=None, title=None):
+def handle_error(ex, hed_info=None, title=None, return_as_str=True):
     """Handles an error by logging and running an error as Response or simple string
 
     Parameters
@@ -447,9 +446,11 @@ def handle_error(ex, hed_info=None, title=None):
         A dictionary of information.
     title: str
         A title to be included with the message.
+    return_as_str: bool
+        If true return as string otherwise as dictionary
     Returns
     -------
-    str
+    str or dict
 
     """
 
@@ -468,7 +469,10 @@ def handle_error(ex, hed_info=None, title=None):
         message = str(ex)
 
     hed_info['message'] = f"{title}[{error_code}: {message}]"
-    return json.dumps(hed_info)
+    if return_as_str:
+        return json.dumps(hed_info)
+    else:
+        return hed_info
 
 
 def handle_http_error(ex):

@@ -63,38 +63,44 @@ def services_process(arguments):
 
     service = arguments.get('service', '')
     response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
-    if not service:
-        response["error_type"] = 'HEDServiceMissing'
-        response["error_msg"] = "Must specify a valid service"
-    elif service == 'get_services':
-        response["results"] = services_list()
-    elif service == "dictionary_to_long":
-        arguments['command'] = common.COMMAND_TO_LONG
-        response["results"] = dictionary_convert(arguments)
-    elif service == "dictionary_to_short":
-        arguments['command'] = common.COMMAND_TO_SHORT
-        response["results"] = dictionary_convert(arguments)
-    elif service == "dictionary_validate":
-        arguments['command'] = common.COMMAND_VALIDATE
-        response["results"] = dictionary_validate(arguments)
-    elif service == "events_assemble":
-        arguments['command'] = common.COMMAND_ASSEMBLE
-        response["results"] = events_assemble(arguments)
-    elif service == "events_validate":
-        response["results"] = events_validate(arguments)
-    elif service == "spreadsheet_validate":
-        response["error_type"] = 'HEDServiceNotYetImplemented'
-        response["error_msg"] = f"{service} not yet implemented"
-    elif service == "string_to_long":
-        arguments['command'] = common.COMMAND_TO_LONG
-        response["results"] = string_convert(arguments)
-    elif service == "string_to_short":
-        arguments['command'] = common.COMMAND_TO_SHORT
-        response["results"] = string_convert(arguments)
-    elif service == "string_validate":
-        arguments['command'] = common.COMMAND_VALIDATE
-        response["results"] = string_validate(arguments)
-    else:
-        response["error_type"] = 'HEDServiceNotSupported'
-        response["error_msg"] = f"{service} not supported"
+    try:
+        if not service:
+            response["error_type"] = 'HEDServiceMissing'
+            response["error_msg"] = "Must specify a valid service"
+        elif service == 'get_services':
+            response["results"] = services_list()
+        elif service == "dictionary_to_long":
+            arguments['command'] = common.COMMAND_TO_LONG
+            response["results"] = dictionary_convert(arguments)
+        elif service == "dictionary_to_short":
+            arguments['command'] = common.COMMAND_TO_SHORT
+            response["results"] = dictionary_convert(arguments)
+        elif service == "dictionary_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = dictionary_validate(arguments)
+        elif service == "events_assemble":
+            arguments['command'] = common.COMMAND_ASSEMBLE
+            response["results"] = events_assemble(arguments)
+        elif service == "events_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = events_validate(arguments)
+        elif service == "spreadsheet_validate":
+            response["error_type"] = 'HEDServiceNotYetImplemented'
+            response["error_msg"] = f"{service} not yet implemented"
+        elif service == "string_to_long":
+            arguments['command'] = common.COMMAND_TO_LONG
+            response["results"] = string_convert(arguments)
+        elif service == "string_to_short":
+            arguments['command'] = common.COMMAND_TO_SHORT
+            response["results"] = string_convert(arguments)
+        elif service == "string_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = string_validate(arguments)
+        else:
+            response["error_type"] = 'HEDServiceNotSupported'
+            response["error_msg"] = f"{service} not supported"
+    except Exception as ex:
+        errors = handle_error(ex)
+        response['error_type'] = errors['error_type']
+        response['error_msg'] = errors['error_msg']
     return response

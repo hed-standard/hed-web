@@ -1,7 +1,7 @@
 %% Shows how to call hed-services to obtain a list of services
 host = 'http://127.0.0.1:5000';
-csrf_url = [host '/hed-services']; 
-services_url = [host '/hed-services-submit'];
+csrf_url = [host '/services']; 
+services_url = [host '/services_submit'];
 
 % hedStrings = {['Event/Category/Experimental stimulus, ' ...
 %                'Event/Label/Stimulus, Event/Description/Square display,'... 
