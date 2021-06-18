@@ -1,7 +1,7 @@
 from flask import render_template, request, Blueprint, current_app
 import json
 
-from hed import schema
+from hed import schema as hedschema
 # from hed.util import hed_cache
 # from hed.schema import hed_schema_file
 from hedweb.constants import common, page_constants
@@ -95,14 +95,34 @@ def schema_version_results():
 
     try:
         hed_info = {}
+        s = request.files
         if common.SCHEMA_PATH in request.files:
             hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-            hed_info[common.SCHEMA_VERSION] = schema.get_hed_xml_version(hed_file_path)
+            hed_info[common.SCHEMA_VERSION] = hedschema.get_hed_xml_version(hed_file_path)
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
     finally:
         delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
+
+
+@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def schema_results():
+    """Get the results of schema processing.
+
+    Returns
+    -------
+        downloadable file
+
+    """
+    input_arguments = {}
+    try:
+        input_arguments = generate_input_from_schema_form(request)
+        return schema_process(input_arguments)
+    except Exception as ex:
+        return handle_http_error(ex)
+    finally:
+        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])
@@ -117,8 +137,8 @@ def schema_versions_results():
     """
 
     try:
-        schema.cache_all_hed_xml_versions()
-        hed_info = {common.SCHEMA_VERSION_LIST: schema.get_all_hed_versions()}
+        hedschema.cache_all_hed_xml_versions()
+        hed_info = {common.SCHEMA_VERSION_LIST: hedschema.get_all_hed_versions()}
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
@@ -141,25 +161,6 @@ def services_results():
         return json.dumps(status)
     except Exception as ex:
         return handle_error(ex)
-
-
-@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def schema_results():
-    """Get the results of schema processing.
-
-    Returns
-    -------
-        downloadable file
-
-    """
-    input_arguments = {}
-    try:
-        input_arguments = generate_input_from_schema_form(request)
-        return schema_process(input_arguments)
-    except Exception as ex:
-        return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SPREADSHEET_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
