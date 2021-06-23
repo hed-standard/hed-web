@@ -2,9 +2,9 @@ from flask import current_app
 from werkzeug import Response
 import pandas as pd
 
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
+from hed.validator.event_validator import EventValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
 from hedweb.utils.web_utils import form_has_option, get_hed_path_from_pull_down, \
@@ -176,7 +176,7 @@ def events_validate(arguments, hed_schema=None, events=None):
 
         events = get_events(arguments, json_dictionary=json_dictionary)
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
-    validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
+    validator = EventValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
     issues = validator.validate_input(events)
     if issues:
         display_name = arguments.get(common.EVENTS_FILE, None)

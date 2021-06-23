@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
 
     def test_schema_process(self):
         from hedweb.schema import schema_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         arguments = {'schema_path': ''}
         try:
             a = schema_process(arguments)
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
 
     def test_schema_convert(self):
         from hedweb.schema import schema_convert
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
 
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {'schema_path': schema_path, 'schema_display_name': 'HED7.1.2.xml'}

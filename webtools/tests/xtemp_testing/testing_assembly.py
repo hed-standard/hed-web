@@ -3,7 +3,7 @@ import pandas as pd
 from hed.models import EventsInput
 from hed.schema.hed_schema_file import load_schema
 from hed.models import ColumnDefGroup
-from hed.util.error_reporter import get_printable_issue_string
+from hed.errors.error_reporter import get_printable_issue_string
 
 if __name__ == '__main__':
     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/HED8.0.0-alpha.1.xml')

@@ -2,9 +2,9 @@ from flask import current_app
 from werkzeug import Response
 
 from hed import models
-from hed.util.error_reporter import ErrorHandler, get_printable_issue_string
-from hed.util.error_types import ErrorSeverity
-from hed.util.exceptions import HedFileError
+from hed.errors.error_reporter import ErrorHandler, get_printable_issue_string
+from hed.errors.error_types import ErrorSeverity
+from hed.errors.exceptions import HedFileError
 from hedweb.constants import common, file_constants
 from hedweb.utils.web_utils import form_has_option, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, package_results
 from hedweb.utils.io_utils import generate_filename, get_hed_schema, get_json_dictionary

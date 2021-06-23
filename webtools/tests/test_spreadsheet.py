@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
     def test_spreadsheet_process_empty_file(self):
         from hedweb.constants import common
         from hedweb.spreadsheet import spreadsheet_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         arguments = {common.SPREADSHEET_PATH: ''}
         try:
             a = spreadsheet_process(arguments)

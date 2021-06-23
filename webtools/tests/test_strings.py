@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
 
     def test_string_process(self):
         from hedweb.strings import string_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         arguments = {'string_list': ''}
         try:
             string_process(arguments)

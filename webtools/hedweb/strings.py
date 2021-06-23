@@ -2,9 +2,9 @@ from flask import current_app
 from werkzeug import Response
 
 from hed import models
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
+from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common
 from hedweb.utils.web_utils import form_has_option, get_hed_path_from_pull_down
@@ -138,7 +138,7 @@ def string_validate(arguments, hed_schema=None):
         hed_strings = arguments[common.STRING_LIST]
     else:
         raise HedFileError('NoStringList', 'No list of HED strings was entered', '')
-    hed_validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
+    hed_validator = EventValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
 
     validation_errors = []
     for pos, string in enumerate(hed_strings, start=1):

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from flask import current_app, Response
 
 from hed import schema as hedschema
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hedweb.constants import common
 from hedweb.utils.io_utils import delete_file_no_exceptions, file_extension_is_valid, save_file_to_upload_folder
 

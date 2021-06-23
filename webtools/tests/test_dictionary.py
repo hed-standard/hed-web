@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
 
     def test_dictionary_process_empty_file(self):
         from hedweb.dictionary import dictionary_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         arguments = {'json_path': ''}
         try:
             dictionary_process(arguments)

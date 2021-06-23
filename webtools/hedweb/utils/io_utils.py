@@ -4,7 +4,7 @@ import tempfile
 
 from flask import current_app
 from hed import models, schema as hedschema
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.util.file_util import delete_file_if_it_exists, get_file_extension
 from werkzeug.utils import secure_filename
 

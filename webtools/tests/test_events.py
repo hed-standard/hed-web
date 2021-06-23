@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
 
     def test_events_process_empty_file(self):
         from hedweb.events import events_process
-        from hed.util.exceptions import HedFileError
+        from hed.errors.exceptions import HedFileError
         # Test for empty events_path
         arguments = {'events_path': ''}
         try:

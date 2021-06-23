@@ -4,8 +4,8 @@ from flask import current_app
 
 from hed.schema import schema_compliance
 from hed.util.file_util import get_file_extension
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.exceptions import HedFileError
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
 
 from hedweb.utils.web_utils import form_has_file, form_has_option, form_has_url, \
     generate_response_download_file_from_text, generate_text_response

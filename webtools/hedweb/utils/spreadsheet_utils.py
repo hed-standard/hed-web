@@ -1,6 +1,6 @@
 import xlrd
 from flask import current_app
-from hed.util.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.util.file_util import get_file_extension
 from hedweb.constants import common, file_constants
 from hedweb.constants import spreadsheet_constants

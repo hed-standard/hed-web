@@ -1,8 +1,8 @@
 from flask import current_app
 
-from hed.util.error_reporter import get_printable_issue_string
-from hed.util.exceptions import HedFileError
-from hed.validator.hed_validator import HedValidator
+from hed.errors.error_reporter import get_printable_issue_string
+from hed.errors.exceptions import HedFileError
+from hed.validator.event_validator import EventValidator
 
 from hedweb.constants import common, file_constants
 from hedweb.utils.web_utils import form_has_option, \
@@ -125,7 +125,7 @@ def spreadsheet_validate(arguments, hed_schema=None, spreadsheet=None):
     schema_version = hed_schema.header_attributes.get('version', 'Unknown version')
     if not spreadsheet:
         spreadsheet = get_spreadsheet(arguments)
-    validator = HedValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
+    validator = EventValidator(check_for_warnings=arguments[common.CHECK_FOR_WARNINGS], hed_schema=hed_schema)
     issues = validator.validate_input(spreadsheet)
     if issues:
         display_name = arguments.get(common.SPREADSHEET_FILE, None)
