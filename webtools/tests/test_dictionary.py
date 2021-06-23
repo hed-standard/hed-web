@@ -5,16 +5,6 @@ from flask import Response
 from hedweb.app_factory import AppFactory
 
 
-def test_dictionaries():
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    test_dict = {'schema_xml_file': os.path.join(base_path, 'data/HED8.0.0-alpha.1.xml'),
-                 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                 'json_path': os.path.join(base_path, 'data/short_form_valid.json'),
-                 'json_file': 'short_form_valid.json',
-                 'check-for-warnings': True}
-    return test_dict
-
-
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -54,10 +44,10 @@ class Test(unittest.TestCase):
     def test_dictionary_process(self):
         from hedweb.dictionary import dictionary_process
         from hedweb.constants import common
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
+                     'json_path': json_path, 'json_file': 'bids_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
             self.assertTrue(isinstance(response, Response),
@@ -68,9 +58,9 @@ class Test(unittest.TestCase):
             self.assertTrue(response.data,
                             'dictionary_process to short should not convert using HED 7.1.2.xml')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', 'command': common.COMMAND_TO_SHORT}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-beta.1.xml',
+                     'json_path': json_path, 'json_file': 'bids_events.json', 'command': common.COMMAND_TO_SHORT}
         with self.app.app_context():
             response = dictionary_process(arguments)
             self.assertTrue(isinstance(response, Response),
@@ -82,10 +72,10 @@ class Test(unittest.TestCase):
     def test_dictionary_convert_to_long(self):
         from hedweb.dictionary import dictionary_convert
         from hedweb.constants import common
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'],
@@ -93,9 +83,9 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'dictionary_convert to long msg_category should be warning for errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_LONG}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-beta.1.xml',
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_TO_LONG}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'],
@@ -106,19 +96,19 @@ class Test(unittest.TestCase):
     def test_dictionary_convert_to_short(self):
         from hedweb.dictionary import dictionary_convert
         from hedweb.constants import common
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_TO_SHORT}
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_TO_SHORT}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'], 'dictionary_convert results should have data key')
             self.assertEqual('warning', results['msg_category'],
                              'dictionary_convert msg_category should be warning for errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-beta.1.xml',
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_convert(arguments)
             self.assertTrue(results['data'], 'dictionary_convert results should have data key')
@@ -128,10 +118,10 @@ class Test(unittest.TestCase):
     def test_dictionary_validate(self):
         from hedweb.dictionary import dictionary_validate
         from hedweb.constants import common
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED7.1.2.xml')
         arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED 7.1.2.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)
             self.assertTrue(results['data'],
@@ -139,9 +129,9 @@ class Test(unittest.TestCase):
             self.assertEqual('warning', results['msg_category'],
                              'dictionary_validate msg_category should be warning when errors')
 
-        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-alpha.1.xml')
-        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-alpha.1.xml',
-                     'json_path': json_path, 'json_file': 'good_events.json', common.COMMAND: common.COMMAND_VALIDATE}
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/HED8.0.0-beta.1.xml')
+        arguments = {common.SCHEMA_PATH: schema_path, 'schema_display_name': 'HED8.0.0-beta.1.xml',
+                     'json_path': json_path, 'json_file': 'bids_events.json', common.COMMAND: common.COMMAND_VALIDATE}
         with self.app.app_context():
             results = dictionary_validate(arguments)
             self.assertFalse(results['data'],

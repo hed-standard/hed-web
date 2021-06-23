@@ -39,20 +39,21 @@ class Test(unittest.TestCase):
 
     def test_process_services_dictionary(self):
         from hedweb.services import services_process
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/good_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/bids_events.json')
         with open(json_path) as f:
             data = json.load(f)
         json_text = json.dumps(data)
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
-                     + 'hedxml/HED8.0.0-alpha.1.xml'
+                     + 'hedxsd-test/HED8.0.0-beta.1.xml'
         arguments = {'service': 'dictionary_validate', 'schema_url': schema_url, 'json_string': json_text}
         with self.app.app_context():
             response = services_process(arguments)
             self.assertFalse(response['error_type'],
                              'dictionary_validation services should not have a error when file is valid')
             results = response['results']
-            self.assertEqual('success', results['msg_category'], "dictionary_validation services has success on good.json")
-            self.assertEqual('8.0.0-alpha.1', results['schema_version'], 'Version 8.0.0.-alpha.1 was used')
+            self.assertEqual('success', results['msg_category'],
+                             "dictionary_validation services has success on bids.json")
+            self.assertEqual('8.0.0-beta.1', results['schema_version'], 'Version 8.0.0.-beta.1 was used')
 
         schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-specification/master/' \
                      + 'hedxml/HED7.2.0.xml'

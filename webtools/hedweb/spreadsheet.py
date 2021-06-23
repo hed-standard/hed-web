@@ -5,10 +5,11 @@ from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 
 from hedweb.constants import common, file_constants
-from hedweb.web_utils import convert_number_str_to_list, form_has_option,\
-    generate_filename, get_hed_schema, get_hed_path_from_pull_down, \
-    get_spreadsheet, get_uploaded_file_path_from_form, get_optional_form_field, package_results
-from hedweb.spreadsheet_utils import get_specific_tag_columns_from_form
+from hedweb.utils.web_utils import form_has_option, \
+    get_hed_path_from_pull_down, \
+    get_uploaded_file_path_from_form, get_optional_form_field, package_results
+from hedweb.utils.io_utils import get_spreadsheet, generate_filename, get_hed_schema
+from hedweb.utils.spreadsheet_utils import get_specific_tag_columns_from_form, convert_number_str_to_list
 
 app_config = current_app.config
 

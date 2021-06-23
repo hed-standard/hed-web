@@ -7,8 +7,10 @@ from hed.util.exceptions import HedFileError
 from hed.validator.hed_validator import HedValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
-from hedweb.web_utils import form_has_option, get_events, get_hed_schema, get_json_dictionary, \
-    generate_filename, get_hed_path_from_pull_down, get_uploaded_file_path_from_form, package_results
+from hedweb.utils.web_utils import form_has_option, get_hed_path_from_pull_down, \
+    get_uploaded_file_path_from_form, package_results
+from hedweb.utils.io_utils import generate_filename, get_events, get_hed_schema, get_json_dictionary
+
 app_config = current_app.config
 
 

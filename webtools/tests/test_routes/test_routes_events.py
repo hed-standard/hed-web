@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         self.assertFalse(response.data, "The response data for empty events request is empty")
 
     def test_events_results_assemble_valid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -44,9 +44,9 @@ class Test(unittest.TestCase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.1',
+            input_data = {'schema_version': '8.0.0-alpha.2',
                           'command_option': 'command_assemble',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
                           'defs_expand': 'on',
                           'check_for_warnings': 'on'}
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
             events_buffer.close()
 
     def test_events_results_assemble_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             input_data = {'schema_version': '7.2.0',
                           'command_option': 'command_assemble',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
             json_buffer.close()
 
     def test_events_results_validate_valid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -99,9 +99,9 @@ class Test(unittest.TestCase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {'schema_version': '8.0.0-alpha.1',
+            input_data = {'schema_version': '8.0.0-alpha.2',
                           'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'events_file': (events_buffer, 'bids_events.tsv'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
             events_buffer.close()
 
     def test_events_results_validate_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_alpha.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
         with self.app.app_context():
             input_data = {'schema_version': '7.2.0',
                           'command_option': 'command_validate',
-                          'json_file': (json_buffer, 'bids_events.json'),
+                          'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'events_file': (events_buffer, 'events_file'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)

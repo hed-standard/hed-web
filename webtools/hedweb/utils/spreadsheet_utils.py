@@ -4,7 +4,7 @@ from hed.util.exceptions import HedFileError
 from hed.util.file_util import get_file_extension
 from hedweb.constants import common, file_constants
 from hedweb.constants import spreadsheet_constants
-from hedweb.web_utils import file_extension_is_valid, find_all_str_indices_in_list, save_file_to_upload_folder
+from hedweb.utils.io_utils import file_extension_is_valid, save_file_to_upload_folder
 
 app_config = current_app.config
 
@@ -224,3 +224,41 @@ def get_worksheet_info(file_path, worksheet_name=None):
     info[common.WORKSHEET_SELECTED] = worksheet_name
     opened_file.release_resources()
     return info
+
+
+def convert_number_str_to_list(number_str):
+    """Converts a string of integers to a list of integers, which is useful for hedweb forms.
+
+    Parameters
+    ----------
+    number_str: str
+        A string containing integers.
+
+    Returns
+    -------
+    list
+        A list containing numbers.
+    """
+    if number_str:
+        return list(map(int, number_str.split(',')))
+    return []
+
+
+def find_all_str_indices_in_list(list_of_str, str_value):
+    """Find the indices of a string value in a list.
+
+    Parameters
+    ----------
+    list_of_str: list
+        A list containing strings.
+    str_value: string
+        A string value.
+
+    Returns
+    -------
+    list
+        A list containing all of the indices where a string value occurs in a string list.
+
+    """
+    return [index + 1 for index, value in enumerate(list_of_str) if
+            value.lower().replace(' ', '') == str_value.lower().replace(' ', '')]
