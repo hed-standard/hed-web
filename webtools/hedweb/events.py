@@ -1,14 +1,15 @@
 from flask import current_app
 from werkzeug import Response
+from werkzeug.utils import secure_filename
 import pandas as pd
 
+from hed import models
 from hed.errors.error_reporter import get_printable_issue_string
 from hed.errors.exceptions import HedFileError
 from hed.validator.event_validator import EventValidator
 from hedweb.constants import common, file_constants
 from hedweb.dictionary import dictionary_validate
-from hedweb.utils.web_utils import form_has_option, get_hed_path_from_pull_down, \
-    get_uploaded_file_path_from_form, package_results
+from hedweb.utils.web_utils import form_has_option, get_hed_schema_from_pull_down, package_results
 from hedweb.utils.io_utils import generate_filename, get_events, get_hed_schema, get_json_dictionary
 
 app_config = current_app.config
@@ -27,29 +28,28 @@ def generate_input_from_events_form(request):
     dictionary
         A dictionary containing input arguments for calling the underlying validation function.
     """
-    hed_file_path, schema_display_name = get_hed_path_from_pull_down(request)
-    uploaded_events_path, original_events_name = \
-        get_uploaded_file_path_from_form(request, common.EVENTS_FILE, file_constants.TEXT_FILE_EXTENSIONS)
-    uploaded_json_name, original_json_name = \
-        get_uploaded_file_path_from_form(request, common.JSON_FILE, file_constants.DICTIONARY_FILE_EXTENSIONS)
-
     arguments = {
-        common.SCHEMA_PATH: hed_file_path,
-        common.SCHEMA_DISPLAY_NAME: schema_display_name,
-        common.EVENTS_PATH: uploaded_events_path,
-        common.EVENTS_FILE: original_events_name,
-        common.EVENTS_DISPLAY_NAME: original_events_name,
-        common.JSON_PATH: uploaded_json_name,
-        common.JSON_DISPLAY_NAME: original_json_name,
+        common.SCHEMA: None,
+        common.EVENTS: None,
+        common.EVENTS_DISPLAY_NAME: None,
+        common.JSON_DICTIONARY: None,
+        common.JSON_DISPLAY_NAME: None,
+        common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on'),
+        common.DEFS_EXPAND: form_has_option(request, common.DEFS_EXPAND, 'on')
     }
-    if form_has_option(request, common.COMMAND_OPTION, common.COMMAND_VALIDATE):
-        arguments[common.COMMAND] = common.COMMAND_VALIDATE
-    elif form_has_option(request, common.COMMAND_OPTION, common.COMMAND_ASSEMBLE):
-        arguments[common.COMMAND] = common.COMMAND_ASSEMBLE
-    else:
-        arguments[common.COMMAND] = ''
-    arguments[common.DEFS_EXPAND] = form_has_option(request, common.DEFS_EXPAND, 'on')
-    arguments[common.CHECK_FOR_WARNINGS] = form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
+
+    arguments[common.SCHEMA] = get_hed_schema_from_pull_down(request)
+    if common.JSON_FILE in request.files:
+        f = request.files[common.JSON_FILE]
+        arguments[common.JSON_DISPLAY_NAME] = secure_filename(f.filename)
+        arguments[common.JSON_DICTIONARY] = \
+            models.ColumnDefGroup(json_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'))
+    if common.EVENTS_FILE in request.files:
+        f = request.files[common.EVENTS_FILE]
+        arguments[common.EVENTS_DISPLAY_NAME] = secure_filename(f.filename)
+        arguments[common.EVENTS] = models.EventsInput(csv_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                                      json_def_files=arguments[common.JSON_DICTIONARY])
     return arguments
 
 
@@ -66,15 +66,13 @@ def events_process(arguments):
       Response
         Downloadable response object.
     """
-    if common.COMMAND not in arguments:
-        raise HedFileError('MissingCommand', 'Command is missing', '')
-    elif arguments['command'] == common.COMMAND_VALIDATE:
+    if arguments['command'] == common.COMMAND_VALIDATE:
         results = events_validate(arguments)
     elif arguments['command'] == common.COMMAND_ASSEMBLE:
         results = events_assemble(arguments)
     else:
         raise HedFileError('UnknownProcessingMethod', 'Select an events file processing method', '')
-    return package_results(results)
+    return results
 
 
 def events_assemble(arguments, hed_schema=None):
@@ -97,11 +95,11 @@ def events_assemble(arguments, hed_schema=None):
         hed_schema = get_hed_schema(arguments)
     json_dictionary = get_json_dictionary(arguments, json_optional=True)
     if json_dictionary:
-        results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
+        results = dictionary_validate(hed_schema, json_dictionary, '')
         if results['data']:
             return results
     events_file = get_events(arguments, json_dictionary=json_dictionary)
-    results = events_validate(arguments, hed_schema=hed_schema, events=events_file)
+    results = events_validate(hed_schema, events_file, json_dictionary)
     if results['data']:
         return results
     hed_tags = []
@@ -170,7 +168,7 @@ def events_validate(arguments, hed_schema=None, events=None):
     if not events:
         json_dictionary = get_json_dictionary(arguments, json_optional=True)
         if json_dictionary:
-            results = dictionary_validate(arguments, hed_schema=hed_schema, json_dictionary=json_dictionary)
+            results = dictionary_validate(hed_schema, json_dictionary)
             if results['data']:
                 return results
 

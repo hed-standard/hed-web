@@ -1,3 +1,4 @@
+BYTE_LIMIT = -1
 TEXT_EXTENSION = '.txt'
 SPREADSHEET_FILE_EXTENSIONS = ['.xls', '.xlsx', '.txt', '.tsv']
 EXCEL_FILE_EXTENSIONS = ['.xls', '.xlsx']

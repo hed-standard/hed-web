@@ -2,6 +2,7 @@ import io
 import os
 import shutil
 import unittest
+from flask import Response
 from hedweb.app_factory import AppFactory
 
 
@@ -27,6 +28,8 @@ class Test(unittest.TestCase):
     def test_dictionary_results_empty_data(self):
         response = self.app.test.post('/dictionary_submit')
         self.assertEqual(200, response.status_code, 'HED dictionary request succeeds even when no data')
+        self.assertTrue(isinstance(response, Response),
+                        'dictionary_process to short should return a Response when no data')
         header_dict = dict(response.headers)
         self.assertEqual("error", header_dict["Category"], "The header category when no dictionary is error ")
         self.assertFalse(response.data, "The response data for empty dictionary request is empty")
@@ -43,7 +46,9 @@ class Test(unittest.TestCase):
                           'json_file': (json_buffer, 'bids_events.json'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'To long of a valid dictionary has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary to long should return a Response when valid dictionary')
+            self.assertEqual(200, response.status_code, 'To long of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
                              "The valid dictionary should convert to long successfully")
@@ -60,8 +65,11 @@ class Test(unittest.TestCase):
                           'command_option': 'command_to_long',
                           'json_file': (json_buffer, 'bids_events.json'),
                           'check_for_warnings': 'on'}
+
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to long has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary to long should return a Response when invalid dictionary')
+            self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to long has valid status')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
                              "Conversion of an invalid dictionary to long generates a warning")
@@ -81,7 +89,9 @@ class Test(unittest.TestCase):
                           'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'To short of a valid dictionary has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary to short should return a Response when valid dictionary')
+            self.assertEqual(200, response.status_code, 'To short of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
                              "The valid dictionary should convert to short successfully")
@@ -100,7 +110,9 @@ class Test(unittest.TestCase):
                           'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary valif should return a Response when valid dictionary')
+            self.assertEqual(200, response.status_code, 'Validation of a valid dictionary has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("success", headers_dict["Category"],
                              "The valid dictionary should validate successfully")
@@ -118,7 +130,9 @@ class Test(unittest.TestCase):
                           'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Conversion of an invalid dictionary to short has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary_process to short should return a response object when invalid dictionary')
+            self.assertEqual(200, response.status_code, 'Conversion of invalid dictionary to short has valid status')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
                              "Conversion of an invalid dictionary to short generates a warning")
@@ -137,7 +151,10 @@ class Test(unittest.TestCase):
                           'json_file': (json_buffer, 'bids_events_alpha.json'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/dictionary_submit', content_type='multipart/form-data', data=input_data)
-            self.assertEqual(200, response.status_code, 'Validation of an invalid dictionary to short has a response')
+            self.assertTrue(isinstance(response, Response),
+                            'dictionary_process validate should return a response object when invalid dictionary')
+            self.assertEqual(200, response.status_code,
+                             'Validation of an invalid dictionary to short has a valid status code')
             headers_dict = dict(response.headers)
             self.assertEqual("warning", headers_dict["Category"],
                              "Validation of an invalid dictionary to short generates a warning")

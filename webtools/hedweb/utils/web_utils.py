@@ -2,10 +2,11 @@ import os
 import pathlib
 from urllib.parse import urlparse
 from flask import current_app, Response
+from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
-from hedweb.constants import common
+from hedweb.constants import common, file_constants
 from hedweb.utils.io_utils import delete_file_no_exceptions, file_extension_is_valid, save_file_to_upload_folder
 
 app_config = current_app.config
@@ -187,6 +188,31 @@ def generate_text_response(download_text, msg_category='success', msg=''):
         headers['Content-Length'] = len(download_text)
     return Response(download_text, mimetype='text/plain charset=utf-8', headers=headers)
 
+def get_hed_schema_from_pull_down(request):
+    """Creates a HedSchema object from a section of form that uses a pull-down box and hed_cache
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from a form.
+
+    Returns
+    -------
+    tuple: str
+        A HedSchema object
+    """
+    if common.SCHEMA_VERSION not in request.form:
+        hed_schema = None
+    elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
+        hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
+    elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
+        f = request.files[common.SCHEMA_PATH]
+        hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                           file_type=secure_filename(f.filename))
+    else:
+        hed_schema = ''
+    return hed_schema
+
 
 def get_hed_path_from_pull_down(request):
     """Gets the hed path from a section of form that uses a pull-down box and hed_cache
@@ -216,7 +242,7 @@ def get_hed_path_from_pull_down(request):
 
 
 def get_hed_schema_from_pull_down(request):
-    """Creates a HedSchema object from the hed path from a section of form that uses a pull-down box and hed_cache
+    """Creates a HedSchema object from a section of form that uses a pull-down box and hed_cache
     Parameters
     ----------
     request: Request object
@@ -224,22 +250,21 @@ def get_hed_schema_from_pull_down(request):
 
     Returns
     -------
-    tuple: str, str
-        The HedSchema project and the HED display file name
+    tuple: str
+        A HedSchema object
     """
     if common.SCHEMA_VERSION not in request.form:
-        hed_file_path = ''
-        schema_display_name = ''
+        raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[common.SCHEMA_VERSION] != common.OTHER_VERSION_OPTION:
         hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
-        schema_display_name = os.path.basename(hed_file_path)
+        hed_schema = hedschema.load_schema(hed_file_path=hed_file_path)
     elif request.form[common.SCHEMA_VERSION] == common.OTHER_VERSION_OPTION and common.SCHEMA_PATH in request.files:
-        hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-        schema_display_name = request.files[common.SCHEMA_PATH].filename
+        f = request.files[common.SCHEMA_PATH]
+        hed_schema = hedschema.from_string(f.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                           file_type=secure_filename(f.filename))
     else:
-        hed_file_path = ''
-        schema_display_name = ''
-    return hed_file_path, schema_display_name
+        raise HedFileError("NoSchemaFile", "Must provide a valid path", "")
+    return hed_schema
 
 
 def get_optional_form_field(request, form_field_name, field_type=''):

@@ -2,14 +2,127 @@ import os
 import json
 
 from flask import current_app
+from hed import models
+from hed import schema as hedschema
 from hedweb.constants import common
-from hedweb.dictionary import dictionary_convert, dictionary_validate
-from hedweb.events import events_assemble, events_validate
-from hedweb.strings import string_convert, string_validate
+from hedweb.dictionary import dictionary_process
+from hedweb.events import events_process
+from hedweb.strings import string_process
 from hedweb.utils.io_utils import handle_error
 
 app_config = current_app.config
 
+
+def generate_input_from_service_request(request):
+    """Gets the validation function input arguments from a request object associated with the validation form.
+
+    Parameters
+    ----------
+    request: Request object
+        A Request object containing user data from the validation form.
+
+    Returns
+    -------
+    dictionary
+        A dictionary containing input arguments for calling the underlying validation function.
+    """
+
+
+    form_data = request.data
+    form_string = form_data.decode()
+    service_request = json.loads(form_string)
+    arguments = {'service': service_request.get('service', None),
+                 common.SCHEMA: None, common.JSON_DICTIONARY: None, 'events': None,
+                 common.SPREADSHEET: None,
+                 common.STRINGS:  service_request.get(common.STRING_LIST, None),
+                 common.CHECK_FOR_WARNINGS: service_request.get('check_for_warnings', True),
+                 common.DEFS_EXPAND: service_request.get('defs_expand', True)}
+    if common.JSON_STRING in service_request:
+        arguments[common.JSON_DICTIONARY] = \
+            models.ColumnDefGroup(json_string=service_request[common.JSON_STRING])
+    if common.SCHEMA_STRING in service_request:
+        arguments[common.SCHEMA] = hedschema.from_string(service_request[common.SCHEMA_STRING])
+    elif common.SCHEMA_VERSION in service_request:
+       hed_file_path = hedschema.get_path_from_hed_version(request.form[common.SCHEMA_VERSION])
+       arguments[common.SCHEMA] = hedschema.load_schema(hed_file_path=hed_file_path)
+
+    if common.JSON_STRING in request.files:
+        f = request.files[common.JSON_FILE]
+        display_name = secure_filename(f.filename)
+        json_dictionary = models.ColumnDefGroup(json_string=f.read(file_constants.BYTE_LIMIT).decode('ascii'))
+    else:
+        raise HedFileError('NoJSONDictionary', "Please provide a JSON dictionary", "")
+    arguments = {
+        common.SCHEMA: hed_schema,
+        common.JSON_DICTIONARY: json_dictionary,
+        common.JSON_DISPLAY_NAME: display_name,
+        common.COMMAND: request.values.get(common.COMMAND_OPTION, ''),
+        common.CHECK_FOR_WARNINGS: form_has_option(request, common.CHECK_FOR_WARNINGS, 'on')
+    }
+    return arguments
+
+
+
+def services_process(arguments):
+    """
+    Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
+
+    Parameters
+    ----------
+    arguments dict
+        a dictionary of arguments
+        Keys include "hed_strings", "check_for_warnings", and "schema_file"
+
+    Returns
+    -------
+    string
+        A serialized JSON string containing information related to the hed strings validation result.
+        If the validation fails then a 500 error message is returned.
+    """
+
+    service = arguments.get('service', '')
+    response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
+    try:
+        if not service:
+            response["error_type"] = 'HEDServiceMissing'
+            response["error_msg"] = "Must specify a valid service"
+        elif service == 'get_services':
+            response["results"] = services_list()
+        elif service == "dictionary_to_long":
+            arguments['command'] = common.COMMAND_TO_LONG
+            response["results"] = dictionary_process(arguments)
+        elif service == "dictionary_to_short":
+            arguments['command'] = common.COMMAND_TO_SHORT
+            response["results"] = dictionary_process(arguments)
+        elif service == "dictionary_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = dictionary_process(arguments)
+        elif service == "events_assemble":
+            arguments['command'] = common.COMMAND_ASSEMBLE
+            response["results"] = events_process(arguments)
+        elif service == "events_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = events_process(arguments)
+        elif service == "spreadsheet_validate":
+            response["error_type"] = 'HEDServiceNotYetImplemented'
+            response["error_msg"] = f"{service} not yet implemented"
+        elif service == "string_to_long":
+            arguments['command'] = common.COMMAND_TO_LONG
+            response["results"] = string_process(arguments)
+        elif service == "string_to_short":
+            arguments['command'] = common.COMMAND_TO_SHORT
+            response["results"] = string_process(arguments)
+        elif service == "string_validate":
+            arguments['command'] = common.COMMAND_VALIDATE
+            response["results"] = string_process(arguments)
+        else:
+            response["error_type"] = 'HEDServiceNotSupported'
+            response["error_msg"] = f"{service} not supported"
+    except Exception as ex:
+        errors = handle_error(ex)
+        response['error_type'] = errors['error_type']
+        response['error_msg'] = errors['error_msg']
+    return response
 
 def services_list():
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -42,65 +155,3 @@ def services_list():
     return {'command': '', 'data': data, 'output_display_name': '',
             'schema_version': '', 'msg_category': 'success',
             'msg': "List of available services and their meanings"}
-
-
-def services_process(arguments):
-    """
-    Reports validation status of hed strings associated with EEG events received from EEGLAB plugin HEDTools
-
-    Parameters
-    ----------
-    arguments dict
-        a dictionary of arguments
-        Keys include "hed_strings", "check_for_warnings", and "schema_file"
-
-    Returns
-    -------
-    string
-        A serialized JSON string containing information related to the hed strings validation result.
-        If the validation fails then a 500 error message is returned.
-    """
-
-    service = arguments.get('service', '')
-    response = {'service': service, 'results': '', 'error_type': '', 'error_msg': ''}
-    try:
-        if not service:
-            response["error_type"] = 'HEDServiceMissing'
-            response["error_msg"] = "Must specify a valid service"
-        elif service == 'get_services':
-            response["results"] = services_list()
-        elif service == "dictionary_to_long":
-            arguments['command'] = common.COMMAND_TO_LONG
-            response["results"] = dictionary_convert(arguments)
-        elif service == "dictionary_to_short":
-            arguments['command'] = common.COMMAND_TO_SHORT
-            response["results"] = dictionary_convert(arguments)
-        elif service == "dictionary_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = dictionary_validate(arguments)
-        elif service == "events_assemble":
-            arguments['command'] = common.COMMAND_ASSEMBLE
-            response["results"] = events_assemble(arguments)
-        elif service == "events_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = events_validate(arguments)
-        elif service == "spreadsheet_validate":
-            response["error_type"] = 'HEDServiceNotYetImplemented'
-            response["error_msg"] = f"{service} not yet implemented"
-        elif service == "string_to_long":
-            arguments['command'] = common.COMMAND_TO_LONG
-            response["results"] = string_convert(arguments)
-        elif service == "string_to_short":
-            arguments['command'] = common.COMMAND_TO_SHORT
-            response["results"] = string_convert(arguments)
-        elif service == "string_validate":
-            arguments['command'] = common.COMMAND_VALIDATE
-            response["results"] = string_validate(arguments)
-        else:
-            response["error_type"] = 'HEDServiceNotSupported'
-            response["error_msg"] = f"{service} not supported"
-    except Exception as ex:
-        errors = handle_error(ex)
-        response['error_type'] = errors['error_type']
-        response['error_msg'] = errors['error_msg']
-    return response
