@@ -1,17 +1,16 @@
 from flask import render_template, request, Blueprint, current_app
+from werkzeug.utils import secure_filename
 import json
 
 from hed import schema as hedschema
-# from hed.util import hed_cache
-# from hed.schema import hed_schema_file
 from hedweb.constants import common, page_constants
-from hedweb.constants import route_constants
-from hedweb.web_utils import delete_file_no_exceptions, \
-   handle_http_error, handle_error, save_file_to_upload_folder
+from hedweb.constants import route_constants, file_constants
+from hedweb.utils.web_utils import handle_http_error, package_results
+from hedweb.utils.io_utils import delete_file_no_exceptions, handle_error
 from hedweb import dictionary, events, spreadsheet, services
-from hedweb.schema import generate_input_from_schema_form, schema_process
-from hedweb.strings import generate_input_from_string_form, string_process
-from hedweb.spreadsheet_utils import generate_input_columns_info, get_columns_info
+from hedweb.schema import get_input_from_schema_form, schema_process
+from hedweb.strings import get_input_from_string_form, string_process
+from hedweb.spreadsheet import get_columns_info, get_input_columns_info
 
 app_config = current_app.config
 route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
@@ -19,17 +18,17 @@ route_blueprint = Blueprint(route_constants.ROUTE_BLUEPRINT, __name__)
 
 @route_blueprint.route(route_constants.COLUMN_INFO_ROUTE, methods=['POST'])
 def columns_info_results():
-    """Gets the names of the spreadsheet columns and column indices that contain HED tags.
+    """Gets the names of the spreadsheet columns and worksheet names if any.
 
     Returns
     -------
     string
-        A serialized JSON string containing information related to the spreadsheet columns.
+        A serialized JSON string containing information related to the column and worksheet information.
 
     """
     input_arguments = {}
     try:
-        input_arguments = generate_input_columns_info(request)
+        input_arguments = get_input_columns_info(request)
         columns_info = get_columns_info(input_arguments)
         return json.dumps(columns_info)
     except Exception as ex:
@@ -40,7 +39,7 @@ def columns_info_results():
 
 @route_blueprint.route(route_constants.DICTIONARY_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
 def dictionary_results():
-    """Process the JSON dictionary in the form after submission and return an attachment containing the output.
+    """Process the JSON dictionary after form submission and return an attachment containing the output.
 
     Returns
     -------
@@ -49,13 +48,11 @@ def dictionary_results():
     """
     input_arguments = {}
     try:
-        input_arguments = dictionary.generate_input_from_dictionary_form(request)
+        input_arguments = dictionary.get_input_from_dictionary_form(request)
         a = dictionary.dictionary_process(input_arguments)
-        return a
+        return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
 
 
 @route_blueprint.route(route_constants.EVENTS_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
@@ -69,14 +66,28 @@ def events_results():
     """
     input_arguments = {}
     try:
-        input_arguments = events.generate_input_from_events_form(request)
+        input_arguments = events.get_input_from_events_form(request)
         a = events.events_process(input_arguments)
-        return a
+        return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.EVENTS_PATH, ''))
-        delete_file_no_exceptions(input_arguments.get(common.JSON_PATH, ''))
+
+
+@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
+def schema_results():
+    """Get the results of schema processing.
+
+    Returns
+    -------
+        downloadable file if schema errors on validation or conversion was successful
+
+    """
+    try:
+        arguments = get_input_from_schema_form(request)
+        a = schema_process(arguments)
+        return package_results(a)
+    except Exception as ex:
+        return handle_http_error(ex)
 
 
 @route_blueprint.route(route_constants.SCHEMA_VERSION_ROUTE, methods=['POST'])
@@ -95,34 +106,14 @@ def schema_version_results():
 
     try:
         hed_info = {}
-        s = request.files
         if common.SCHEMA_PATH in request.files:
-            hed_file_path = save_file_to_upload_folder(request.files[common.SCHEMA_PATH])
-            hed_info[common.SCHEMA_VERSION] = hedschema.get_hed_xml_version(hed_file_path)
+            f = request.files[common.SCHEMA_PATH]
+            hed_schema = hedschema.from_string(f.stream.read(file_constants.BYTE_LIMIT).decode('ascii'),
+                                               file_type=secure_filename(f.filename))
+            hed_info[common.SCHEMA_VERSION] = hed_schema.header_attributes['version']
         return json.dumps(hed_info)
     except Exception as ex:
         return handle_error(ex)
-    finally:
-        delete_file_no_exceptions(request.files[common.SCHEMA_PATH])
-
-
-@route_blueprint.route(route_constants.SCHEMA_SUBMIT_ROUTE, strict_slashes=False, methods=['POST'])
-def schema_results():
-    """Get the results of schema processing.
-
-    Returns
-    -------
-        downloadable file
-
-    """
-    input_arguments = {}
-    try:
-        input_arguments = generate_input_from_schema_form(request)
-        return schema_process(input_arguments)
-    except Exception as ex:
-        return handle_http_error(ex)
-    finally:
-        delete_file_no_exceptions(input_arguments.get(common.SCHEMA_PATH, ''))
 
 
 @route_blueprint.route(route_constants.SCHEMA_VERSIONS_ROUTE, methods=['GET', 'POST'])
@@ -154,9 +145,7 @@ def services_results():
         A serialized JSON string containing processed information.
     """
     try:
-        form_data = request.data
-        form_string = form_data.decode()
-        arguments = json.loads(form_string)
+        arguments = services.get_input_from_service_request(request)
         status = services.services_process(arguments)
         return json.dumps(status)
     except Exception as ex:
@@ -174,8 +163,9 @@ def spreadsheet_results():
     """
     input_arguments = {}
     try:
-        input_arguments = spreadsheet.generate_input_from_spreadsheet_form(request)
-        return spreadsheet.spreadsheet_process(input_arguments)
+        input_arguments = spreadsheet.get_input_from_spreadsheet_form(request)
+        a = spreadsheet.spreadsheet_process(input_arguments)
+        return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
     finally:
@@ -193,10 +183,9 @@ def string_results():
     """
 
     try:
-        input_arguments = generate_input_from_string_form(request)
-        a = json.dumps(string_process(input_arguments))
-        return a
-        # return json.dumps(string_process(input_arguments))
+        input_arguments = get_input_from_string_form(request)
+        a = string_process(input_arguments)
+        return json.dumps(a)
     except Exception as ex:
         return handle_error(ex)
 

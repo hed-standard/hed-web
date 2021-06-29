@@ -22,6 +22,7 @@ TAG_COLUMNS = 'tag_columns'
 COLUMN_INDICES = 'column_indices'
 DOWNLOAD_FILE = 'download_file'
 
+EVENTS = 'events'
 EVENTS_DISPLAY_NAME = 'events_display_name'
 EVENTS_FILE = 'events_file'
 EVENTS_FLASH = 'events_flash'
@@ -34,9 +35,6 @@ OTHER_VERSION_OPTION = 'Other'
 
 HEDSTRING = 'hedstring'
 
-
-
-
 JSON_DICTIONARY = 'json_dictionary'
 JSON_DISPLAY_NAME = 'json_display_name'
 JSON_FILE = 'json_file'
@@ -47,6 +45,7 @@ JSON_STRINGS = 'json_strings'
 OUTPUT_DISPLAY_NAME = 'output_display_name'
 
 # Schema-specific constants
+SCHEMA = 'schema'
 SCHEMA_FORM = 'schema_form'
 SCHEMA_DISPLAY_NAME = 'schema_display_name'
 SCHEMA_FILE = 'schema_file'
@@ -66,7 +65,10 @@ SCHEMA_URL_OPTION = 'schema_url_option'
 SCHEMA_VERSION = 'schema_version'
 SCHEMA_VERSION_LIST = 'schema_version_list'
 
+SERVICE = 'service'
+
 REQUIRED_COLUMN_INDICES = 'required_column_indices'
+SPREADSHEET = 'spreadsheet'
 SPREADSHEET_DISPLAY_NAME = 'spreadsheet_display_name'
 SPREADSHEET_FILE = 'spreadsheet_file'
 SPREADSHEET_FLASH = 'spreadsheet_flash'
