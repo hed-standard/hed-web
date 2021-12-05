@@ -1,4 +1,4 @@
-HED version="8.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd"
+HED version="8.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd"
 
 '''Prologue'''
 This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
@@ -6,7 +6,7 @@ This schema is the first official release that includes an xsd and requires unit
 !# start schema 
 
 '''Event''' <nowiki>{suggestedTag=Task-property}[Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
-* Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Attribute/Sensory}[Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
+* Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Sensory-presentation}[Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
 * Agent-action <nowiki>{suggestedTag=Task-event-role, suggestedTag=Agent}[Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.]</nowiki>
 * Data-feature <nowiki>{suggestedTag=Data-property}[An event marking the occurrence of a data feature such as an interictal spike or alpha burst that is often added post hoc to the data record.]</nowiki>
 * Experiment-control <nowiki>[An event pertaining to the physical control of the experiment during its operation.]</nowiki>
@@ -232,7 +232,7 @@ This schema is the first official release that includes an xsd and requires unit
 *** Animal <nowiki>[A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.]</nowiki>
 *** Human <nowiki>[The bipedal primate mammal Homo sapiens.]</nowiki>
 *** Plant <nowiki>[Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.]</nowiki>
-* Language-item <nowiki>{suggestedTag=Attribute/Sensory}[An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.]</nowiki>
+* Language-item <nowiki>{suggestedTag=Sensory-presentation}[An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.]</nowiki>
 ** Character <nowiki>[A mark or symbol used in writing.]</nowiki>
 ** Clause <nowiki>[A  unit of grammatical organization next below the sentence in rank, usually consisting of a subject and predicate.]</nowiki>
 ** Glyph <nowiki>[A hieroglyphic character, symbol, or pictograph.]</nowiki>
@@ -244,7 +244,7 @@ This schema is the first official release that includes an xsd and requires unit
 ** Syllable <nowiki>[A unit of spoken language larger than a phoneme.]</nowiki>
 ** Textblock <nowiki>[A block of text.]</nowiki>
 ** Word <nowiki>[A word is the smallest free form (an item that may be expressed in isolation with semantic or pragmatic content) in a language.]</nowiki>
-* Object <nowiki>{suggestedTag=Attribute/Sensory}[Something perceptible by one or more of the senses, especially by vision or touch. A material thing.]</nowiki>
+* Object <nowiki>{suggestedTag=Sensory-presentation}[Something perceptible by one or more of the senses, especially by vision or touch. A material thing.]</nowiki>
 ** Geometric-object <nowiki>[An object or a representation that has structure and topology in space.]</nowiki>
 *** Pattern <nowiki>[An arrangement of objects, facts, behaviors, or other things which have scientific, mathematical, geometric, statistical, or other meaning.]</nowiki>
 **** Dots <nowiki>[A small round mark or spot.]</nowiki>
@@ -515,16 +515,16 @@ This schema is the first official release that includes an xsd and requires unit
 *** Categorical-value <nowiki>[Indicates that something can take on a limited and usually fixed number of possible values.]</nowiki>
 **** Categorical-class-value <nowiki>[Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.]</nowiki>
 ***** All <nowiki>{relatedTag=Some, relatedTag=None}[To a complete degree or to the full or entire extent.]</nowiki>
-***** Correct <nowiki>{relatedTag=Incorrect}[Free from error. Especially conforming to fact or truth.]</nowiki>
+***** Correct <nowiki>{relatedTag=Wrong}[Free from error. Especially conforming to fact or truth.]</nowiki>
 ***** Explicit <nowiki>{relatedTag=Implicit}[Stated clearly and in detail, leaving no room for confusion or doubt.]</nowiki>
 ***** False <nowiki>{relatedTag=True}[Not in accordance with facts, reality or definitive criteria.]</nowiki>
 ***** Implicit <nowiki>{relatedTag=Explicit}[Implied though not plainly expressed.]</nowiki>
-***** Invalid <nowiki>{relatedTag=Valid}[Not true because based on erroneous information or unsound reasoning or not conforming to the correct format or specifications.]</nowiki>
+***** Invalid <nowiki>{relatedTag=Valid}[Not allowed or not conforming to the correct format or specifications.]</nowiki>
 ***** None <nowiki>{relatedTag=All, relatedTag=Some}[No person or thing, nobody, not any.]</nowiki>
 ***** Some <nowiki>{relatedTag=All, relatedTag=None}[At least a small amount or number of, but not a large amount of, or often.]</nowiki>
 ***** True <nowiki>{relatedTag=False}[Conforming to facts, reality or definitive criteria.]</nowiki>
 ***** Valid <nowiki>{relatedTag=Invalid}[Allowable, usable, or acceptable.]</nowiki>
-***** Wrong <nowiki>{relatedTag=Correct}[Not accurate, correct, or appropriate.]</nowiki>
+***** Wrong <nowiki>{relatedTag=Correct}[Inaccurate or not correct.]</nowiki>
 **** Categorical-judgment-value <nowiki>[Categorical values that are based on the judgment or perception of the participant such familiar and famous.]</nowiki>
 ***** Abnormal <nowiki>{relatedTag=Normal}[Deviating in any way from the state, position, structure, condition, behavior, or rule which is considered a norm.]</nowiki>
 ***** Asymmetrical <nowiki>{relatedTag=Symmetrical}[Lacking symmetry or having parts that fail to correspond to one another in shape, size, or arrangement.]</nowiki>
@@ -581,7 +581,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** Weight <nowiki>[The relative mass or the quantity of matter contained by something.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=weightUnits}</nowiki>
 *** Quantitative-value <nowiki>[Something capable of being estimated or expressed with numeric values.] </nowiki> 
-**** Fraction <nowiki>[A numerical value betwee 0 and 1.]</nowiki>
+**** Fraction <nowiki>[A numerical value between 0 and 1.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Item-count <nowiki>[The integer count of something which is usually grouped with the entity it is counting. (Item-count/3, A) indicates that 3 of A have occurred up to this point.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>  
@@ -727,7 +727,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** <nowiki># {takesValue}[Usually is a semantic version.]</nowiki> 
 ** Parameter <nowiki>[Something user-defined for this experiment.]</nowiki>
 *** Parameter-label <nowiki>[The name of the parameter.]</nowiki>
-**** <nowiki># {takesValue, valueClass=labelClass}</nowiki>
+**** <nowiki># {takesValue, valueClass=nameClass}</nowiki>
 *** Parameter-value <nowiki>[The value of the parameter.]</nowiki>
 **** <nowiki># {takesValue, valueClass=textClass}</nowiki>
 * Organizational-property <nowiki>[Relating to an organization or the action of organizing something.]</nowiki>
@@ -957,7 +957,7 @@ This schema is the first official release that includes an xsd and requires unit
 ******* <nowiki># {takesValue, valueClass=numericClass} [Angular value between 0 and 360]</nowiki> 
 ****** Saturation <nowiki>[Colorfulness of a stimulus relative to its own brightness.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass} [B value of RGB between 0 and 1]</nowiki> 
-****** HSV-value <nowiki>[AAttribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
+****** HSV-value <nowiki>[An attribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
 ******* <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 ***** RGB-color <nowiki>[A color from the RGB schema.]</nowiki>
 ****** RGB-red <nowiki>[The red component.]</nowiki>
