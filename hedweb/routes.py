@@ -6,8 +6,13 @@ from hed import schema as hedschema
 
 from hedweb.constants import base_constants, page_constants
 from hedweb.constants import route_constants, file_constants
-from hedweb.web_util import handle_http_error, handle_error, package_results
-from hedweb import sidecar, events, spreadsheet, services, strings, schema
+from hedweb.web_util import convert_hed_versions, handle_http_error, handle_error, package_results
+from hedweb import sidecar as sidecar
+from hedweb import events as events
+from hedweb import spreadsheet as spreadsheet
+from hedweb import services as services
+from hedweb import strings as strings
+from hedweb import schema as schema
 from hedweb.columns import get_columns_request
 
 app_config = current_app.config
@@ -105,8 +110,9 @@ def schema_versions_results():
 
     try:
         hedschema.cache_xml_versions()
-        hed_info = {base_constants.SCHEMA_VERSION_LIST: hedschema.get_hed_versions()}
-        return json.dumps(hed_info)
+        hed_info = {base_constants.SCHEMA_VERSION_LIST: hedschema.get_hed_versions(get_libraries=True)}
+        hed_list = convert_hed_versions(hed_info)
+        return json.dumps(hed_list)
     except Exception as ex:
         return handle_error(ex)
 
@@ -152,7 +158,9 @@ def sidecar_results():
     try:
         input_arguments = sidecar.get_input_from_form(request)
         a = sidecar.process(input_arguments)
-        return package_results(a)
+        b = package_results(a)
+        return b
+        # return package_results(a)
     except Exception as ex:
         return handle_http_error(ex)
 

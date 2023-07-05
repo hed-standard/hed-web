@@ -8,28 +8,44 @@ $(function () {
  */
 $('#process_actions').change(function(){
     setOptions();
+    clearFlashMessages();
 });
 
+$('#sidecar_file').change(function() {
+    clearFlashMessages();
+})
+
+
 /**
- * Submit the form on click if schema and json file specified.
+ * Submit the form if schema and json file specified.
  */
 $('#sidecar_submit').on('click', function () {
-    if (fileIsSpecified('#sidecar_file', 'sidecar_flash', 'Sidecar file is not specified.' ) &&
-        schemaSpecifiedWhenOtherIsSelected()) {
+    if (!schemaSpecifiedWhenOtherIsSelected()) {
+        return;
+    } 
+    // let selectedElement = document.getElementById("process_actions");
+    if ($('#process_actions').val() === "merge_spreadsheet" ||
+        fileIsSpecified('#sidecar_file', 'sidecar_flash', 'Sidecar file is not specified.' )) {
         submitForm();
     }
 });
 
 /**
+ * Clear the form.
+ */
+$('#sidecar_clear').on('click', function () {
+    clearForm();
+});
+
+
+/**
  * Clear the fields in the form.
  */
 function clearForm() {
-    $('#sidecar_form')[0].reset();
-    $("#validate").prop('checked', true);
-    clearWorksheet()
+    clearFlashMessages();
     setOptions();
-    clearFlashMessages()
-    clearSidecarFileLabel();
+    $('#sidecar_file').val('');
+    clearSpreadsheet();
     hideOtherSchemaVersionFileUpload()
 }
 
@@ -37,9 +53,8 @@ function clearForm() {
  * Clear the flash messages that aren't related to the form submission.
  */
 function clearFlashMessages() {
-    clearJsonSidecarFlashMessages();
     clearSchemaSelectFlashMessages();
-    flashMessageOnScreen('', 'success', 'sidecar_submit_flash');
+    flashMessageOnScreen('', 'success', 'sidecar_flash');
 }
 
 /**
@@ -48,6 +63,8 @@ function clearFlashMessages() {
  */
 function prepareForm() {
     clearForm();
+    $('#sidecar_form')[0].reset();
+    $('#process_actions').val('validate');
     getSchemaVersions()
     hideOtherSchemaVersionFileUpload();
 }
@@ -56,7 +73,8 @@ function prepareForm() {
  * Set the options for the events depending on the action
  */
 function setOptions() {
-    if ($("#validate").is(":checked")) {
+    let selectedElement = document.getElementById("process_actions");
+    if (selectedElement.value === "validate") {
         hideOption("expand_defs");
         showOption("check_for_warnings");
         hideOption("include_description_tags");
@@ -64,7 +82,7 @@ function setOptions() {
         $("#spreadsheet_input_section").hide();
         $("#schema_pulldown_section").show();
         $("#options_section").show();
-    } else if ($("#to_long").is(":checked")) {
+    } else if (selectedElement.value === "to_long") {
         hideOption("check_for_warnings");
         showOption("expand_defs");
         hideOption("include_description_tags");
@@ -72,7 +90,7 @@ function setOptions() {
         $("#spreadsheet_input_section").hide();
         $("#schema_pulldown_section").show();
         $("#options_section").show();
-    } else if ($("#to_short").is(":checked")) {
+    } else if (selectedElement.value === "to_short") {
         hideOption("check_for_warnings");
         showOption("expand_defs");
         hideOption("include_description_tags");
@@ -80,7 +98,7 @@ function setOptions() {
         $("#spreadsheet_input_section").hide();
         $("#schema_pulldown_section").show();
         $("#options_section").show();
-    } else if ($("#extract_spreadsheet").is(":checked")) {
+    } else if (selectedElement.value === "extract_spreadsheet") {
         hideOption("check_for_warnings");
         hideOption("expand_defs");
         hideOption("include_description_tags");
@@ -88,7 +106,7 @@ function setOptions() {
         $("#spreadsheet_input_section").hide();
         $("#schema_pulldown_section").hide();
         $("#options_section").hide();
-    } else if ($("#merge_spreadsheet").is(":checked")) {
+    } else if (selectedElement.value === "merge_spreadsheet") {
         hideOption("expand_defs");
         hideOption("check_for_warnings");
         showOption("include_description_tags");
@@ -106,11 +124,15 @@ function setOptions() {
 function submitForm() {
     let sidecarForm = document.getElementById("sidecar_form");
     let formData = new FormData(sidecarForm);
-
-    let sidecarFile = getJsonFileLabel();
+    let selectedElement = document.getElementById("process_actions");
+    formData.append("command_option", selectedElement.value)
+    let sidecarFile = $("#sidecar_file")[0];
+    formData.append('sidecar', sidecarFile.files[0])
     let display_name = convertToResultsName(sidecarFile, 'issues')
+    let spreadsheetFile = $("#spreadsheet_file")[0];
+    formData.append('spreadsheet', spreadsheetFile.files[0])
     clearFlashMessages();
-    flashMessageOnScreen('Sidecar is being processed ...', 'success', 'sidecar_submit_flash')
+    flashMessageOnScreen('Sidecar is being processed ...', 'success', 'sidecar_flash')
     $.ajax({
             type: 'POST',
             url: "{{url_for('route_blueprint.sidecar_results')}}",
@@ -119,10 +141,10 @@ function submitForm() {
             processData: false,
             dataType: 'text',
             success: function (download, status, xhr) {
-                getResponseSuccess(download, xhr, display_name, 'sidecar_submit_flash')
+                getResponseSuccess(download, xhr, display_name, 'sidecar_flash')
             },
             error: function (xhr, status, errorThrown) {
-                getResponseFailure(xhr, status, errorThrown, display_name, 'sidecar_submit_flash')
+                getResponseFailure(xhr, status, errorThrown, display_name, 'sidecar_flash')
             }
         }
     )

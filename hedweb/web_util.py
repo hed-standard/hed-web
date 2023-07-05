@@ -1,4 +1,5 @@
 import io
+from datetime import datetime
 import json
 import os
 import zipfile
@@ -7,11 +8,24 @@ from flask import current_app, Response, make_response, send_file
 from werkzeug.utils import secure_filename
 
 from hed import schema as hedschema
+from hed import HedSchema, HedSchemaGroup
 
 from hed.errors import HedFileError, ErrorSeverity, ErrorHandler
 from hedweb.constants import base_constants, file_constants
 
 app_config = current_app.config
+
+TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
+
+
+def convert_hed_versions(hed_info):
+    hed_list = []
+    for key, key_list in hed_info['schema_version_list'].items():
+        if key is None:
+            hed_list = hed_list + key_list
+        else:
+            hed_list = hed_list + [key + '_' + element for element in key_list]
+    return {'schema_version_list': hed_list}
 
 
 def file_extension_is_valid(filename, accepted_extensions=None):
@@ -142,7 +156,7 @@ def generate_download_spreadsheet(results):
                                                  base_constants.MSG_CATEGORY: results[base_constants.MSG_CATEGORY],
                                                  base_constants.MSG: results[base_constants.MSG]})
     buffer = io.BytesIO()
-    spreadsheet.to_excel(buffer, output_processed_file=True)
+    spreadsheet.to_excel(buffer)
     buffer.seek(0)
     response = make_response()
     response.data = buffer.read()
@@ -151,6 +165,41 @@ def generate_download_spreadsheet(results):
     response.headers['Message'] = results[base_constants.MSG]
     response.mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     return response
+
+
+def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
+    """ Generate a filename for the attachment.
+
+    Parameters:
+        base_name (str):   Name of the base, usually the name of the file that the issues were generated from.
+        name_prefix (str): Prefix prepended to the front of the base name.
+        name_suffix (str): Suffix appended to the end of the base name.
+        extension (str):   Extension to use.
+        append_datetime (bool): If True, append the current date-time to the base output filename.
+
+    Returns:
+        str:  Name of the attachment other containing the issues.
+
+    Notes:
+        - The form prefix_basename_suffix + extension.
+
+    """
+
+    pieces = []
+    if name_prefix:
+        pieces = pieces + [name_prefix]
+    if base_name:
+        pieces.append(os.path.splitext(base_name)[0])
+    if name_suffix:
+        pieces = pieces + [name_suffix]
+    filename = "".join(pieces)
+    if append_datetime:
+        now = datetime.now()
+        filename = filename + '_' + now.strftime(TIME_FORMAT)[:-3]
+    if filename and extension:
+        filename = filename + extension
+
+    return secure_filename(filename)
 
 
 def generate_text_response(results):
@@ -210,7 +259,11 @@ def get_hed_schema_from_pull_down(request):
     if base_constants.SCHEMA_VERSION not in request.form:
         raise HedFileError("NoSchemaError", "Must provide a valid schema or schema version", "")
     elif request.form[base_constants.SCHEMA_VERSION] != base_constants.OTHER_VERSION_OPTION:
-        hed_file_path = hedschema.get_path_from_hed_version(request.form[base_constants.SCHEMA_VERSION])
+        version = request.form[base_constants.SCHEMA_VERSION].split('_')
+        if len(version) == 1:
+            hed_file_path = hedschema.get_path_from_hed_version(version[0])
+        else:
+            hed_file_path = hedschema.get_path_from_hed_version(version[1], library_name=version[0])
         hed_schema = hedschema.load_schema(hed_file_path)
     elif request.form[base_constants.SCHEMA_VERSION] == \
             base_constants.OTHER_VERSION_OPTION and base_constants.SCHEMA_PATH in request.files:
@@ -222,12 +275,20 @@ def get_hed_schema_from_pull_down(request):
     return hed_schema
 
 
-# def get_hed_versions(hed_schema):
-#     if hed_schema:
-#         hed_versions = hed_schema.get_formatted_version(as_string=False)
-#     else:
-#         hed_versions = None
-#     return hed_versions
+def get_option(options, option_name, default_value):
+    option_value = default_value
+    if options and option_name in options:
+        option_value = options[option_name]
+    return option_value
+
+
+def get_schema_versions(hed_schema):
+    if isinstance(hed_schema, HedSchema) or isinstance(hed_schema, HedSchemaGroup):
+        return hed_schema.get_formatted_version()
+    if not hed_schema:
+        return ''
+    else:
+        raise ValueError("InvalidHedSchemaOrHedSchemaGroup", "Expected schema or schema group")
 
 
 def handle_error(ex, hed_info=None, title=None, return_as_str=True):
@@ -278,13 +339,20 @@ def handle_http_error(ex):
     """
     if hasattr(ex, 'error_type'):
         error_code = ex.error_type
+    elif hasattr(ex, 'code'):
+        error_code = ex.code
     else:
         error_code = type(ex).__name__
     if hasattr(ex, 'message'):
         message = ex.message
     else:
         message = str(ex)
-    error_message = f"{error_code}: [{message}]"
+    message = message.replace('\n', ' ')
+    if hasattr(ex, 'filename'):
+        filename = str(ex.filename)
+    else:
+        filename = ''
+    error_message = f"{error_code}: {filename} [{message}]"
     return generate_text_response({'data': '', base_constants.MSG_CATEGORY: 'error', base_constants.MSG: error_message})
 
 
@@ -298,9 +366,9 @@ def package_results(results):
 
     if results.get(base_constants.FILE_LIST, None):
         return generate_download_zip_file(results)
-    elif results.get('data', None):
+    elif results.get('data', None) and results.get('command_target', None) != 'spreadsheet':
         return generate_download_file_from_text(results)
-    elif not results.get('spreadsheet', None):
+    elif results.get('data', None) or not results.get('spreadsheet', None):
         return generate_text_response(results)
     else:
         return generate_download_spreadsheet(results)

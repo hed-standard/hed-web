@@ -34,6 +34,20 @@ class Test(TestWebBase):
                             "The error message for invalid mediawiki conversion should not be empty")
             schema_buffer.close()
 
+    def test_check_schema_string(self):
+        from hed.errors import HedFileError
+        from hed import schema as hedschema
+        schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../data/HEDBad8.2.0.mediawiki')
+        with open(schema_path, 'r') as sc:
+            x = sc.read()
+        schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
+        schema_string = schema_buffer.read(-1).decode('ascii')
+        try:
+            hedschema.from_string(schema_string, file_type=schema_path)
+        except HedFileError as e:
+            self.assertIsInstance(e.issues, list)
+
     def test_schema_results_convert_mediawiki_valid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    '../data/HED8.0.0.mediawiki')
@@ -79,7 +93,7 @@ class Test(TestWebBase):
 
     def test_schema_results_convert_xml_url_valid(self):
         schema_url = \
-            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
+            'https://raw.githubusercontent.com/hed-standard/hed-schemas/main/standard_schema/hedxml/HED8.0.0.xml'
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'convert_schema',
@@ -96,7 +110,7 @@ class Test(TestWebBase):
 
     def test_schema_results_convert_xml_url_valid2(self):
         schema_url = \
-            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml'
+            'https://raw.githubusercontent.com/hed-standard/hed-schemas/main/standard_schema/hedxml/HED8.0.0.xml'
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'convert_schema',
@@ -136,7 +150,7 @@ class Test(TestWebBase):
 
     def test_schema_results_validate_mediawiki_valid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED8.0.1.mediawiki')
+                                   '../data/HED8.1.0.mediawiki')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
@@ -157,14 +171,14 @@ class Test(TestWebBase):
 
     def test_schema_results_validate_xml_valid(self):
         schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '../data/HED8.0.1.xml')
+                                   '../data/HED8.1.0.xml')
         with open(schema_path, 'r') as sc:
             x = sc.read()
         schema_buffer = io.BytesIO(bytes(x, 'utf-8'))
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_file_option',
                           'command_option': 'validate',
-                          'schema_file': (schema_buffer, 'HED8.0.1.xml'),
+                          'schema_file': (schema_buffer, 'HED8.1.0.xml'),
                           'check_for_warnings': 'on'}
             response = self.app.test.post('/schema_submit', content_type='multipart/form-data', data=input_data)
             self.assertEqual(200, response.status_code, 'Validation of a valid xml has a response')
@@ -177,8 +191,8 @@ class Test(TestWebBase):
             schema_buffer.close()
 
     def test_schema_results_validate_xml_url_invalid(self):
-        schema_url = \
-            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED7.2.0.xml'
+        schema_url = 'https://raw.githubusercontent.com/hed-standard/hed-schemas/' + \
+                     'main/standard_schema/hedxml/deprecated/HED7.2.0.xml'
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'validate',
@@ -195,7 +209,7 @@ class Test(TestWebBase):
 
     def test_schema_results_validate_xml_url_valid(self):
         schema_url = \
-            'https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.1.0.xml'
+            'https://raw.githubusercontent.com/hed-standard/hed-schemas/main/standard_schema/hedxml/HED8.1.0.xml'
         with self.app.app_context():
             input_data = {'schema_upload_options': 'schema_url_option',
                           'command_option': 'validate',

@@ -7,6 +7,7 @@ from hedweb.constants import base_constants
 
 
 class Test(TestWebBase):
+
     def test_events_results_empty_data(self):
         response = self.app.test.post('/events_submit')
         self.assertEqual(200, response.status_code, 'HED events request succeeds even when no data')
@@ -45,7 +46,7 @@ class Test(TestWebBase):
             events_buffer.close()
 
     def test_events_results_assemble_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_bad.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -57,9 +58,9 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+            input_data = {base_constants.SCHEMA_VERSION: '8.2.0',
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
-                          base_constants.SIDECAR_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.SIDECAR_FILE: (json_buffer, 'bids_events_bad.json'),
                           base_constants.EVENTS_FILE: (events_buffer, 'bids_events.tsv'),
                           base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
@@ -161,7 +162,7 @@ class Test(TestWebBase):
             events_buffer.close()
 
     def test_events_results_validate_invalid(self):
-        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events_bad.json')
         events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.tsv')
 
         with open(json_path, 'r') as sc:
@@ -173,9 +174,9 @@ class Test(TestWebBase):
         events_buffer = io.BytesIO(bytes(y, 'utf-8'))
 
         with self.app.app_context():
-            input_data = {base_constants.SCHEMA_VERSION: '7.2.0',
+            input_data = {base_constants.SCHEMA_VERSION: '8.2.0',
                           base_constants.COMMAND_OPTION: base_constants.COMMAND_VALIDATE,
-                          base_constants.SIDECAR_FILE: (json_buffer, 'bids_events.json'),
+                          base_constants.SIDECAR_FILE: (json_buffer, 'bids_events_bad.json'),
                           base_constants.EVENTS_FILE: (events_buffer, 'events_file'),
                           base_constants.CHECK_FOR_WARNINGS: 'on'}
             response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
@@ -189,6 +190,27 @@ class Test(TestWebBase):
                             "The response data for invalid event validation should have error messages")
             json_buffer.close()
             events_buffer.close()
+
+    def test_events_results_validate_bad_file(self):
+        sidecar_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/bids_events.json')
+        with open(sidecar_path, 'r') as sc:
+            x = sc.read()
+        sidecar_buffer = io.BytesIO(bytes(x, 'utf-8'))
+
+        with self.app.app_context():
+            input_data = {base_constants.SCHEMA_VERSION: '8.0.0',
+                          base_constants.COMMAND_OPTION: base_constants.COMMAND_ASSEMBLE,
+                          'sidecar_file': (sidecar_buffer, 'bids_events.json'),
+                          'events_file': (sidecar_buffer, 'bids_events.tsv'),
+                          'expand_defs': 'on',
+                          base_constants.CHECK_FOR_WARNINGS: 'on'}
+            response = self.app.test.post('/events_submit', content_type='multipart/form-data', data=input_data)
+            self.assertEqual(200, response.status_code, 'Invalid events file has a response')
+            headers_dict = dict(response.headers)
+            self.assertEqual("error", headers_dict["Category"], "The invalid events file not validate")
+            self.assertTrue(headers_dict["Message"].startswith("INVALID_FILE_FORMAT"))
+            self.assertFalse(response.data, "The assembled events file should be empty")
+            sidecar_buffer.close()
 
 
 if __name__ == '__main__':
