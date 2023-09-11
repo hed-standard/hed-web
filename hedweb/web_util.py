@@ -20,7 +20,7 @@ TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
 
 def convert_hed_versions(hed_info):
     hed_list = []
-    for key, key_list in hed_info['schema_version_list'].items():
+    for key, key_list in hed_info['schema_version_list']:
         if key is None:
             hed_list = hed_list + key_list
         else:
