@@ -4,7 +4,7 @@ coverage>=6.3.2
 defusedxml==0.7.1
 et-xmlfile==1.1.0
 Flask==2.1.2
-Flask-WTF==1.0.1
+Flask-WTF==1.2.1
 inflect>=5.5.2
 itsdangerous==2.1.2
 jdcal==1.4.1
