@@ -1,768 +1,522 @@
-# HED Web Tools - User guide
+# The HED Online Tools user guide
 
-This guide provides step-by-step instructions for deploying and using HED Web Tools in various environments, from local development to production Docker deployments.
+This guide provides comprehensive instructions for using the HED web-based tools and REST API services for validation, transformation, and analysis of HED annotations.
 
 ## Quick links
 
-- 📚 [API Reference](api/index.md)
+- 📚 [API Reference](api/index.html)
+- 🌐 [HED Online Tools](https://hedtools.org/hed)
 - 🐛 [GitHub Issues](https://github.com/hed-standard/hed-web/issues)
-- 📖 [HED Specification](https://hed-specification.readthedocs.io/)
-- 🌐 [Online Tools](https://hedtools.org)
+- 🎓 [HED Resources](https://www.hedtags.org/hed-resources)
+- 📖 [HED Specification](https://www.hedtags.org/hed-specification)
+- 🐍 [Python Tools](https://hed-python.readthedocs.io/)
 
 ## Table of contents
 
-1. [Installation](#installation)
-2. [Local development setup](#local-development-setup)
-3. [Docker deployment](#docker-deployment)
-4. [Production deployment](#production-deployment)
-5. [Configuration](#configuration)
-6. [Using the web interface](#using-the-web-interface)
-7. [REST API access](#rest-api-access)
-8. [Troubleshooting](#troubleshooting)
+1. [Getting started](#getting-started)
+2. [Working with events files](#working-with-events-files)
+3. [Working with sidecars](#working-with-sidecars)
+4. [Working with spreadsheets](#working-with-spreadsheets)
+5. [Working with HED strings](#working-with-hed-strings)
+6. [Working with HED schemas](#working-with-hed-schemas)
+7. [Using RESTful services](#using-restful-services)
+8. [Best practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
-## Installation
+## Getting started
 
-### Prerequisites
+### Accessing HED Online Tools
 
-- **Python 3.10 or higher** — [Download Python](https://www.python.org/downloads/)
-- **Git** — [Download Git](https://git-scm.com/downloads/)
+HED web-based tools are available directly through a browser at [https://hedtools.org/hed](https://hedtools.org/hed). These tools are free to use and don't require a login.
 
-For Docker deployment:
-- **Docker** — [Get Docker](https://docs.docker.com/get-docker/)
-- **Ubuntu Server** (recommended for production)
+Two versions are available:
 
-### Clone the repository
+- **Production**: [https://hedtools.org/hed](https://hedtools.org/hed) - Stable release version
+- **Development**: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev) - Latest development features
 
-```bash
-git clone https://github.com/hed-standard/hed-web
-cd hed-web
-```
+### Tool organization
 
-## Local development setup
+The HED browser-based tools are organized into the following pages:
 
-### 1. Create and activate virtual environment
+| Tool | URL | Description |
+|------|-----|-------------|
+| **Events** | [link](https://hedtools.org/hed/events) | Validation, summary, search, and generation tools for BIDS events files |
+| **Sidecars** | [link](https://hedtools.org/hed/sidecars) | Validation, transformation, extraction, and merging tools for JSON sidecars |
+| **Spreadsheets** | [link](https://hedtools.org/hed/spreadsheets) | Validation and transformation tools for spreadsheet files |
+| **Strings** | [link](https://hedtools.org/hed/strings) | Quick validation and transformation of individual HED strings |
+| **Schemas** | [link](https://hedtools.org/hed/schemas) | Validation, conversion, and comparison tools for HED schemas |
 
-**Windows (PowerShell):**
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
+### Common features
 
-**macOS/Linux:**
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
+#### Schema selection
 
-```{note}
-You'll need to activate the virtual environment every time you work on the project in a new terminal session.
-```
+Most tools require you to specify a HED schema version. You can:
 
-### 2. Install dependencies
+- **Select a standard version**: Use the pull-down menu to choose from official HED releases
+- **Upload a custom schema**: Select "Other" and upload your own HED schema file
 
-```bash
-pip install -r requirements.txt
-```
+The tool automatically caches standard schemas for faster processing.
 
-### 3. Create configuration file
+#### Tag formats
 
-Copy the configuration template:
+HED supports three tag formats:
 
-**Windows:**
-```powershell
-Copy-Item config_template.py config.py
-```
+- **Short form**: Only the leaf node (e.g., `Red`)
+- **Long form**: Full path from root (e.g., `Property/Sensory-property/.../Red`)
+- **Intermediate form**: Partial path (e.g., `Color/Red`)
 
-**macOS/Linux:**
-```bash
-cp config_template.py config.py
-```
+All HED tools handle any combination of these formats.
 
-### 4. Run the development server
+#### Definition expansion
 
-```bash
-python hedweb/runserver.py
-```
+Many tools have an `Expand defs` option that replaces `Def/xxx` tags with expanded definitions in the form `(Def-expand/xxx, yyy)` where `yyy` is the actual definition content.
 
-Or use the command-line interface:
+## Working with events files
 
-```bash
-python -m hedweb.runserver --host 127.0.0.1 --port 5000 --debug
-```
+Events files are BIDS-style tab-separated value (TSV) files with a header line giving column names. These columns map to metadata in accompanying JSON sidecars.
 
-### 5. Access the application
+### Validate an events file
 
-Open your browser and navigate to: **http://127.0.0.1:5000**
+Validates HED annotations in a BIDS events file, useful for debugging during annotation development.
 
-```{note}
-The development server includes debug mode with auto-reload on code changes.
-```
+**Steps:**
+1. Select the `Validate` action
+2. Toggle `Check for warnings` if you want to include warnings
+3. Select the HED version
+4. Optionally upload a JSON sidecar file (`.json`)
+5. Upload an events file (`.tsv`)
+6. Click the `Process` button
 
-## Docker deployment
+**Returns:** A downloadable `.txt` file of error messages if errors are found.
 
-### Quick deployment
+**Note:** This tool validates a single events file. For full BIDS dataset validation with inherited sidecars and library schemas, use the [Python tools](https://hed-python.readthedocs.io/).
 
-The simplest way to deploy using Docker is with the provided deployment script:
+### Assemble annotations
 
-```bash
-# Create deployment directory
-mkdir -p ~/deploy_hed
-cd ~/deploy_hed
+Produces a file with fully assembled HED annotations for each event, combining sidecar and column values.
 
-# Download deployment script
-curl -fsSL -o deploy.sh https://raw.githubusercontent.com/hed-standard/hed-web/main/deploy/deploy.sh
+**Steps:**
+1. Select the `Assemble annotations` action
+2. Toggle `Expand defs` if you want expanded definitions
+3. Select the HED version
+4. Optionally upload a JSON sidecar file (`.json`)
+5. Upload the events file (`.tsv`)
+6. Click the `Process` button
 
-# Make script executable
-chmod +x deploy.sh
+**Returns:** A downloadable `.tsv` file with two columns: onset times and assembled HED strings.
 
-# Run deployment
-./deploy.sh main prod
-```
+### Search annotations
 
-### Deployment script options
+Search for events matching specific HED criteria within an events file.
 
-The `deploy.sh` script accepts three optional parameters:
+**Steps:**
+1. Select the `Search annotations` action
+2. Enter your search query using HED tags
+3. Select the HED version
+4. Optionally upload a JSON sidecar file (`.json`)
+5. Upload the events file (`.tsv`)
+6. Click the `Process` button
 
-```bash
-./deploy.sh [branch] [environment] [bind_address]
-```
+**Returns:** A downloadable `.tsv` file containing only the rows matching your search criteria.
 
-- **branch**: Git branch to deploy (default: `main`)
-- **environment**: `prod` or `dev` (default: `prod`)
-- **bind_address**: IP address to bind (default: `0.0.0.0`, use `127.0.0.1` for localhost-only)
+### Generate sidecar template
 
-**Examples:**
+Creates a JSON sidecar template from an events file, ready to be filled with HED annotations.
 
-```bash
-# Production deployment from main branch
-./deploy.sh main prod
+**Steps:**
+1. Select the `Generate sidecar template` action
+2. Upload the events file (`.tsv`)
+3. Review the column list that appears
+4. In the left checkboxes, select columns to include in the template
+5. In the right checkboxes, select columns requiring individual value annotations
+6. Click the `Process` button
 
-# Development deployment from develop branch
-./deploy.sh develop dev
+**Returns:** A downloadable `.json` sidecar template file.
 
-# Localhost-only deployment
-./deploy.sh main prod 127.0.0.1
-```
+**Tip:** For datasets with multiple events files, use the Python tools to generate a template based on all files.
 
-### Environment-specific configurations
+### Execute remodel script
 
-**Production environment (`prod`):**
-- Container name: `hedtools`
-- Host port: `33000`
-- URL prefix: `/hed`
-- HED source: PyPI release (`hedtools` package)
+Apply table remodeling operations to transform or summarize events files without programming.
 
-**Development environment (`dev`):**
-- Container name: `hedtools_dev`
-- Host port: `33004`
-- URL prefix: `/hed_dev`
-- HED source: GitHub main branch
+**Steps:**
+1. Select the `Execute remodel script` action
+2. Toggle `Include summaries` if you want summary output
+3. Select the HED version
+4. Upload a JSON remodel script file
+5. Optionally upload a JSON sidecar file (`.json`)
+6. Upload the events file (`.tsv`)
+7. Click the `Process` button
 
-### Manual Docker build
+**Returns:** A zip archive containing transformed events file and summaries.
 
-If you prefer manual control over the Docker build:
+See the [Table remodeler documentation](https://www.hedtags.org/table-remodeler) for details on creating remodel scripts.
 
-```bash
-# Build the Docker image
-docker build -t hedtools:latest \
-  --build-arg HED_INSTALL_SOURCE=pypi \
-  --build-arg CACHE_BUST=$(date +%s) \
-  -f deploy/Dockerfile .
+## Working with sidecars
 
-# Run the container
-docker run -d \
-  --name hedtools \
-  -p 33000:80 \
-  -e HED_URL_PREFIX=/hed \
-  -e HED_STATIC_URL_PATH=/hed/hedweb/static \
-  hedtools:latest
-```
+BIDS JSON sidecars (files ending in `events.json`) contain metadata and HED annotations for BIDS datasets.
 
-### Docker management commands
+### Validate a sidecar
 
-```bash
-# Check container status
-docker ps
+Validates HED annotations in a JSON sidecar file.
 
-# View container logs
-docker logs hedtools
+**Steps:**
+1. Select the `Validate` action
+2. Toggle `Check for warnings` if you want warnings
+3. Select the HED version
+4. Upload a JSON sidecar file (`.json`)
+5. Click the `Process` button
 
-# Stop the container
-docker stop hedtools
+**Returns:** A downloadable `.txt` file of error messages if errors are found.
 
-# Remove the container
-docker rm hedtools
+**Note:** For sidecars with external definitions or library schemas, use the Python tools for complete validation.
 
-# Restart the container
-docker restart hedtools
-```
+### Convert sidecar to long
 
-## Production deployment
+Converts all HED tags in a sidecar to long form (full paths).
 
-### Reverse proxy setup with Nginx
+**Steps:**
+1. Select the `Convert to long` action
+2. Toggle `Expand defs` if you want expanded definitions
+3. Select the HED version
+4. Upload the JSON sidecar file (`.json`)
+5. Click the `Process` button
 
-For production deployments, use Nginx as a reverse proxy in front of the Docker container.
+**Returns:** A downloadable converted `.json` sidecar file.
 
-#### 1. Install Nginx
+### Convert sidecar to short
 
-```bash
-sudo apt update
-sudo apt install nginx
-```
+Converts all HED tags in a sidecar to short form (leaf nodes only).
 
-#### 2. Configure Nginx
+**Steps:**
+1. Select the `Convert to short` action
+2. Toggle `Expand defs` if you want expanded definitions
+3. Select the HED version
+4. Upload the JSON sidecar file (`.json`)
+5. Click the `Process` button
 
-Create a new Nginx configuration file at `/etc/nginx/sites-available/hedtools`:
+**Returns:** A downloadable converted `.json` sidecar file.
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
+### Extract spreadsheet from sidecar
 
-    location /hed {
-        proxy_pass http://localhost:33000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Handle large file uploads
-        client_max_body_size 100M;
-        proxy_read_timeout 300s;
-        proxy_connect_timeout 300s;
-    }
+Exports sidecar content to a 4-column spreadsheet for easier editing.
 
-    location /hed/hedweb/static {
-        proxy_pass http://localhost:33000;
-        proxy_set_header Host $host;
-        
-        # Cache static files
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-```
+**Steps:**
+1. Select the `Extract HED spreadsheet` action
+2. Upload the JSON sidecar file (`.json`)
+3. Click the `Process` button
 
-#### 3. Enable the site
-
-```bash
-sudo ln -s /etc/nginx/sites-available/hedtools /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-```
+**Returns:** A downloadable `.tsv` spreadsheet with columns: `column_name`, `column_value`, `description`, `HED`.
 
-### SSL/TLS setup with Let's Encrypt
+See the [BIDS Annotation Quickstart](https://www.hedtags.org/hed-resources/BidsAnnotationQuickstart.html) for a tutorial on using this spreadsheet.
 
-Secure your deployment with HTTPS using Certbot:
+### Merge spreadsheet with sidecar
 
-```bash
-# Install Certbot
-sudo apt install certbot python3-certbot-nginx
+Imports HED annotations from a 4-column spreadsheet back into a JSON sidecar.
 
-# Obtain SSL certificate
-sudo certbot --nginx -d your-domain.com
+**Steps:**
+1. Select the `Merge HED spreadsheet` action
+2. Toggle `Include Description tags` to include descriptions as HED tags
+3. Upload the target JSON sidecar file (`.json`)
+4. Upload the spreadsheet (`.tsv` or `.xlsx`)
+5. Click the `Process` button
 
-# Verify auto-renewal
-sudo certbot renew --dry-run
-```
+**Returns:** A downloadable merged `.json` sidecar file.
 
-### Deployment with both prod and dev versions
+## Working with spreadsheets
 
-To run both production and development versions simultaneously:
+Spreadsheet tools support general-purpose HED annotation in Excel (`.xlsx`) or tab-separated (`.tsv`) format, useful when developing annotations outside of specific datasets.
 
-```bash
-# Deploy production version
-./deploy.sh main prod
+### Validate a spreadsheet
 
-# Deploy development version
-./deploy.sh develop dev
-```
-
-Update your Nginx configuration to handle both:
+Validates HED tags in spreadsheet columns.
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    # Production version
-    location /hed {
-        proxy_pass http://localhost:33000;
-        # ... other proxy settings
-    }
-
-    # Development version
-    location /hed_dev {
-        proxy_pass http://localhost:33004;
-        # ... other proxy settings
-    }
-}
-```
+**Steps:**
+1. Select the `Validate` action
+2. Toggle `Check for warnings` if you want warnings
+3. Select the HED version
+4. Upload a spreadsheet file (`.tsv` or `.xlsx`)
+5. Select a worksheet (if Excel file with multiple sheets)
+6. Check boxes next to columns containing HED tags
+7. Enter prefix tags in text boxes (e.g., `Description`) if needed
+8. Click the `Process` button
 
-## Configuration
+**Returns:** A downloadable `.txt` file of error messages if errors are found.
 
-### Configuration file structure
+### Convert spreadsheet to long
 
-The application uses a Python-based configuration system. Edit `config.py` to customize settings:
-
-```python
-import os
+Converts all HED tags in selected columns to long form.
 
-class Config:
-    """Base configuration"""
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    
-    # Upload settings
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-    UPLOAD_FOLDER = '/tmp/hed_uploads'
-    
-    # HED schema settings
-    HED_CACHE_FOLDER = '/var/cache/schema_cache'
-    
-    # Flask settings
-    WTF_CSRF_ENABLED = True
-    WTF_CSRF_TIME_LIMIT = None
+**Steps:**
+1. Select the `Convert to long` action
+2. Select the HED version
+3. Upload a spreadsheet file (`.tsv` or `.xlsx`)
+4. Select a worksheet if needed
+5. Check columns containing HED strings to convert
+6. Click the `Process` button
 
-class ProductionConfig(Config):
-    """Production configuration"""
-    DEBUG = False
-    TESTING = False
+**Returns:** A downloadable spreadsheet with converted HED tags.
 
-class DevelopmentConfig(Config):
-    """Development configuration"""
-    DEBUG = True
-    TESTING = False
-```
+### Convert spreadsheet to short
 
-### Environment variables
+Converts all HED tags in selected columns to short form.
 
-The application recognizes these environment variables:
+**Steps:**
+1. Select the `Convert to short` action
+2. Select the HED version
+3. Upload a spreadsheet file (`.tsv` or `.xlsx`)
+4. Select a worksheet if needed
+5. Check columns containing HED strings to convert
+6. Click the `Process` button
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `HEDTOOLS_CONFIG_CLASS` | Configuration class to use | `config.ProductionConfig` |
-| `HED_URL_PREFIX` | URL prefix for the application | `/hed` |
-| `HED_STATIC_URL_PATH` | Path to static files | `/hed/hedweb/static` |
-| `SECRET_KEY` | Flask secret key for sessions | Generated |
+**Returns:** A downloadable spreadsheet with converted HED tags.
 
-### Docker environment variables
+## Working with HED strings
 
-When running in Docker, set environment variables in the `docker run` command:
+String tools provide quick validation and conversion for individual HED annotations.
 
-```bash
-docker run -d \
-  --name hedtools \
-  -p 33000:80 \
-  -e HED_URL_PREFIX=/hed \
-  -e SECRET_KEY=your-production-secret-key \
-  hedtools:latest
-```
+### Validate a HED string
 
-## Using the web interface
+Validates a single HED string containing tags and groups.
 
-### Available tools
+**Steps:**
+1. Select the `Validate` action
+2. Toggle `Check for warnings` if you want warnings
+3. Select the HED version
+4. Type or paste your HED string into the text box
+5. Click the `Process` button
 
-The HED Web Tools interface provides several categories of operations:
+**Returns:** Error messages displayed in the Results box at the bottom.
 
-**Events operations:**
-- Validate HED annotations in event files
-- Assemble HED strings from tabular data
-- Search HED annotations with query syntax
-- Generate sidecar templates from event files
-- Execute remodeling scripts
+### Convert string to long
 
-**Sidecar operations:**
-- Validate BIDS JSON sidecars
-- Convert HED tags to long form
-- Convert HED tags to short form
-- Extract spreadsheet templates from sidecars
-- Merge spreadsheet data into sidecars
-
-**Spreadsheet operations:**
-- Validate HED in spreadsheet files
-- Convert spreadsheets to long/short form
-
-**String operations:**
-- Validate individual HED strings
-- Convert strings to long/short form
+Converts a HED string to long form (full paths).
 
-**Schema operations:**
-- Validate HED schema files
-- Convert schema formats
-- Check for schema issues
+**Steps:**
+1. Select the `Convert to long` action
+2. Select the HED version
+3. Type or paste your HED string into the text box
+4. Click the `Process` button
 
-### File upload guidelines
+**Returns:** Converted string or error messages in the Results box.
 
-- **Maximum file size**: 16MB (configurable)
-- **Supported formats**: TSV, CSV, Excel (.xlsx, .xls), JSON
-- **Encoding**: UTF-8 recommended
+### Convert string to short
 
-### Workflow example
+Converts a HED string to short form (leaf nodes only).
 
-1. Navigate to **Events** > **Validate events file**
-2. Upload your events file (TSV/CSV)
-3. Optionally upload a JSON sidecar
-4. Select HED schema version
-5. Click **Validate**
-6. Review validation results
-7. Download validation report if needed
+**Steps:**
+1. Select the `Convert to short` action
+2. Select the HED version
+3. Type or paste your HED string into the text box
+4. Click the `Process` button
 
-## REST API access
+**Returns:** Converted string or error messages in the Results box.
 
-### API overview
+## Working with HED schemas
 
-All HED operations available through the web interface can also be accessed programmatically via REST API endpoints. The API accepts multipart/form-data requests and returns JSON responses.
+Schema tools help HED schema developers validate, convert, and compare schemas.
 
-### API endpoint structure
+View standard schemas using the [HED Schema Browser](https://www.hedtags.org/hed-schema-browser/).
 
-```
-POST /services/<operation_category>/<operation_name>
-```
+### Validate a schema
 
-Examples:
-- `/services/events/validate`
-- `/services/sidecars/validate`
-- `/services/strings/validate`
+Checks schema syntax and HED-3G compliance.
 
-### Example: Validating a HED string
+**Steps:**
+1. Select the `Validate` action
+2. Toggle `Check for warnings` if you want warnings
+3. Enter a schema URL or upload a schema file (`.xml` or `.mediawiki`)
+4. Click the `Process` button
 
-**Python example:**
+**Returns:** A downloadable `.txt` file of error messages if errors are found.
 
-```python
-import requests
+### Convert a schema
 
-url = "http://localhost:5000/services/strings/validate"
+Converts between `.mediawiki` and `.xml` formats.
 
-# Prepare request
-files = {
-    'schema_version': (None, '8.2.0'),
-    'hed_strings': (None, 'Sensory-event, Visual-presentation'),
-    'check_for_warnings': (None, 'on')
-}
+**Steps:**
+1. Select the `Convert schema` action
+2. Enter a schema URL or upload a schema file (`.xml` or `.mediawiki`)
+3. Click the `Process` button
 
-# Send request
-response = requests.post(url, files=files)
-result = response.json()
+**Returns:** A downloadable converted schema file.
 
-if result.get('error_type'):
-    print(f"Error: {result['error_type']}")
-    print(result.get('error_msg'))
-else:
-    print("Validation successful!")
-    if result.get('data'):
-        print(f"Issues found: {result['data']}")
-```
+**Note:** All HED tools use `.xml` format, but `.mediawiki` is easier to read and edit manually.
 
-### Example: Validating an events file
+### Compare schemas
 
-**Python example:**
+Shows differences between two schema versions.
 
-```python
-import requests
+**Steps:**
+1. Select the `Compare schemas` action
+2. Enter URL or upload file for first schema
+3. Enter URL or upload file for second schema
+4. Click the `Process` button
 
-url = "http://localhost:5000/services/events/validate"
+**Returns:** A downloadable `.txt` file with schema differences.
 
-# Prepare files
-with open('events.tsv', 'rb') as events_file:
-    files = {
-        'events_file': ('events.tsv', events_file, 'text/tab-separated-values'),
-        'schema_version': (None, '8.2.0'),
-        'check_for_warnings': (None, 'on')
-    }
-    
-    response = requests.post(url, files=files)
-    result = response.json()
-    
-    if result.get('error_type'):
-        print(f"Error: {result['error_type']}")
-    else:
-        print("Validation complete")
-        print(result.get('msg_category'))
-```
+## Using RESTful services
 
-### API response format
+HED provides REST API services for programmatic access to all tools.
 
-All API responses follow this JSON structure:
+### Service setup
+
+1. Send HTTP `GET` request to obtain CSRF token: `https://hedtools.org/hed/services`
+2. Extract CSRF token and cookie from response
+3. Send HTTP `POST` requests with token to: `https://hedtools.org/hed/services_submit`
+
+See [hed-matlab web services demos](https://github.com/hed-standard/hed-matlab/tree/main/hedmat/web_services_demos) for implementation examples.
+
+### Request format
+
+All requests are JSON dictionaries with a `service` parameter and additional parameters.
+
+**Example:** Validating a JSON sidecar:
 
 ```json
 {
-    "error_type": "",
-    "error_msg": "",
-    "service": "operation_name",
-    "results": {},
-    "msg_category": "success|warning|error",
-    "msg": "Human-readable message"
+    "service": "sidecar_validate",
+    "schema_version": "8.4.0", 
+    "json_string": "json file text",
+    "check_for_warnings": "on"
 }
 ```
 
-### Complete API documentation
+### Available services
 
-For complete API documentation including all available endpoints, parameters, and response formats, see:
-- [API Usage Guide](api/api_usage.md)
-- [Service Categories](api/service_categories.md)
+| Service | Description |
+|---------|-------------|
+| `get_services` | Returns list of available services |
+| `events_validate` | Validate BIDS events file |
+| `events_assemble` | Assemble HED annotations |
+| `events_extract` | Extract sidecar template |
+| `sidecar_validate` | Validate JSON sidecar |
+| `sidecar_to_long` | Convert sidecar to long form |
+| `sidecar_to_short` | Convert sidecar to short form |
+| `spreadsheet_validate` | Validate spreadsheet |
+| `spreadsheet_to_long` | Convert spreadsheet to long form |
+| `spreadsheet_to_short` | Convert spreadsheet to short form |
+| `strings_validate` | Validate HED strings |
+| `strings_to_long` | Convert strings to long form |
+| `strings_to_short` | Convert strings to short form |
 
-## Troubleshooting
+### Service parameters
 
-### Common issues
+Common parameters:
 
-#### Application won't start
+- `service` (string): Service name
+- `schema_version` (string): HED version (e.g., "8.4.0")
+- `schema_string` (string): Custom schema as XML string
+- `check_for_warnings` (boolean): Include validation warnings
+- `expand_defs` (boolean): Expand definition tags
+- `events_string` (string): BIDS events file content
+- `json_string` (string): JSON sidecar content
+- `spreadsheet_string` (string): Spreadsheet content
+- `hed_strings` (list): List of HED strings
 
-**Symptoms:** Import errors or module not found
+### Service responses
 
-**Solutions:**
-1. Verify Python version: `python --version` (must be 3.10+)
-2. Ensure virtual environment is activated
-3. Reinstall dependencies: `pip install -r requirements.txt`
-4. Check for conflicting packages: `pip list`
+All services return JSON with:
 
-#### Port already in use
-
-**Symptoms:** `Address already in use` error
-
-**Solutions:**
-
-**Windows (PowerShell):**
-```powershell
-# Find process using port 5000
-netstat -ano | findstr :5000
-
-# Kill process (replace PID)
-taskkill /PID <PID> /F
+```json
+{
+    "service": "service_name",
+    "results": {
+        "command": "command_executed",
+        "command_target": "data_type",
+        "data": "result_or_errors",
+        "schema_version": "8.4.0",
+        "msg_category": "success|warning|failure",
+        "msg": "explanation"
+    },
+    "error_type": "",
+    "error_msg": ""
+}
 ```
 
-**Linux/macOS:**
-```bash
-# Find and kill process
-lsof -ti:5000 | xargs kill -9
-```
-
-#### Docker container exits immediately
-
-**Symptoms:** Container starts but immediately stops
-
-**Solutions:**
-1. Check container logs:
-   ```bash
-   docker logs hedtools
-   ```
-2. Inspect container:
-   ```bash
-   docker inspect hedtools
-   ```
-3. Verify configuration files are present
-4. Check file permissions in the container
-
-#### Schema validation errors
-
-**Symptoms:** "Could not load HED schema" errors
-
-**Solutions:**
-1. Check internet connectivity (schemas are fetched from GitHub)
-2. Verify schema version exists
-3. Use a local schema file if network is unavailable
-4. Check cache directory permissions
-
-#### File upload fails
-
-**Symptoms:** 413 Request Entity Too Large or upload timeout
-
-**Solutions:**
-1. Check file size (default limit: 16MB)
-2. Increase `MAX_CONTENT_LENGTH` in config:
-   ```python
-   MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB
-   ```
-3. For Nginx, update `client_max_body_size`
-4. Check available disk space
-
-### Performance issues
-
-#### Slow validation
-
-**Causes and solutions:**
-- **Large files**: Process in batches or increase timeout
-- **Complex schemas**: Use schema caching
-- **Network issues**: Use local schema files
-
-#### High memory usage
-
-**Solutions:**
-1. Limit concurrent requests
-2. Increase Docker container memory:
-   ```bash
-   docker run -d --memory="2g" --name hedtools hedtools:latest
-   ```
-3. Process files in streaming mode if available
-
-### Getting help
-
-If you encounter issues not covered here:
-
-1. **Check logs**:
-   - Development: Console output
-   - Docker: `docker logs hedtools`
-   - Production: Check `/var/log/hedtools/`
-
-2. **Search GitHub Issues**: [hed-web issues](https://github.com/hed-standard/hed-web/issues)
-
-3. **Create a new issue** with:
-   - Detailed problem description
-   - Steps to reproduce
-   - Error messages and logs
-   - Environment information (OS, Python version, deployment method)
+- Empty `error_type` and `error_msg`: Operation completed
+- `msg_category`: Indicates validation result (success/warning/failure)
+- `data`: Contains processed result or validation errors
 
 ## Best practices
 
-### Security
+### For annotation development
 
-- **Change default secret key** in production
-- **Use HTTPS** (SSL/TLS) for production deployments
-- **Keep software updated**: Regularly update dependencies
-- **Limit file upload sizes** appropriately
-- **Use environment variables** for sensitive configuration
-- **Enable CSRF protection** (enabled by default)
+1. **Start with templates**: Generate sidecar templates from events files
+2. **Use spreadsheet workflow**: Extract to spreadsheet, annotate, merge back
+3. **Validate frequently**: Check annotations after each change
+4. **Test with warnings**: Enable warning checks to catch potential issues early
+5. **Use short form**: Shorter tags are easier to read and maintain
 
-### Performance
+### For schema development
 
-- **Use Docker** for consistent deployments
-- **Enable caching** for HED schemas
-- **Use a reverse proxy** (Nginx) in production
-- **Monitor resource usage** and set appropriate limits
-- **Use CDN** for static files if serving high traffic
+1. **Validate before converting**: Always validate schemas before format conversion
+2. **Use mediawiki for editing**: Easier to read and modify than XML
+3. **Compare versions**: Use comparison tool to track changes between versions
+4. **Check warnings**: Schema warnings can indicate potential issues
 
-### Maintenance
+### For programmatic access
 
-- **Regular backups** of configuration and logs
-- **Monitor logs** for errors and warnings
-- **Test updates** in development before production
-- **Document custom configurations**
-- **Keep deployment scripts** version-controlled
+1. **Cache CSRF tokens**: Reuse tokens across multiple requests in a session
+2. **Batch operations**: Group related operations to minimize requests
+3. **Handle errors gracefully**: Check both service errors and validation results
+4. **Use specific versions**: Always specify schema versions for reproducibility
 
-### Development
+## Troubleshooting
 
-- **Use virtual environments** to isolate dependencies
-- **Run tests** before committing changes
-- **Format code** with black/ruff before commits
-- **Follow PEP 8** style guidelines
-- **Write tests** for new features
+### Common validation errors
 
-## Additional resources
+**"Invalid HED tag"**
+- Tag not found in specified schema version
+- Check for typos in tag names
+- Verify you're using the correct schema version
 
-### Documentation
+**"Required tag missing"**
+- Certain HED constructs require specific tags
+- Check HED specification for requirements
 
-- **HED Standard**: [https://www.hedtags.org/](https://www.hedtags.org/)
-- **HED Specification**: [https://hed-specification.readthedocs.io/](https://hed-specification.readthedocs.io/)
-- **HED Python Tools**: [https://github.com/hed-standard/hed-python](https://github.com/hed-standard/hed-python)
-- **HED Schemas**: [https://github.com/hed-standard/hed-schemas](https://github.com/hed-standard/hed-schemas)
+**"Comma errors"**
+- Missing or extra commas in HED string
+- Tags in a group should be comma-separated
+- Groups should be comma-separated
 
-### Tools
+**"Placeholder errors"**
+- Definition placeholders not properly filled
+- Use correct syntax: `Def/MyDef/value`
 
-- **HED Online Tools (Production)**: [https://hedtools.org/hed](https://hedtools.org/hed)
-- **HED Online Tools (Development)**: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
-- **CTagger**: [http://ctagger.hed.tools](http://ctagger.hed.tools)
+### File format issues
 
-### Community
+**"Cannot parse file"**
+- Ensure TSV files use tabs, not spaces
+- Check for proper UTF-8 encoding
+- Verify JSON files are valid JSON
 
-- **GitHub Discussions**: [hed-standard discussions](https://github.com/orgs/hed-standard/discussions)
-- **Issue Tracker**: [hed-web issues](https://github.com/hed-standard/hed-web/issues)
+**"Column not found"**
+- Column names in sidecar must match events file exactly
+- Column names are case-sensitive
 
-## Appendix: Quick reference
+### Schema issues
 
-### Command reference
+**"Cannot load schema"**
+- Check internet connection for downloading standard schemas
+- For custom schemas, verify XML/mediawiki format
+- Ensure schema file is complete and well-formed
 
-**Local development:**
-```bash
-# Activate virtual environment (Windows)
-.venv\Scripts\Activate.ps1
+### Service issues
 
-# Activate virtual environment (Linux/macOS)
-source .venv/bin/activate
+**"CSRF token error"**
+- Obtain fresh token from services endpoint
+- Include token in request headers
+- Check that cookie is preserved across requests
 
-# Install dependencies
-pip install -r requirements.txt
+**"Service timeout"**
+- Large files may timeout on web interface
+- Consider using Python tools for large datasets
+- Break operations into smaller batches
 
-# Run development server
-python hedweb/runserver.py
-python -m hedweb.runserver --port 5000 --debug
-```
+### Getting help
 
-**Docker deployment:**
-```bash
-# Quick deployment
-./deploy.sh main prod
-
-# Build image manually
-docker build -t hedtools:latest -f deploy/Dockerfile .
-
-# Run container
-docker run -d --name hedtools -p 33000:80 hedtools:latest
-
-# View logs
-docker logs hedtools
-
-# Stop/start/restart
-docker stop hedtools
-docker start hedtools
-docker restart hedtools
-```
-
-**Testing:**
-```bash
-# Run all tests
-python -m unittest discover
-
-# Run specific test category
-python -m unittest discover -s tests/
-python -m unittest discover -s services_tests/
-
-# Run with coverage
-coverage run -m unittest discover
-coverage report
-```
-
-**Documentation:**
-```bash
-# Build documentation
-cd docs
-sphinx-build -b html . _build/html
-
-# Serve with auto-reload
-sphinx-autobuild . _build/html
-```
-
-### File locations
-
-**Configuration:**
-- Template: `config_template.py`
-- Local: `config.py` (create from template)
-- Docker: `/root/hedtools/config.py`
-
-**Logs (Docker):**
-- Application: `/var/log/hedtools/`
-- Gunicorn: `/var/log/hedtools/gunicorn.log`
-
-**Cache:**
-- Local: `/tmp/hed_cache` or configured location
-- Docker: `/var/cache/schema_cache`
-
-**Static files:**
-- Source: `hedweb/static/`
-- URL: `/hed/hedweb/static/` (in production)
-
-### Port reference
-
-| Deployment | Container Port | Host Port | URL Prefix |
-|------------|---------------|-----------|------------|
-| Production | 80 | 33000 | /hed |
-| Development | 80 | 33004 | /hed_dev |
-| Local dev | - | 5000 | / |
-
-### Environment variables reference
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `HEDTOOLS_CONFIG_CLASS` | Config class | `config.ProductionConfig` |
-| `HED_URL_PREFIX` | URL prefix | `/hed` |
-| `HED_STATIC_URL_PATH` | Static files path | `/hed/hedweb/static` |
-| `SECRET_KEY` | Flask secret key | Auto-generated |
-| `HED_INSTALL_SOURCE` | Docker HED source | `pypi` or `main` |
+- 📖 [HED Specification](https://www.hedtags.org/hed-specification)
+- 💬 [GitHub Discussions](https://github.com/hed-standard/hed-specification/discussions)
+- 🐛 [Report Issues](https://github.com/hed-standard/hed-web/issues)
+- 📧 [Contact HED Team](mailto:hed.maintainers@gmail.com)
