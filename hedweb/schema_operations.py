@@ -11,7 +11,7 @@ import zipfile
 from hed import schema as hedschema
 from hed.errors import HedFileError, get_printable_issue_string
 from hed.schema.schema_comparer import SchemaComparer
-from hed.scripts.hed_script_util import validate_schema_object
+from hed.scripts.schema_script_util import validate_schema_object
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
