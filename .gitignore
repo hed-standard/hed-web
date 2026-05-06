@@ -1,0 +1,5 @@
+node_modules/
+buildweb/
+dist/
+.DS_Store
+*.local

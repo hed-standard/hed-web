@@ -1,0 +1,23 @@
+{
+  "name": "hed-web",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --base=/hed-web/",
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "hed-validator": "github:hed-standard/hed-javascript#main",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.1.0",
+    "@vitest/ui": "^3.2.4",
+    "jsdom": "^24.0.0",
+    "vite": "^6.4.2",
+    "vitest": "^3.2.4"
+  }
+}
