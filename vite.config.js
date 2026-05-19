@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => {
 
     build: {
       outDir: "buildweb",
-      rollupOptions: {
+      rolldownOptions: {
         input: {
           main: path.resolve(__dirname, "index.html"),
           validate_dataset: path.resolve(__dirname, "validate_dataset.html"),
