@@ -18,6 +18,8 @@ export default defineConfig(({ command }) => {
           main: path.resolve(__dirname, "index.html"),
           validate_dataset: path.resolve(__dirname, "validate_dataset.html"),
           validate_file: path.resolve(__dirname, "validate_file.html"),
+          validate_string: path.resolve(__dirname, "validate_string.html"),
+          validate_sidecar: path.resolve(__dirname, "validate_sidecar.html"),
         },
         output: {
           manualChunks(id) {

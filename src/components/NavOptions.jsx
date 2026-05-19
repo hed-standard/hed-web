@@ -42,10 +42,10 @@ export const NavOptions = ({ base_url }) => {
         />
       ),
       title: "Validate file",
-      description: "Check a BIDS-style tsv file for HED errors.",
+      description: "Check a BIDS-style TSV file for HED errors.",
     },
     {
-      href: "https://hed-standard.github.io/hed-javascript/",
+      href: "./validate_string.html",
       icon: (
         <img
           src={`${base_url}favicon.ico`}
@@ -53,13 +53,25 @@ export const NavOptions = ({ base_url }) => {
           className="h-6 w-6"
         />
       ),
-      title: "API Docs",
-      description: "Browse the technical documentation for developers.",
+      title: "Validate string",
+      description: "Validate a HED annotation string against a schema.",
+    },
+    {
+      href: "./validate_sidecar.html",
+      icon: (
+        <img
+          src={`${base_url}favicon.ico`}
+          alt="HED Icon"
+          className="h-6 w-6"
+        />
+      ),
+      title: "Validate sidecar",
+      description: "Validate HED annotations in a BIDS JSON sidecar.",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
       {navOptions.map((option) => (
         <NavCard
           key={option.title}
