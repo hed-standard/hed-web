@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
+import { FileInput } from "./components/FileInput";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import {
   BidsHedIssue,
@@ -19,7 +20,7 @@ import {
 // --- Main Application Component ---
 
 function ValidateSidecarApp() {
-  const [jsonText, setJsonText] = useState("");
+  const [jsonFile, setJsonFile] = useState(null);
   const [hedVersion, setHedVersion] = useState("8.4.0");
   const [checkWarnings, setCheckWarnings] = useState(false);
   const [limitErrors, setLimitErrors] = useState(false);
@@ -28,9 +29,10 @@ function ValidateSidecarApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [validated, setValidated] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   function handleClear() {
-    setJsonText("");
+    setJsonFile(null);
     setHedVersion("8.4.0");
     setCheckWarnings(false);
     setLimitErrors(false);
@@ -38,10 +40,10 @@ function ValidateSidecarApp() {
     setDownloadableErrors([]);
     setSuccessMessage("");
     setValidated(false);
+    setFileInputKey(Date.now());
   }
 
   async function handleValidation() {
-    if (!jsonText.trim()) return;
     setIsLoading(true);
     setErrors([]);
     setDownloadableErrors([]);
@@ -51,15 +53,16 @@ function ValidateSidecarApp() {
 
     try {
       const hedSchemas = await buildSchemasFromVersion(hedVersion.trim());
-      const jsonObject = JSON.parse(jsonText.trim());
+      const jsonText = await jsonFile.text();
+      const jsonObject = JSON.parse(jsonText);
       const sidecar = new BidsSidecar(
-        "sidecar.json",
-        { path: "sidecar.json", name: "sidecar.json" },
+        jsonFile.name,
+        { path: jsonFile.name, name: jsonFile.name },
         jsonObject,
       );
       issues = sidecar.validate(hedSchemas);
     } catch (err) {
-      issues = BidsHedIssue.transformToBids([err], { path: "sidecar.json" });
+      issues = BidsHedIssue.transformToBids([err], { path: jsonFile?.name ?? "sidecar.json" });
     } finally {
       const issuesForDownload = BidsHedIssue.processIssues(
         issues,
@@ -95,7 +98,7 @@ function ValidateSidecarApp() {
             Validate a sidecar
           </h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Validate HED annotations in a BIDS JSON sidecar.
+            Validate HED annotations in a BIDS JSON sidecar file.
             <br />
             This tool is browser-based -- all data remains local.
           </p>
@@ -103,21 +106,16 @@ function ValidateSidecarApp() {
 
         <main className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-xl shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
           <div className="flex flex-col gap-6">
-            {/* JSON sidecar textarea */}
-            <div>
-              <label
-                htmlFor="sidecar-json-input"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Sidecar JSON
-              </label>
-              <textarea
-                id="sidecar-json-input"
-                value={jsonText}
-                onChange={(e) => setJsonText(e.target.value)}
-                placeholder={'{\n  "trial_type": {\n    "go": {"HED": "Sensory-event, Green"},\n    "stop": {"HED": "Sensory-event, Red"}\n  }\n}'}
-                rows={10}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+            {/* JSON sidecar file upload */}
+            <div className="flex flex-col items-center justify-center gap-8">
+              <FileInput
+                key={`json-${fileInputKey}`}
+                id="json-upload"
+                buttonText="JSON file"
+                tooltip="Upload a BIDS JSON sidecar file"
+                accept=".json"
+                onFileSelect={setJsonFile}
+                isLoading={isLoading}
               />
             </div>
 
@@ -177,7 +175,7 @@ function ValidateSidecarApp() {
             <div className="flex gap-4">
               <button
                 onClick={handleValidation}
-                disabled={isLoading || !jsonText.trim() || !hedVersion.trim()}
+                disabled={isLoading || !jsonFile || !hedVersion.trim()}
                 className="w-36 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 disabled:dark:bg-gray-600"
               >
                 {isLoading ? "Validating..." : "Validate"}
