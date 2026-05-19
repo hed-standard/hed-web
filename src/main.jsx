@@ -31,7 +31,7 @@ function App() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <header className="text-center mb-10 md:mb-16">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">
-          Welcome to the HED JavaScript Validator
+          HED Browser-based Validator
         </h1>
         <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           A suite of tools to validate HED (Hierarchical Event Descriptor) tags.
