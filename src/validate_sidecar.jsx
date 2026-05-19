@@ -106,16 +106,18 @@ function ValidateSidecarApp() {
 
         <main className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-xl shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
           {/* File input */}
-          <div className="flex flex-col items-center justify-center gap-8">
-            <FileInput
-              key={`json-${fileInputKey}`}
-              id="json-upload"
-              buttonText="JSON file"
-              tooltip="Upload a BIDS JSON sidecar file"
-              accept=".json"
-              onFileSelect={setJsonFile}
-              isLoading={isLoading}
-            />
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <FileInput
+                key={`json-${fileInputKey}`}
+                id="json-upload"
+                buttonText="JSON file"
+                tooltip="Upload a BIDS JSON sidecar file"
+                accept=".json"
+                onFileSelect={setJsonFile}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
 
           {/* HED Version Input */}
