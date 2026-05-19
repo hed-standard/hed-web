@@ -105,107 +105,101 @@ function ValidateSidecarApp() {
         </header>
 
         <main className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-xl shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
-          <div className="flex flex-col gap-6">
-            {/* JSON sidecar file upload */}
-            <div className="flex flex-col items-center justify-center gap-8">
-              <FileInput
-                key={`json-${fileInputKey}`}
-                id="json-upload"
-                buttonText="JSON file"
-                tooltip="Upload a BIDS JSON sidecar file"
-                accept=".json"
-                onFileSelect={setJsonFile}
-                isLoading={isLoading}
+          {/* File input */}
+          <div className="flex flex-col items-center justify-center gap-8">
+            <FileInput
+              key={`json-${fileInputKey}`}
+              id="json-upload"
+              buttonText="JSON file"
+              tooltip="Upload a BIDS JSON sidecar file"
+              accept=".json"
+              onFileSelect={setJsonFile}
+              isLoading={isLoading}
+            />
+          </div>
+
+          {/* HED Version Input */}
+          <div className="mt-6 flex justify-center">
+            <div className="flex items-center w-full max-w-md gap-4">
+              <label
+                htmlFor="hed-version"
+                className="text-gray-600 dark:text-gray-400 whitespace-nowrap"
+              >
+                HED schema version
+              </label>
+              <input
+                id="hed-version"
+                type="text"
+                value={hedVersion}
+                onChange={(e) => setHedVersion(e.target.value)}
+                title="enter the version of the HED schema to use (separate multiple schema versions with commas)"
+                className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
               />
-            </div>
-
-            {/* HED version and options */}
-            <div className="flex flex-wrap gap-6 items-center">
-              <div className="flex items-center gap-3">
-                <label
-                  htmlFor="hed-version"
-                  className="text-gray-600 dark:text-gray-400 whitespace-nowrap"
-                >
-                  HED schema version
-                </label>
-                <input
-                  id="hed-version"
-                  type="text"
-                  value={hedVersion}
-                  onChange={(e) => setHedVersion(e.target.value)}
-                  title="Enter the HED schema version (e.g. 8.4.0)"
-                  className="w-28 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="check-warnings"
-                  type="checkbox"
-                  checked={checkWarnings}
-                  onChange={(e) => setCheckWarnings(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label
-                  htmlFor="check-warnings"
-                  className="ml-2 text-gray-600 dark:text-gray-400"
-                >
-                  Check warnings
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="limit-errors"
-                  type="checkbox"
-                  checked={limitErrors}
-                  onChange={(e) => setLimitErrors(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label
-                  htmlFor="limit-errors"
-                  className="ml-2 text-gray-600 dark:text-gray-400"
-                >
-                  Limit errors
-                </label>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-4">
-              <button
-                onClick={handleValidation}
-                disabled={isLoading || !jsonFile || !hedVersion.trim()}
-                className="w-36 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 disabled:dark:bg-gray-600"
-              >
-                {isLoading ? "Validating..." : "Validate"}
-              </button>
-              <button
-                onClick={handleClear}
-                className="w-36 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
-              >
-                Clear
-              </button>
             </div>
           </div>
 
-          {/* Results */}
-          {validated && !isLoading && (
-            <>
-              {successMessage && (
-                <div className="text-center mt-4">
-                  <p className="text-green-600 dark:text-green-400">
-                    {successMessage}
-                  </p>
-                </div>
-              )}
-              {errors.length > 0 && (
-                <ErrorDisplay
-                  errors={errors}
-                  downloadableErrors={downloadableErrors}
-                />
-              )}
-            </>
+          {/* Checkboxes for validation options */}
+          <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
+            <div className="flex items-center">
+              <input
+                id="check-warnings"
+                type="checkbox"
+                checked={checkWarnings}
+                onChange={(e) => setCheckWarnings(e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label
+                htmlFor="check-warnings"
+                className="ml-2 text-gray-600 dark:text-gray-400"
+              >
+                Check warnings
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="limit-errors"
+                type="checkbox"
+                checked={limitErrors}
+                onChange={(e) => setLimitErrors(e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label
+                htmlFor="limit-errors"
+                className="ml-2 text-gray-600 dark:text-gray-400"
+              >
+                Limit errors
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleValidation}
+              disabled={!jsonFile || !hedVersion.trim() || isLoading}
+              className="w-36 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 disabled:dark:bg-gray-600"
+            >
+              {isLoading ? "Validating..." : "Validate"}
+            </button>
+            <button
+              onClick={handleClear}
+              className="ml-4 w-36 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
+            >
+              Clear
+            </button>
+          </div>
+
+          {validated && successMessage && (
+            <div className="text-center mt-4">
+              <p className="text-green-600 dark:text-green-400">
+                {successMessage}
+              </p>
+            </div>
+          )}
+          {validated && errors.length > 0 && (
+            <ErrorDisplay
+              errors={errors}
+              downloadableErrors={downloadableErrors}
+            />
           )}
         </main>
       </div>
