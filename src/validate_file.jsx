@@ -144,25 +144,27 @@ function ValidateFileApp() {
 
         <main className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-xl shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
           {/* Container for the file inputs with increased vertical spacing */}
-          <div className="flex flex-col items-center justify-center gap-8">
-            <FileInput
-              key={`tsv-${fileInputKey}`}
-              id="tsv-upload"
-              buttonText="TSV file"
-              tooltip="Upload a BIDS tabular (.tsv) file"
-              accept=".tsv"
-              onFileSelect={setTsvFile}
-              isLoading={isLoading}
-            />
-            <FileInput
-              key={`json-${fileInputKey}`}
-              id="json-upload"
-              buttonText="JSON file"
-              tooltip="Upload a JSON sidecar file corresponding to the tsv file"
-              accept=".json"
-              onFileSelect={setJsonFile}
-              isLoading={isLoading}
-            />
+          <div className="flex justify-center">
+            <div className="flex flex-col w-full max-w-md gap-8">
+              <FileInput
+                key={`tsv-${fileInputKey}`}
+                id="tsv-upload"
+                buttonText="TSV file"
+                tooltip="Upload a BIDS tabular (.tsv) file"
+                accept=".tsv"
+                onFileSelect={setTsvFile}
+                isLoading={isLoading}
+              />
+              <FileInput
+                key={`json-${fileInputKey}`}
+                id="json-upload"
+                buttonText="JSON file"
+                tooltip="Upload a JSON sidecar file corresponding to the tsv file"
+                accept=".json"
+                onFileSelect={setJsonFile}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
 
           {/* HED Version Input */}
