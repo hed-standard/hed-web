@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "hed-validator": "github:hed-standard/hed-javascript",
-    "react": "^19.2.0",
+    "react": "^19.2.7",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
