@@ -16,7 +16,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.5",
     "@vitest/ui": "^4.1.10",
-    "jsdom": "^30.0.0",
+    "jsdom": "^30.0.1",
     "vite": "^8.2.0",
     "vitest": "^4.1.9"
   }
