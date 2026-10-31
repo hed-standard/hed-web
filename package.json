@@ -9,7 +9,7 @@
     "test": "vitest --run"
   },
   "dependencies": {
-    "hed-validator": "github:hed-standard/hed-javascript",
+    "hed-validator": "github:hed-standard/hed-javascript#613ece8",
     "react": "^19.2.8",
     "react-dom": "^19.3.1"
   },

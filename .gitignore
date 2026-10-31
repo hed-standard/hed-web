@@ -3,3 +3,4 @@ buildweb/
 dist/
 .DS_Store
 *.local
+.status/
